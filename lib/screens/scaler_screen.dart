@@ -18,11 +18,46 @@ class _ScalerScreenState extends State<ScalerScreen> {
   late double _newWeight;
   ScaleMode _mode = ScaleMode.size;
 
+  late final TextEditingController _diameterController;
+  late final TextEditingController _weightController;
+
   @override
   void initState() {
     super.initState();
     _newDiameter = widget.recipe.diameter;
     _newWeight = widget.recipe.weight > 0 ? widget.recipe.weight : 1000;
+    _diameterController = TextEditingController(
+      text: '${_newDiameter.round()}',
+    );
+    _weightController = TextEditingController(text: '${_newWeight.round()}');
+  }
+
+  void _onDiameterSlider(double v) {
+    setState(() {
+      _newDiameter = v;
+      _diameterController.text = '${v.round()}';
+    });
+  }
+
+  void _onDiameterInput(String v) {
+    final parsed = double.tryParse(v);
+    if (parsed != null && parsed >= 1 && parsed <= 50) {
+      setState(() => _newDiameter = parsed);
+    }
+  }
+
+  void _onWeightSlider(double v) {
+    setState(() {
+      _newWeight = v;
+      _weightController.text = '${v.round()}';
+    });
+  }
+
+  void _onWeightInput(String v) {
+    final parsed = double.tryParse(v);
+    if (parsed != null && parsed >= 1 && parsed <= 20000) {
+      setState(() => _newWeight = parsed);
+    }
   }
 
   @override
@@ -54,7 +89,7 @@ class _ScalerScreenState extends State<ScalerScreen> {
       body: SafeArea(
         child: Column(
           children: [
-            // Верхний блок с градиентом
+            // Верхний блок
             Container(
               width: double.infinity,
               decoration: const BoxDecoration(
@@ -192,7 +227,6 @@ class _ScalerScreenState extends State<ScalerScreen> {
                     ),
                     child: Column(
                       children: [
-                        // Заголовок секции
                         Container(
                           padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
                           decoration: BoxDecoration(
@@ -241,7 +275,6 @@ class _ScalerScreenState extends State<ScalerScreen> {
                             ],
                           ),
                         ),
-                        // Ингредиенты
                         ...scaledSection.ingredients.asMap().entries.map((
                           entry,
                         ) {
@@ -338,28 +371,62 @@ class _ScalerScreenState extends State<ScalerScreen> {
     final sizeRatio = _newDiameter / recipe.diameter;
     return Column(
       children: [
-        AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
-          width: 50 + (sizeRatio * 50),
-          height: 50 + (sizeRatio * 50),
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: Colors.white.withValues(alpha: 0.2),
-            border: Border.all(
-              color: Colors.white.withValues(alpha: 0.5),
-              width: 2.5,
-            ),
-          ),
-          child: Center(
-            child: Text(
-              '${_newDiameter.round()} см',
-              style: const TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
+        // Круг + поле ввода
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              width: 40 + (sizeRatio * 40),
+              height: 40 + (sizeRatio * 40),
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.white.withValues(alpha: 0.2),
+                border: Border.all(
+                  color: Colors.white.withValues(alpha: 0.5),
+                  width: 2.5,
+                ),
+              ),
+              child: Center(
+                child: Text(
+                  '⌀',
+                  style: TextStyle(
+                    fontSize: 18,
+                    color: Colors.white.withValues(alpha: 0.7),
+                  ),
+                ),
               ),
             ),
-          ),
+            const SizedBox(width: 20),
+            // Поле ввода
+            Container(
+              width: 100,
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.2),
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(color: Colors.white.withValues(alpha: 0.3)),
+              ),
+              child: TextField(
+                controller: _diameterController,
+                keyboardType: TextInputType.number,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFFFF6B8A),
+                ),
+                decoration: const InputDecoration(
+                  border: InputBorder.none,
+                  suffixText: 'см',
+                  suffixStyle: TextStyle(fontSize: 14, color: Colors.white70),
+                  isDense: true,
+                  contentPadding: EdgeInsets.zero,
+                ),
+                onChanged: _onDiameterInput,
+              ),
+            ),
+          ],
         ),
         const SizedBox(height: 10),
         Text(
@@ -377,12 +444,12 @@ class _ScalerScreenState extends State<ScalerScreen> {
             overlayColor: Colors.white.withValues(alpha: 0.2),
           ),
           child: Slider(
-            value: _newDiameter,
+            value: _newDiameter.clamp(10, 35),
             min: 10,
             max: 35,
             divisions: 25,
             label: '${_newDiameter.round()} см',
-            onChanged: (v) => setState(() => _newDiameter = v),
+            onChanged: _onDiameterSlider,
           ),
         ),
       ],
@@ -392,29 +459,54 @@ class _ScalerScreenState extends State<ScalerScreen> {
   Widget _buildWeightControl(Recipe recipe) {
     return Column(
       children: [
-        Container(
-          width: 100,
-          height: 100,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: Colors.white.withValues(alpha: 0.2),
-            border: Border.all(
-              color: Colors.white.withValues(alpha: 0.5),
-              width: 2.5,
-            ),
-          ),
-          child: Center(
-            child: Text(
-              _newWeight >= 1000
-                  ? '${(_newWeight / 1000).toStringAsFixed(1)} кг'
-                  : '${_newWeight.round()} г',
-              style: const TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
+        // Иконка + поле ввода
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              width: 70,
+              height: 70,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.white.withValues(alpha: 0.2),
+                border: Border.all(
+                  color: Colors.white.withValues(alpha: 0.5),
+                  width: 2.5,
+                ),
+              ),
+              child: const Center(
+                child: Icon(Icons.scale, color: Colors.white, size: 28),
               ),
             ),
-          ),
+            const SizedBox(width: 20),
+            Container(
+              width: 120,
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.2),
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(color: Colors.white.withValues(alpha: 0.3)),
+              ),
+              child: TextField(
+                controller: _weightController,
+                keyboardType: TextInputType.number,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFFFF6B8A),
+                ),
+                decoration: const InputDecoration(
+                  border: InputBorder.none,
+                  suffixText: 'г',
+                  suffixStyle: TextStyle(fontSize: 14, color: Colors.white70),
+                  isDense: true,
+                  contentPadding: EdgeInsets.zero,
+                ),
+                onChanged: _onWeightInput,
+              ),
+            ),
+          ],
         ),
         const SizedBox(height: 10),
         Text(
@@ -432,14 +524,14 @@ class _ScalerScreenState extends State<ScalerScreen> {
             overlayColor: Colors.white.withValues(alpha: 0.2),
           ),
           child: Slider(
-            value: _newWeight,
+            value: _newWeight.clamp(100, 10000),
             min: 100,
             max: 10000,
             divisions: 99,
             label: _newWeight >= 1000
                 ? '${(_newWeight / 1000).toStringAsFixed(1)} кг'
                 : '${_newWeight.round()} г',
-            onChanged: (v) => setState(() => _newWeight = v),
+            onChanged: _onWeightSlider,
           ),
         ),
       ],
