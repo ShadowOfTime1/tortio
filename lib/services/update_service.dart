@@ -4,7 +4,7 @@ import 'package:http/http.dart' as http;
 class UpdateService {
   static const String _owner = 'ShadowOfTime1';
   static const String _repo = 'tortio';
-  static const String currentVersion = '1.1.0';
+  static const String currentVersion = '1.2.0';
 
   static Future<UpdateInfo?> checkForUpdate() async {
     try {

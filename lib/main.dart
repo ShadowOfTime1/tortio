@@ -72,6 +72,7 @@ class MainWrapper extends StatefulWidget {
 
 class _MainWrapperState extends State<MainWrapper> {
   UpdateInfo? _update;
+  bool _bannerDismissed = false;
 
   @override
   void initState() {
@@ -86,82 +87,24 @@ class _MainWrapperState extends State<MainWrapper> {
     }
   }
 
-  void _showUpdateDialog() {
-    final update = _update!;
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: const Color(0xFFFF6B8A).withValues(alpha: 0.15),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: const Icon(Icons.system_update, color: Color(0xFFFF6B8A)),
-            ),
-            const SizedBox(width: 12),
-            const Text('Обновление'),
-          ],
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('Доступна версия ${update.version}'),
-            Text(
-              'Текущая: ${UpdateService.currentVersion}',
-              style: TextStyle(color: Colors.grey.shade500, fontSize: 13),
-            ),
-            if (update.changelog.isNotEmpty) ...[
-              const SizedBox(height: 12),
-              Text(update.changelog, style: const TextStyle(fontSize: 13)),
-            ],
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: const Text('Позже'),
-          ),
-          FilledButton(
-            onPressed: () {
-              Navigator.pop(ctx);
-              launchUrl(
-                Uri.parse(update.downloadUrl),
-                mode: LaunchMode.externalApplication,
-              );
-            },
-            style: FilledButton.styleFrom(
-              backgroundColor: const Color(0xFFFF6B8A),
-            ),
-            child: const Text('Скачать'),
-          ),
-        ],
-      ),
+  void _downloadUpdate() {
+    launchUrl(
+      Uri.parse(_update!.downloadUrl),
+      mode: LaunchMode.externalApplication,
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        RecipeListScreen(),
-        // Баннер обновления
-        if (_update != null)
-          Positioned(
-            top: MediaQuery.of(context).padding.top + 60,
-            left: 16,
-            right: 16,
-            child: GestureDetector(
-              onTap: _showUpdateDialog,
+    return Scaffold(
+      body: Column(
+        children: [
+          // Баннер обновления
+          if (_update != null && !_bannerDismissed)
+            SafeArea(
+              bottom: false,
               child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 12,
-                ),
+                margin: const EdgeInsets.fromLTRB(16, 8, 16, 0),
                 decoration: BoxDecoration(
                   gradient: const LinearGradient(
                     colors: [Color(0xFFFF6B8A), Color(0xFFFF8E53)],
@@ -175,36 +118,70 @@ class _MainWrapperState extends State<MainWrapper> {
                     ),
                   ],
                 ),
-                child: Row(
-                  children: [
-                    const Icon(
-                      Icons.system_update,
-                      color: Colors.white,
-                      size: 20,
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: Text(
-                        'Доступна версия ${_update!.version}',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w600,
-                        ),
+                child: Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(14),
+                    onTap: _downloadUpdate,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 14,
+                      ),
+                      child: Row(
+                        children: [
+                          const Icon(
+                            Icons.system_update,
+                            color: Colors.white,
+                            size: 22,
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  'Версия ${_update!.version} доступна',
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 14,
+                                  ),
+                                ),
+                                const Text(
+                                  'Нажмите чтобы обновить',
+                                  style: TextStyle(
+                                    color: Colors.white70,
+                                    fontSize: 12,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          IconButton(
+                            onPressed: () =>
+                                setState(() => _bannerDismissed = true),
+                            icon: const Icon(
+                              Icons.close,
+                              color: Colors.white70,
+                              size: 18,
+                            ),
+                            padding: EdgeInsets.zero,
+                            constraints: const BoxConstraints(),
+                          ),
+                        ],
                       ),
                     ),
-                    const Text(
-                      'Обновить →',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
               ),
             ),
-          ),
-      ],
+
+          // Основной контент
+          Expanded(child: RecipeListScreen()),
+        ],
+      ),
     );
   }
 }
