@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'screens/recipe_list_screen.dart';
 import 'services/update_service.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 void main() {
   runApp(const TortioApp());
@@ -73,6 +72,8 @@ class MainWrapper extends StatefulWidget {
 class _MainWrapperState extends State<MainWrapper> {
   UpdateInfo? _update;
   bool _bannerDismissed = false;
+  bool _downloading = false;
+  double _progress = 0;
 
   @override
   void initState() {
@@ -87,11 +88,27 @@ class _MainWrapperState extends State<MainWrapper> {
     }
   }
 
-  void _downloadUpdate() {
-    launchUrl(
-      Uri.parse(_update!.downloadUrl),
-      mode: LaunchMode.externalApplication,
-    );
+  void _downloadUpdate() async {
+    if (_downloading) return;
+    setState(() {
+      _downloading = true;
+      _progress = 0;
+    });
+
+    try {
+      await UpdateService.downloadAndInstall(_update!.downloadUrl, (progress) {
+        if (mounted) setState(() => _progress = progress);
+      });
+    } catch (e) {
+      if (mounted) {
+        setState(() => _downloading = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Ошибка скачивания. Проверьте интернет.'),
+          ),
+        );
+      }
+    }
   }
 
   @override
@@ -122,54 +139,79 @@ class _MainWrapperState extends State<MainWrapper> {
                   color: Colors.transparent,
                   child: InkWell(
                     borderRadius: BorderRadius.circular(14),
-                    onTap: _downloadUpdate,
+                    onTap: _downloading ? null : _downloadUpdate,
                     child: Padding(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 16,
                         vertical: 14,
                       ),
-                      child: Row(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
                         children: [
-                          const Icon(
-                            Icons.system_update,
-                            color: Colors.white,
-                            size: 22,
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Text(
-                                  'Версия ${_update!.version} доступна',
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.w600,
-                                    fontSize: 14,
-                                  ),
+                          Row(
+                            children: [
+                              Icon(
+                                _downloading
+                                    ? Icons.downloading
+                                    : Icons.system_update,
+                                color: Colors.white,
+                                size: 22,
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Text(
+                                      _downloading
+                                          ? 'Скачивание... ${(_progress * 100).toInt()}%'
+                                          : 'Версия ${_update!.version} доступна',
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.w600,
+                                        fontSize: 14,
+                                      ),
+                                    ),
+                                    if (!_downloading)
+                                      const Text(
+                                        'Нажмите чтобы обновить',
+                                        style: TextStyle(
+                                          color: Colors.white70,
+                                          fontSize: 12,
+                                        ),
+                                      ),
+                                  ],
                                 ),
-                                const Text(
-                                  'Нажмите чтобы обновить',
-                                  style: TextStyle(
+                              ),
+                              if (!_downloading)
+                                IconButton(
+                                  onPressed: () =>
+                                      setState(() => _bannerDismissed = true),
+                                  icon: const Icon(
+                                    Icons.close,
                                     color: Colors.white70,
-                                    fontSize: 12,
+                                    size: 18,
                                   ),
+                                  padding: EdgeInsets.zero,
+                                  constraints: const BoxConstraints(),
                                 ),
-                              ],
-                            ),
+                            ],
                           ),
-                          IconButton(
-                            onPressed: () =>
-                                setState(() => _bannerDismissed = true),
-                            icon: const Icon(
-                              Icons.close,
-                              color: Colors.white70,
-                              size: 18,
+                          if (_downloading) ...[
+                            const SizedBox(height: 8),
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(4),
+                              child: LinearProgressIndicator(
+                                value: _progress,
+                                backgroundColor: Colors.white24,
+                                valueColor: const AlwaysStoppedAnimation(
+                                  Colors.white,
+                                ),
+                                minHeight: 4,
+                              ),
                             ),
-                            padding: EdgeInsets.zero,
-                            constraints: const BoxConstraints(),
-                          ),
+                          ],
                         ],
                       ),
                     ),

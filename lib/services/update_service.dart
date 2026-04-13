@@ -1,10 +1,14 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:http/http.dart' as http;
+import 'package:dio/dio.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:open_filex/open_filex.dart';
 
 class UpdateService {
   static const String _owner = 'ShadowOfTime1';
   static const String _repo = 'tortio';
-  static const String currentVersion = '1.3.0';
+  static const String currentVersion = '1.3.1';
 
   static Future<UpdateInfo?> checkForUpdate() async {
     try {
@@ -30,6 +34,26 @@ class UpdateService {
       // Нет интернета — молчим
     }
     return null;
+  }
+
+  static Future<void> downloadAndInstall(
+    String url,
+    void Function(double progress) onProgress,
+  ) async {
+    final dir = await getTemporaryDirectory();
+    final filePath = '${dir.path}/tortio-update.apk';
+
+    await Dio().download(
+      url,
+      filePath,
+      onReceiveProgress: (received, total) {
+        if (total > 0) {
+          onProgress(received / total);
+        }
+      },
+    );
+
+    await OpenFilex.open(filePath);
   }
 
   static String? _findApkUrl(List<dynamic> assets) {
