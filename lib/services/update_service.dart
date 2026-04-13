@@ -8,8 +8,7 @@ import 'package:open_filex/open_filex.dart';
 class UpdateService {
   static const String _owner = 'ShadowOfTime1';
   static const String _repo = 'tortio';
-  static const String currentVersion = '1.3.1';
-
+  static const String currentVersion = '1.4.2';
   static Future<UpdateInfo?> checkForUpdate() async {
     try {
       final url = Uri.parse(
@@ -53,7 +52,10 @@ class UpdateService {
       },
     );
 
-    await OpenFilex.open(filePath);
+    await OpenFilex.open(
+      filePath,
+      type: 'application/vnd.android.package-archive',
+    );
   }
 
   static String? _findApkUrl(List<dynamic> assets) {
