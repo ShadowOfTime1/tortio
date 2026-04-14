@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import '../models/recipe.dart';
 import '../services/storage_service.dart';
 import 'add_recipe_screen.dart';
@@ -14,6 +15,7 @@ class RecipeListScreen extends StatefulWidget {
 class _RecipeListScreenState extends State<RecipeListScreen> {
   List<Recipe> _recipes = [];
   bool _loaded = false;
+  String _version = '...';
 
   final List<List<Color>> _cardGradients = [
     [const Color(0xFFFF9A9E), const Color(0xFFFAD0C4)],
@@ -28,6 +30,16 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
   void initState() {
     super.initState();
     _loadRecipes();
+    _loadVersion();
+  }
+
+  void _loadVersion() async {
+    try {
+      final info = await PackageInfo.fromPlatform();
+      if (mounted) setState(() => _version = info.version);
+    } catch (e) {
+      if (mounted) setState(() => _version = '?');
+    }
   }
 
   void _loadRecipes() async {
@@ -129,10 +141,10 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
                     ),
                   ),
                   const SizedBox(width: 14),
-                  const Column(
+                  Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
+                      const Text(
                         'Tortio',
                         style: TextStyle(
                           fontSize: 26,
@@ -140,8 +152,11 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
                         ),
                       ),
                       Text(
-                        'Калькулятор рецептов',
-                        style: TextStyle(fontSize: 13, color: Colors.grey),
+                        'v$_version • Калькулятор рецептов',
+                        style: const TextStyle(
+                          fontSize: 13,
+                          color: Colors.grey,
+                        ),
                       ),
                     ],
                   ),
