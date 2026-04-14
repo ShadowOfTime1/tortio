@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/recipe.dart';
+import '../services/storage_service.dart';
 import 'add_recipe_screen.dart';
 import 'scaler_screen.dart';
 
@@ -11,7 +12,8 @@ class RecipeListScreen extends StatefulWidget {
 }
 
 class _RecipeListScreenState extends State<RecipeListScreen> {
-  final List<Recipe> _recipes = [];
+  List<Recipe> _recipes = [];
+  bool _loaded = false;
 
   final List<List<Color>> _cardGradients = [
     [const Color(0xFFFF9A9E), const Color(0xFFFAD0C4)],
@@ -22,12 +24,31 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
     [const Color(0xFFFA709A), const Color(0xFFFEE140)],
   ];
 
+  @override
+  void initState() {
+    super.initState();
+    _loadRecipes();
+  }
+
+  void _loadRecipes() async {
+    final recipes = await StorageService.loadRecipes();
+    setState(() {
+      _recipes = recipes;
+      _loaded = true;
+    });
+  }
+
+  void _saveRecipes() {
+    StorageService.saveRecipes(_recipes);
+  }
+
   void _addRecipe() async {
     final recipe = await Navigator.of(
       context,
     ).push<Recipe>(MaterialPageRoute(builder: (_) => const AddRecipeScreen()));
     if (recipe != null) {
       setState(() => _recipes.add(recipe));
+      _saveRecipes();
     }
   }
 
@@ -39,6 +60,7 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
     );
     if (updated != null) {
       setState(() => _recipes[index] = updated);
+      _saveRecipes();
     }
   }
 
@@ -65,6 +87,7 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
             onPressed: () {
               Navigator.pop(ctx);
               setState(() => _recipes.removeAt(index));
+              _saveRecipes();
             },
             style: FilledButton.styleFrom(backgroundColor: Colors.red.shade400),
             child: const Text('Удалить'),
@@ -80,7 +103,6 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
       body: SafeArea(
         child: Column(
           children: [
-            // Шапка
             Container(
               padding: const EdgeInsets.fromLTRB(24, 20, 24, 16),
               child: Row(
@@ -126,9 +148,13 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
                 ],
               ),
             ),
-
-            // Контент
-            Expanded(child: _recipes.isEmpty ? _buildEmpty() : _buildList()),
+            Expanded(
+              child: !_loaded
+                  ? const Center(child: CircularProgressIndicator())
+                  : _recipes.isEmpty
+                  ? _buildEmpty()
+                  : _buildList(),
+            ),
           ],
         ),
       ),
@@ -204,7 +230,6 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
                 padding: const EdgeInsets.all(16),
                 child: Row(
                   children: [
-                    // Иконка торта
                     Container(
                       width: 54,
                       height: 54,
