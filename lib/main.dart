@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'screens/recipe_list_screen.dart';
 import 'services/update_service.dart';
 
@@ -74,11 +75,22 @@ class _MainWrapperState extends State<MainWrapper> {
   bool _bannerDismissed = false;
   bool _downloading = false;
   double _progress = 0;
+  String _myVersion = '...';
 
   @override
   void initState() {
     super.initState();
+    _loadVersion();
     _checkUpdate();
+  }
+
+  void _loadVersion() async {
+    try {
+      final info = await PackageInfo.fromPlatform();
+      if (mounted) setState(() => _myVersion = info.version);
+    } catch (e) {
+      // ignore
+    }
   }
 
   void _checkUpdate() async {
@@ -116,7 +128,6 @@ class _MainWrapperState extends State<MainWrapper> {
     return Scaffold(
       body: Column(
         children: [
-          // Баннер обновления
           if (_update != null && !_bannerDismissed)
             SafeArea(
               bottom: false,
@@ -219,8 +230,6 @@ class _MainWrapperState extends State<MainWrapper> {
                 ),
               ),
             ),
-
-          // Основной контент
           Expanded(child: RecipeListScreen()),
         ],
       ),

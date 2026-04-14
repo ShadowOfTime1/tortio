@@ -177,7 +177,7 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
         onPressed: _addRecipe,
         icon: const Icon(Icons.add),
         label: const Text('Рецепт'),
-        backgroundColor: const Color(0xFFFF6B8A),
+        backgroundColor: const Color(0xFF9C27B0),
         foregroundColor: Colors.white,
       ),
     );

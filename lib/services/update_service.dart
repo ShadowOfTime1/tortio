@@ -1,16 +1,19 @@
 import 'dart:convert';
-import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:dio/dio.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:open_filex/open_filex.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
 class UpdateService {
   static const String _owner = 'ShadowOfTime1';
   static const String _repo = 'tortio';
-  static const String currentVersion = '1.4.2';
+
   static Future<UpdateInfo?> checkForUpdate() async {
     try {
+      final info = await PackageInfo.fromPlatform();
+      final currentVersion = info.version.trim();
+
       final url = Uri.parse(
         'https://api.github.com/repos/$_owner/$_repo/releases/latest',
       );
@@ -18,7 +21,9 @@ class UpdateService {
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
-        final latestTag = (data['tag_name'] as String).replaceAll('v', '');
+        final latestTag = (data['tag_name'] as String)
+            .replaceAll('v', '')
+            .trim();
         final downloadUrl = _findApkUrl(data['assets']);
 
         if (downloadUrl != null && _isNewer(latestTag, currentVersion)) {
@@ -68,14 +73,18 @@ class UpdateService {
   }
 
   static bool _isNewer(String latest, String current) {
-    final latestParts = latest.split('.').map(int.parse).toList();
-    final currentParts = current.split('.').map(int.parse).toList();
+    try {
+      final latestParts = latest.split('.').map(int.parse).toList();
+      final currentParts = current.split('.').map(int.parse).toList();
 
-    for (var i = 0; i < 3; i++) {
-      final l = i < latestParts.length ? latestParts[i] : 0;
-      final c = i < currentParts.length ? currentParts[i] : 0;
-      if (l > c) return true;
-      if (l < c) return false;
+      for (var i = 0; i < 3; i++) {
+        final l = i < latestParts.length ? latestParts[i] : 0;
+        final c = i < currentParts.length ? currentParts[i] : 0;
+        if (l > c) return true;
+        if (l < c) return false;
+      }
+    } catch (e) {
+      return false;
     }
     return false;
   }
