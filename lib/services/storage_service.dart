@@ -49,6 +49,7 @@ class StorageService {
               'typeName': s.type.name,
               'typeIcon': s.type.icon,
               'scaleType': s.type.scaleType.index,
+              'notes': s.notes,
               'ingredients': s.ingredients
                   .map(
                     (i) => {
@@ -80,6 +81,7 @@ class StorageService {
             icon: s['typeIcon'],
             scaleType: scaleType,
           ),
+          notes: (s['notes'] as String?) ?? '',
           ingredients: (s['ingredients'] as List).map((i) {
             return Ingredient(
               name: i['name'],

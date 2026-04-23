@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:share_plus/share_plus.dart';
 import '../models/recipe.dart';
 import '../models/scaler.dart';
@@ -295,7 +296,7 @@ class _ScalerScreenState extends State<ScalerScreen> {
                   return Container(
                     margin: const EdgeInsets.only(bottom: 12),
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: Theme.of(context).colorScheme.surface,
                       borderRadius: BorderRadius.circular(20),
                       boxShadow: [
                         BoxShadow(
@@ -392,13 +393,28 @@ class _ScalerScreenState extends State<ScalerScreen> {
                                     fontWeight: FontWeight.w700,
                                     color: changed
                                         ? const Color(0xFFFF6B8A)
-                                        : Colors.black87,
+                                        : Theme.of(
+                                            context,
+                                          ).textTheme.bodyLarge?.color,
                                   ),
                                 ),
                               ],
                             ),
                           );
                         }),
+                        if (scaledSection.notes.trim().isNotEmpty)
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(16, 0, 16, 10),
+                            child: Text(
+                              scaledSection.notes,
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.grey.shade600,
+                                fontStyle: FontStyle.italic,
+                                height: 1.3,
+                              ),
+                            ),
+                          ),
                         const SizedBox(height: 8),
                       ],
                     ),
@@ -665,6 +681,44 @@ class _ScalerScreenState extends State<ScalerScreen> {
             label: '${_newDiameter.round()} см',
             onChanged: _onDiameterSlider,
           ),
+        ),
+        const SizedBox(height: 4),
+        // Быстрые кнопки для частых диаметров форм
+        Wrap(
+          spacing: 6,
+          runSpacing: 4,
+          alignment: WrapAlignment.center,
+          children: const [16, 18, 20, 22, 24, 26].map((d) {
+            final selected = _newDiameter.round() == d;
+            return GestureDetector(
+              onTap: () {
+                HapticFeedback.selectionClick();
+                _onDiameterSlider(d.toDouble());
+              },
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 6,
+                ),
+                decoration: BoxDecoration(
+                  color: selected
+                      ? Colors.white
+                      : Colors.white.withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Text(
+                  '$d',
+                  style: TextStyle(
+                    color: selected
+                        ? const Color(0xFFE85D75)
+                        : Colors.white,
+                    fontSize: 13,
+                    fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+                  ),
+                ),
+              ),
+            );
+          }).toList(),
         ),
       ],
     );

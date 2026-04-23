@@ -45,7 +45,10 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
     _notesController = TextEditingController(text: r?.notes ?? '');
     if (r != null) {
       for (final section in r.sections) {
-        final sectionInput = _SectionInput(type: section.type);
+        final sectionInput = _SectionInput(
+          type: section.type,
+          notes: section.notes,
+        );
         for (final ing in section.ingredients) {
           sectionInput.ingredients.add(
             _IngredientInput(name: ing.name, amount: '${ing.amount}'),
@@ -124,7 +127,11 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
                 );
               })
               .toList();
-          return RecipeSection(type: s.type, ingredients: ingredients);
+          return RecipeSection(
+            type: s.type,
+            ingredients: ingredients,
+            notes: s.notesController.text.trim(),
+          );
         })
         .where((s) => s.ingredients.isNotEmpty)
         .toList();
@@ -321,7 +328,7 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
                 padding: const EdgeInsets.only(bottom: 12),
                 child: Container(
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: Theme.of(context).colorScheme.surface,
                     borderRadius: BorderRadius.circular(20),
                     boxShadow: [
                       BoxShadow(
@@ -440,6 +447,31 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
                                 style: TextStyle(color: colors[0]),
                               ),
                             ),
+                            // Заметка по секции (необязательно)
+                            Padding(
+                              padding: const EdgeInsets.only(
+                                right: 8,
+                                bottom: 4,
+                              ),
+                              child: TextField(
+                                controller: section.notesController,
+                                maxLines: 2,
+                                minLines: 1,
+                                style: const TextStyle(fontSize: 13),
+                                decoration: InputDecoration(
+                                  hintText: 'Заметка к секции (опционально)',
+                                  hintStyle: TextStyle(
+                                    fontSize: 13,
+                                    color: Colors.grey.shade400,
+                                  ),
+                                  isDense: true,
+                                  contentPadding: const EdgeInsets.symmetric(
+                                    horizontal: 10,
+                                    vertical: 8,
+                                  ),
+                                ),
+                              ),
+                            ),
                           ],
                         ),
                       ),
@@ -519,7 +551,9 @@ class _SectionPicker extends StatelessWidget {
 class _SectionInput {
   final SectionType type;
   final List<_IngredientInput> ingredients = [];
-  _SectionInput({required this.type});
+  final TextEditingController notesController;
+  _SectionInput({required this.type, String notes = ''})
+    : notesController = TextEditingController(text: notes);
 }
 
 class _IngredientInput {

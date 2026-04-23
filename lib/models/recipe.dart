@@ -54,8 +54,13 @@ class Ingredient {
 class RecipeSection {
   final SectionType type;
   final List<Ingredient> ingredients;
+  final String notes;
 
-  RecipeSection({required this.type, required this.ingredients});
+  RecipeSection({
+    required this.type,
+    required this.ingredients,
+    this.notes = '',
+  });
 }
 
 class Recipe {

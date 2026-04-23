@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import '../models/recipe.dart';
 import '../services/storage_service.dart';
+import '../services/theme_service.dart';
 import 'add_recipe_screen.dart';
 import 'scaler_screen.dart';
 
@@ -87,30 +88,59 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
     ).push(MaterialPageRoute(builder: (_) => ScalerScreen(recipe: recipe)));
   }
 
-  void _confirmDelete(Recipe recipe) {
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: const Text('Удалить рецепт?'),
-        content: Text('«${recipe.title}» будет удалён.'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: const Text('Отмена'),
-          ),
-          FilledButton(
+  void _duplicateRecipe(Recipe recipe) {
+    final copy = Recipe(
+      id: DateTime.now().millisecondsSinceEpoch.toString(),
+      title: '${recipe.title} (копия)',
+      diameter: recipe.diameter,
+      height: recipe.height,
+      weight: recipe.weight,
+      notes: recipe.notes,
+      sections: recipe.sections
+          .map(
+            (s) => RecipeSection(
+              type: s.type,
+              notes: s.notes,
+              ingredients: s.ingredients
+                  .map(
+                    (i) => Ingredient(
+                      name: i.name,
+                      amount: i.amount,
+                      scaleType: i.scaleType,
+                    ),
+                  )
+                  .toList(),
+            ),
+          )
+          .toList(),
+    );
+    setState(() => _recipes.add(copy));
+    _saveRecipes();
+  }
+
+  void _deleteWithUndo(Recipe recipe) {
+    final index = _recipes.indexWhere((r) => r.id == recipe.id);
+    if (index == -1) return;
+
+    setState(() => _recipes.removeAt(index));
+    _saveRecipes();
+
+    ScaffoldMessenger.of(context)
+      ..clearSnackBars()
+      ..showSnackBar(
+        SnackBar(
+          content: Text('«${recipe.title}» удалён'),
+          behavior: SnackBarBehavior.floating,
+          duration: const Duration(seconds: 4),
+          action: SnackBarAction(
+            label: 'Отменить',
             onPressed: () {
-              Navigator.pop(ctx);
-              setState(() => _recipes.removeWhere((r) => r.id == recipe.id));
+              setState(() => _recipes.insert(index, recipe));
               _saveRecipes();
             },
-            style: FilledButton.styleFrom(backgroundColor: Colors.red.shade400),
-            child: const Text('Удалить'),
           ),
-        ],
-      ),
-    );
+        ),
+      );
   }
 
   @override
@@ -120,7 +150,7 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
         child: Column(
           children: [
             Container(
-              padding: const EdgeInsets.fromLTRB(24, 20, 24, 16),
+              padding: const EdgeInsets.fromLTRB(24, 20, 16, 16),
               child: Row(
                 children: [
                   Container(
@@ -145,24 +175,34 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
                     ),
                   ),
                   const SizedBox(width: 14),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'Tortio',
-                        style: TextStyle(
-                          fontSize: 26,
-                          fontWeight: FontWeight.bold,
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Tortio',
+                          style: TextStyle(
+                            fontSize: 26,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
-                      ),
-                      Text(
-                        'v$_version • Калькулятор рецептов',
-                        style: const TextStyle(
-                          fontSize: 13,
-                          color: Colors.grey,
+                        Text(
+                          'v$_version • Калькулятор рецептов',
+                          style: const TextStyle(
+                            fontSize: 13,
+                            color: Colors.grey,
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
+                  ),
+                  ListenableBuilder(
+                    listenable: ThemeService.instance,
+                    builder: (context, _) => IconButton(
+                      tooltip: 'Тема: ${ThemeService.instance.label}',
+                      onPressed: () => ThemeService.instance.cycle(),
+                      icon: Icon(ThemeService.instance.icon),
+                    ),
                   ),
                 ],
               ),
@@ -331,17 +371,54 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
                         ],
                       ),
                     ),
-                    Column(
-                      children: [
-                        IconButton(
-                          onPressed: () => _editRecipe(r),
-                          icon: const Icon(Icons.edit_outlined, size: 20),
-                          color: Colors.grey.shade500,
+                    PopupMenuButton<String>(
+                      icon: Icon(Icons.more_vert, color: Colors.grey.shade600),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                      onSelected: (action) {
+                        switch (action) {
+                          case 'edit':
+                            _editRecipe(r);
+                          case 'duplicate':
+                            _duplicateRecipe(r);
+                          case 'delete':
+                            _deleteWithUndo(r);
+                        }
+                      },
+                      itemBuilder: (_) => const [
+                        PopupMenuItem(
+                          value: 'edit',
+                          child: ListTile(
+                            leading: Icon(Icons.edit_outlined),
+                            title: Text('Редактировать'),
+                            dense: true,
+                            contentPadding: EdgeInsets.zero,
+                          ),
                         ),
-                        IconButton(
-                          onPressed: () => _confirmDelete(r),
-                          icon: const Icon(Icons.delete_outline, size: 20),
-                          color: Colors.red.shade300,
+                        PopupMenuItem(
+                          value: 'duplicate',
+                          child: ListTile(
+                            leading: Icon(Icons.copy_outlined),
+                            title: Text('Дублировать'),
+                            dense: true,
+                            contentPadding: EdgeInsets.zero,
+                          ),
+                        ),
+                        PopupMenuItem(
+                          value: 'delete',
+                          child: ListTile(
+                            leading: Icon(
+                              Icons.delete_outline,
+                              color: Colors.red,
+                            ),
+                            title: Text(
+                              'Удалить',
+                              style: TextStyle(color: Colors.red),
+                            ),
+                            dense: true,
+                            contentPadding: EdgeInsets.zero,
+                          ),
                         ),
                       ],
                     ),
