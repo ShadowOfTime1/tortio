@@ -33,7 +33,19 @@ class RecipeScaler {
     required double originalWeight,
     required double newWeight,
   }) {
-    final ratio = newWeight / originalWeight;
+    // Fixed-секции не меняются с весом, поэтому исключаем их из обоих весов
+    // перед расчётом ratio — иначе итоговый вес рецепта не сойдётся с newWeight.
+    final fixedWeight = sections
+        .where((s) => s.type.scaleType == ScaleType.fixed)
+        .expand((s) => s.ingredients)
+        .fold<double>(0, (sum, ing) => sum + ing.amount);
+
+    final scalableOriginal = originalWeight - fixedWeight;
+    final scalableNew = newWeight - fixedWeight;
+
+    if (scalableOriginal <= 0 || scalableNew <= 0) return sections;
+
+    final ratio = scalableNew / scalableOriginal;
 
     return sections.map((section) {
       if (section.type.scaleType == ScaleType.fixed) return section;

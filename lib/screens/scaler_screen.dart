@@ -85,6 +85,10 @@ class _ScalerScreenState extends State<ScalerScreen> {
       ratio = _newDiameter / recipe.diameter;
     }
 
+    final totalWeight = scaled
+        .expand((s) => s.ingredients)
+        .fold<double>(0, (sum, i) => sum + i.amount);
+
     return Scaffold(
       body: SafeArea(
         child: Column(
@@ -166,12 +170,12 @@ class _ScalerScreenState extends State<ScalerScreen> {
               ),
             ),
 
-            // Бейдж коэффициента
-            if (ratio != 1.0)
-              Padding(
-                padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
-                child: Row(
-                  children: [
+            // Бейдж коэффициента + итоговый вес
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
+              child: Row(
+                children: [
+                  if (ratio != 1.0) ...[
                     Container(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 12,
@@ -201,8 +205,28 @@ class _ScalerScreenState extends State<ScalerScreen> {
                       ),
                     ),
                   ],
-                ),
+                  const Spacer(),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 6,
+                    ),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFFF6B8A).withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Text(
+                      'итого ≈ ${_formatWeight(totalWeight)}',
+                      style: const TextStyle(
+                        color: Color(0xFFE85D75),
+                        fontWeight: FontWeight.w600,
+                        fontSize: 13,
+                      ),
+                    ),
+                  ),
+                ],
               ),
+            ),
 
             // Список по секциям
             Expanded(
@@ -330,6 +354,11 @@ class _ScalerScreenState extends State<ScalerScreen> {
         ),
       ),
     );
+  }
+
+  String _formatWeight(double g) {
+    if (g >= 1000) return '${(g / 1000).toStringAsFixed(1)} кг';
+    return '${g.round()} г';
   }
 
   Widget _modeTab(String label, IconData icon, ScaleMode mode) {
