@@ -48,6 +48,16 @@ APK окажется в `build/app/outputs/flutter-apk/app-release.apk`.
 
 Каждый push в `main` и pull request прогоняет `flutter analyze` + `flutter test` (см. `.github/workflows/ci.yml`).
 
+### Pre-commit hook (опционально)
+
+Чтобы локально проверять `flutter analyze` перед каждым коммитом, включи hooks из репо:
+
+```bash
+git config core.hooksPath .githooks
+```
+
+Запретит коммит, если `flutter analyze` находит warnings.
+
 ## История изменений
 
 См. [CHANGELOG.md](CHANGELOG.md).

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:share_plus/share_plus.dart';
 import '../models/recipe.dart';
 import '../models/scaler.dart';
+import '../services/shopping_list.dart';
+import '../utils.dart';
 
 enum ScaleMode { size, weight }
 
@@ -41,7 +43,7 @@ class _ScalerScreenState extends State<ScalerScreen> {
   }
 
   void _onDiameterInput(String v) {
-    final parsed = double.tryParse(v);
+    final parsed = parseNumber(v);
     if (parsed != null && parsed >= 1 && parsed <= 50) {
       setState(() => _newDiameter = parsed);
     }
@@ -55,7 +57,7 @@ class _ScalerScreenState extends State<ScalerScreen> {
   }
 
   void _onWeightInput(String v) {
-    final parsed = double.tryParse(v);
+    final parsed = parseNumber(v);
     if (parsed != null && parsed >= 1 && parsed <= 20000) {
       setState(() => _newWeight = parsed);
     }
@@ -415,29 +417,8 @@ class _ScalerScreenState extends State<ScalerScreen> {
     return '${g.round()} г';
   }
 
-  // Суммирует ингредиенты с одинаковым названием (case-insensitive),
-  // сохраняя оригинальное написание из первого вхождения.
-  Map<String, double> _aggregate(List<RecipeSection> sections) {
-    final amounts = <String, double>{};
-    final canonical = <String, String>{};
-    for (final s in sections) {
-      for (final ing in s.ingredients) {
-        final name = ing.name.trim();
-        if (name.isEmpty) continue;
-        final key = name.toLowerCase();
-        final display = canonical.putIfAbsent(key, () => name);
-        amounts.update(
-          display,
-          (v) => v + ing.amount,
-          ifAbsent: () => ing.amount,
-        );
-      }
-    }
-    return amounts;
-  }
-
   void _showShoppingList(List<RecipeSection> scaled) {
-    final items = _aggregate(scaled).entries.toList()
+    final items = aggregateIngredients(scaled).entries.toList()
       ..sort((a, b) => b.value.compareTo(a.value));
     final total = items.fold<double>(0, (sum, e) => sum + e.value);
 

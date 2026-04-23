@@ -13,10 +13,13 @@ fi
 VERSION="$1"
 MESSAGE="${2:-release}"
 
-# Bump версии в pubspec.yaml. Build-номер всегда +1, как в предыдущих релизах.
-sed -i "s/^version: .*/version: ${VERSION}+1/" pubspec.yaml
+# Build number = unix timestamp. Гарантирует монотонно растущий versionCode для
+# Android (без этого новый APK с тем же build-номером отказывается ставиться
+# поверх старого как обновление).
+BUILD_NUM=$(date +%s)
+sed -i "s/^version: .*/version: ${VERSION}+${BUILD_NUM}/" pubspec.yaml
 
-echo "Version updated to ${VERSION}"
+echo "Version updated to ${VERSION}+${BUILD_NUM}"
 
 git add .
 git commit -m "v${VERSION} ${MESSAGE}"

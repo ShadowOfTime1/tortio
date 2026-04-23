@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/recipe.dart';
+import '../utils.dart';
 
 class AddRecipeScreen extends StatefulWidget {
   final Recipe? existingRecipe;
@@ -88,9 +89,9 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
 
   void _save() {
     final title = _titleController.text.trim();
-    final diameter = double.tryParse(_diameterController.text) ?? 0;
-    final height = double.tryParse(_heightController.text) ?? 0;
-    final weight = double.tryParse(_weightController.text) ?? 0;
+    final diameter = parseNumber(_diameterController.text) ?? 0;
+    final height = parseNumber(_heightController.text) ?? 0;
+    final weight = parseNumber(_weightController.text) ?? 0;
 
     if (title.isEmpty) {
       _showError('Введите название');
@@ -105,6 +106,34 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
       return;
     }
 
+    // Дропаем пустые ингредиенты (пустое имя или вес ≤ 0) и пустые секции,
+    // чтобы не сохранять мусор. Если после очистки рецепт пустой — ошибка.
+    final cleanSections = _sections
+        .map((s) {
+          final ingredients = s.ingredients
+              .where(
+                (ing) =>
+                    ing.nameController.text.trim().isNotEmpty &&
+                    (parseNumber(ing.amountController.text) ?? 0) > 0,
+              )
+              .map((ing) {
+                return Ingredient(
+                  name: ing.nameController.text.trim(),
+                  amount: parseNumber(ing.amountController.text) ?? 0,
+                  scaleType: s.type.scaleType,
+                );
+              })
+              .toList();
+          return RecipeSection(type: s.type, ingredients: ingredients);
+        })
+        .where((s) => s.ingredients.isNotEmpty)
+        .toList();
+
+    if (cleanSections.isEmpty) {
+      _showError('Заполните хотя бы один ингредиент с весом > 0');
+      return;
+    }
+
     final recipe = Recipe(
       id:
           widget.existingRecipe?.id ??
@@ -114,21 +143,7 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
       height: height,
       weight: weight,
       notes: _notesController.text.trim(),
-      sections: _sections.map((s) {
-        return RecipeSection(
-          type: s.type,
-          ingredients: s.ingredients
-              .where((ing) => ing.nameController.text.trim().isNotEmpty)
-              .map((ing) {
-                return Ingredient(
-                  name: ing.nameController.text.trim(),
-                  amount: double.tryParse(ing.amountController.text) ?? 0,
-                  scaleType: s.type.scaleType,
-                );
-              })
-              .toList(),
-        );
-      }).toList(),
+      sections: cleanSections,
     );
     Navigator.of(context).pop(recipe);
   }

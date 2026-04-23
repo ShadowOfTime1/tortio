@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+# Pre-commit: гоняем flutter analyze, чтобы не залетал warning-ный код.
+# Включается одной командой: git config core.hooksPath .githooks
+set -e
+
+# Только если в стейдже есть изменения в Dart-коде.
+if git diff --cached --name-only | grep -qE '\.(dart|yaml)$'; then
+  echo "→ flutter analyze"
+  flutter analyze --fatal-warnings
+fi

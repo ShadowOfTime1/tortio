@@ -1,4 +1,6 @@
 import 'dart:convert';
+import 'dart:io' show Platform;
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:http/http.dart' as http;
 import 'package:dio/dio.dart';
 import 'package:path_provider/path_provider.dart';
@@ -18,6 +20,9 @@ class UpdateService {
   static const String _repo = 'tortio';
 
   static Future<UpdateInfo?> checkForUpdate() async {
+    // Auto-update механизм работает только на Android (через APK install).
+    // На iOS / desktop / web баннер бесполезен — install не сработает.
+    if (kIsWeb || !Platform.isAndroid) return null;
     try {
       final info = await PackageInfo.fromPlatform();
       final currentVersion = info.version.trim();
@@ -97,20 +102,27 @@ class UpdateService {
   }
 
   static bool _isNewer(String latest, String current) {
-    try {
-      final latestParts = latest.split('.').map(int.parse).toList();
-      final currentParts = current.split('.').map(int.parse).toList();
-
-      for (var i = 0; i < 3; i++) {
-        final l = i < latestParts.length ? latestParts[i] : 0;
-        final c = i < currentParts.length ? currentParts[i] : 0;
-        if (l > c) return true;
-        if (l < c) return false;
-      }
-    } catch (e) {
-      return false;
+    final latestParts = _versionParts(latest);
+    final currentParts = _versionParts(current);
+    final n = latestParts.length > currentParts.length
+        ? latestParts.length
+        : currentParts.length;
+    for (var i = 0; i < n; i++) {
+      final l = i < latestParts.length ? latestParts[i] : 0;
+      final c = i < currentParts.length ? currentParts[i] : 0;
+      if (l > c) return true;
+      if (l < c) return false;
     }
     return false;
+  }
+
+  // Берёт ведущую числовую часть каждого сегмента: "1.10.2-beta" → [1, 10, 2],
+  // "5rc1" → 5, неразборчивый сегмент → 0. Поддерживает > 3 сегментов.
+  static List<int> _versionParts(String v) {
+    return v.split('.').map((s) {
+      final m = RegExp(r'^\d+').firstMatch(s);
+      return m != null ? int.parse(m.group(0)!) : 0;
+    }).toList();
   }
 }
 
