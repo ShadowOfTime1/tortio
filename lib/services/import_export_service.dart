@@ -33,7 +33,7 @@ class ImportExportService {
   /// существующим (без замены). Возвращает число добавленных рецептов.
   /// Выбрасывает исключение на битом JSON.
   static Future<int> importRecipes() async {
-    final result = await FilePicker.platform.pickFiles(
+    final result = await FilePicker.pickFiles(
       type: FileType.custom,
       allowedExtensions: ['json'],
     );
