@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
-import 'package:file_picker/file_picker.dart';
+import 'package:file_selector/file_selector.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 import '../models/recipe.dart';
@@ -33,16 +33,14 @@ class ImportExportService {
   /// существующим (без замены). Возвращает число добавленных рецептов.
   /// Выбрасывает исключение на битом JSON.
   static Future<int> importRecipes() async {
-    final result = await FilePicker.pickFiles(
-      type: FileType.custom,
-      allowedExtensions: ['json'],
+    const typeGroup = XTypeGroup(
+      label: 'JSON',
+      extensions: ['json'],
     );
-    if (result == null || result.files.isEmpty) return 0;
+    final file = await openFile(acceptedTypeGroups: [typeGroup]);
+    if (file == null) return 0;
 
-    final path = result.files.single.path;
-    if (path == null) return 0;
-
-    final content = await File(path).readAsString();
+    final content = await file.readAsString();
     final imported = _fromJson(content);
 
     final existing = await StorageService.loadRecipes();
