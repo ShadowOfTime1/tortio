@@ -4,6 +4,14 @@ import 'package:dio/dio.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:open_filex/open_filex.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:permission_handler/permission_handler.dart';
+
+class UpdateException implements Exception {
+  final String message;
+  UpdateException(this.message);
+  @override
+  String toString() => message;
+}
 
 class UpdateService {
   static const String _owner = 'ShadowOfTime1';
@@ -57,10 +65,26 @@ class UpdateService {
       },
     );
 
-    await OpenFilex.open(
+    // Запрашиваем разрешение «Установка из неизвестных источников» ДО открытия APK.
+    // Без явного запроса Android 8+ просто отбрасывает в Settings и не возвращает
+    // к диалогу установки. После однократного предоставления разрешение запоминается
+    // per-source — следующие апдейты пройдут одним тапом.
+    if (!await Permission.requestInstallPackages.isGranted) {
+      final result = await Permission.requestInstallPackages.request();
+      if (!result.isGranted) {
+        throw UpdateException(
+          'Нужно разрешить установку из неизвестных источников в настройках Android.',
+        );
+      }
+    }
+
+    final result = await OpenFilex.open(
       filePath,
       type: 'application/vnd.android.package-archive',
     );
+    if (result.type != ResultType.done) {
+      throw UpdateException('Не удалось открыть установщик: ${result.message}');
+    }
   }
 
   static String? _findApkUrl(List<dynamic> assets) {

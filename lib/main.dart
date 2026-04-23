@@ -102,11 +102,12 @@ class _MainWrapperState extends State<MainWrapper> {
     } catch (e) {
       if (mounted) {
         setState(() => _downloading = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Ошибка скачивания. Проверьте интернет.'),
-          ),
-        );
+        final msg = e is UpdateException
+            ? e.message
+            : 'Ошибка обновления. Проверьте интернет.';
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(msg)));
       }
     }
   }
