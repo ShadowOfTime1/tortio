@@ -1,6 +1,8 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import '../models/recipe.dart';
+import '../services/import_export_service.dart';
 import '../services/storage_service.dart';
 import '../services/theme_service.dart';
 import 'add_recipe_screen.dart';
@@ -19,6 +21,7 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
   String _version = '...';
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
+  String? _selectedTag;
 
   final List<List<Color>> _cardGradients = [
     [const Color(0xFFFF9A9E), const Color(0xFFFAD0C4)],
@@ -45,8 +48,9 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
     }
   }
 
-  void _loadRecipes() async {
+  Future<void> _loadRecipes() async {
     final recipes = await StorageService.loadRecipes();
+    if (!mounted) return;
     setState(() {
       _recipes = recipes;
       _loaded = true;
@@ -88,6 +92,49 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
     ).push(MaterialPageRoute(builder: (_) => ScalerScreen(recipe: recipe)));
   }
 
+  Future<void> _exportRecipes() async {
+    if (_recipes.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Нечего экспортировать — список пустой')),
+      );
+      return;
+    }
+    try {
+      await ImportExportService.exportRecipes(_recipes);
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Ошибка экспорта: $e')));
+      }
+    }
+  }
+
+  Future<void> _importRecipes() async {
+    try {
+      final count = await ImportExportService.importRecipes();
+      if (!mounted) return;
+      if (count == 0) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Ничего не импортировано')),
+        );
+      } else {
+        await _loadRecipes();
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Импортировано рецептов: $count')),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Ошибка импорта: битый JSON — $e')),
+        );
+      }
+    }
+  }
+
   void _duplicateRecipe(Recipe recipe) {
     final copy = Recipe(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
@@ -96,6 +143,8 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
       height: recipe.height,
       weight: recipe.weight,
       notes: recipe.notes,
+      tags: List<String>.from(recipe.tags),
+      imagePath: recipe.imagePath,
       sections: recipe.sections
           .map(
             (s) => RecipeSection(
@@ -204,6 +253,38 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
                       icon: Icon(ThemeService.instance.icon),
                     ),
                   ),
+                  PopupMenuButton<String>(
+                    tooltip: 'Меню',
+                    icon: const Icon(Icons.more_vert),
+                    onSelected: (action) {
+                      switch (action) {
+                        case 'export':
+                          _exportRecipes();
+                        case 'import':
+                          _importRecipes();
+                      }
+                    },
+                    itemBuilder: (_) => const [
+                      PopupMenuItem(
+                        value: 'export',
+                        child: ListTile(
+                          leading: Icon(Icons.upload_file_outlined),
+                          title: Text('Экспортировать (JSON)'),
+                          dense: true,
+                          contentPadding: EdgeInsets.zero,
+                        ),
+                      ),
+                      PopupMenuItem(
+                        value: 'import',
+                        child: ListTile(
+                          leading: Icon(Icons.download_outlined),
+                          title: Text('Импортировать (JSON)'),
+                          dense: true,
+                          contentPadding: EdgeInsets.zero,
+                        ),
+                      ),
+                    ],
+                  ),
                 ],
               ),
             ),
@@ -227,6 +308,43 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
                     isDense: true,
                   ),
                   onChanged: (v) => setState(() => _searchQuery = v.trim()),
+                ),
+              ),
+            if (_loaded && _allTags.isNotEmpty)
+              SizedBox(
+                height: 40,
+                child: ListView(
+                  scrollDirection: Axis.horizontal,
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 4,
+                        vertical: 4,
+                      ),
+                      child: FilterChip(
+                        label: const Text('Все'),
+                        selected: _selectedTag == null,
+                        onSelected: (_) =>
+                            setState(() => _selectedTag = null),
+                      ),
+                    ),
+                    ..._allTags.map(
+                      (tag) => Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 4,
+                          vertical: 4,
+                        ),
+                        child: FilterChip(
+                          label: Text(tag),
+                          selected: _selectedTag == tag,
+                          onSelected: (sel) => setState(
+                            () => _selectedTag = sel ? tag : null,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             Expanded(
@@ -283,9 +401,21 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
   }
 
   List<Recipe> get _visibleRecipes {
-    if (_searchQuery.isEmpty) return _recipes;
     final q = _searchQuery.toLowerCase();
-    return _recipes.where((r) => r.title.toLowerCase().contains(q)).toList();
+    return _recipes.where((r) {
+      if (q.isNotEmpty && !r.title.toLowerCase().contains(q)) return false;
+      if (_selectedTag != null && !r.tags.contains(_selectedTag)) return false;
+      return true;
+    }).toList();
+  }
+
+  List<String> get _allTags {
+    final set = <String>{};
+    for (final r in _recipes) {
+      set.addAll(r.tags);
+    }
+    final list = set.toList()..sort();
+    return list;
   }
 
   Widget _buildList() {
@@ -302,16 +432,46 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
         ),
       );
     }
-    return ListView.builder(
+    // Drag-to-reorder доступен только когда фильтры выключены —
+    // иначе индексы в видимом списке не соответствуют _recipes.
+    final canReorder = _searchQuery.isEmpty && _selectedTag == null;
+
+    if (!canReorder) {
+      return ListView.builder(
+        padding: const EdgeInsets.fromLTRB(16, 0, 16, 100),
+        itemCount: visible.length,
+        itemBuilder: (context, i) => _buildRecipeCard(visible[i], i),
+      );
+    }
+
+    return ReorderableListView.builder(
       padding: const EdgeInsets.fromLTRB(16, 0, 16, 100),
       itemCount: visible.length,
+      buildDefaultDragHandles: false,
+      onReorder: (oldIdx, newIdx) {
+        setState(() {
+          if (newIdx > oldIdx) newIdx -= 1;
+          final item = _recipes.removeAt(oldIdx);
+          _recipes.insert(newIdx, item);
+        });
+        _saveRecipes();
+      },
       itemBuilder: (context, i) {
         final r = visible[i];
-        final gradient = _cardGradients[i % _cardGradients.length];
+        return ReorderableDragStartListener(
+          key: ValueKey(r.id),
+          index: i,
+          child: _buildRecipeCard(r, i),
+        );
+      },
+    );
+  }
 
-        return Padding(
-          padding: const EdgeInsets.only(bottom: 12),
-          child: GestureDetector(
+  Widget _buildRecipeCard(Recipe r, int i) {
+    final gradient = _cardGradients[i % _cardGradients.length];
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: GestureDetector(
             onTap: () => _openRecipe(r),
             child: Container(
               decoration: BoxDecoration(
@@ -334,8 +494,16 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
                       width: 54,
                       height: 54,
                       decoration: BoxDecoration(
-                        gradient: LinearGradient(colors: gradient),
+                        gradient: r.imagePath.isEmpty
+                            ? LinearGradient(colors: gradient)
+                            : null,
                         borderRadius: BorderRadius.circular(16),
+                        image: r.imagePath.isNotEmpty
+                            ? DecorationImage(
+                                image: FileImage(File(r.imagePath)),
+                                fit: BoxFit.cover,
+                              )
+                            : null,
                         boxShadow: [
                           BoxShadow(
                             color: gradient[0].withValues(alpha: 0.3),
@@ -344,9 +512,14 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
                           ),
                         ],
                       ),
-                      child: const Center(
-                        child: Text('🍰', style: TextStyle(fontSize: 24)),
-                      ),
+                      child: r.imagePath.isEmpty
+                          ? const Center(
+                              child: Text(
+                                '🍰',
+                                style: TextStyle(fontSize: 24),
+                              ),
+                            )
+                          : null,
                     ),
                     const SizedBox(width: 14),
                     Expanded(
@@ -427,8 +600,6 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
               ),
             ),
           ),
-        );
-      },
     );
   }
 }

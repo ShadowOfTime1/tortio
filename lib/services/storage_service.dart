@@ -43,6 +43,8 @@ class StorageService {
       'height': r.height,
       'weight': r.weight,
       'notes': r.notes,
+      'tags': r.tags,
+      'imagePath': r.imagePath,
       'sections': r.sections
           .map(
             (s) => {
@@ -73,6 +75,8 @@ class StorageService {
       height: (j['height'] as num).toDouble(),
       weight: (j['weight'] as num?)?.toDouble() ?? 0,
       notes: (j['notes'] as String?) ?? '',
+      tags: (j['tags'] as List?)?.map((t) => t as String).toList() ?? const [],
+      imagePath: (j['imagePath'] as String?) ?? '',
       sections: (j['sections'] as List).map((s) {
         final scaleType = ScaleType.values[s['scaleType'] as int];
         return RecipeSection(

@@ -70,6 +70,8 @@ class Recipe {
   final double height;
   final double weight;
   final String notes;
+  final List<String> tags;
+  final String imagePath;
   final List<RecipeSection> sections;
 
   Recipe({
@@ -79,6 +81,8 @@ class Recipe {
     required this.height,
     this.weight = 0,
     this.notes = '',
+    this.tags = const [],
+    this.imagePath = '',
     required this.sections,
   });
 

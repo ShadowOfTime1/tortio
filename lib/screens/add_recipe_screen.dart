@@ -1,5 +1,11 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import '../models/recipe.dart';
+import '../services/custom_types_service.dart';
+import '../services/image_picker_service.dart';
+import '../services/ingredient_history.dart';
+import '../services/storage_service.dart';
 import '../utils.dart';
 
 class AddRecipeScreen extends StatefulWidget {
@@ -16,7 +22,12 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
   late final TextEditingController _heightController;
   late final TextEditingController _weightController;
   late final TextEditingController _notesController;
+  late final TextEditingController _tagInputController;
   final List<_SectionInput> _sections = [];
+  final List<String> _tags = [];
+  List<SectionType> _customTypes = [];
+  List<String> _ingredientSuggestions = const [];
+  String _imagePath = '';
   bool get _isEditing => widget.existingRecipe != null;
 
   final List<List<Color>> _sectionColors = [
@@ -43,6 +54,11 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
       text: r != null && r.weight > 0 ? '${r.weight}' : '',
     );
     _notesController = TextEditingController(text: r?.notes ?? '');
+    _tagInputController = TextEditingController();
+    if (r != null) _tags.addAll(r.tags);
+    _imagePath = r?.imagePath ?? '';
+    _loadCustomTypes();
+    _loadIngredientHistory();
     if (r != null) {
       for (final section in r.sections) {
         final sectionInput = _SectionInput(
@@ -59,17 +75,140 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
     }
   }
 
+  Future<void> _loadCustomTypes() async {
+    final types = await CustomTypesService.load();
+    if (mounted) setState(() => _customTypes = types);
+  }
+
+  Future<void> _loadIngredientHistory() async {
+    final all = await StorageService.loadRecipes();
+    if (mounted) setState(() => _ingredientSuggestions = ingredientHistory(all));
+  }
+
   void _addSection() {
     showModalBottomSheet(
       context: context,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
+      isScrollControlled: true,
       builder: (ctx) => _SectionPicker(
+        customTypes: _customTypes,
         onSelect: (type) {
           Navigator.pop(ctx);
           setState(() => _sections.add(_SectionInput(type: type)));
         },
+        onCreateCustom: () async {
+          Navigator.pop(ctx);
+          final created = await _showCreateCustomTypeDialog();
+          if (created != null) {
+            final updated = [..._customTypes, created];
+            await CustomTypesService.save(updated);
+            if (mounted) {
+              setState(() {
+                _customTypes = updated;
+                _sections.add(_SectionInput(type: created));
+              });
+            }
+          }
+        },
+      ),
+    );
+  }
+
+  Future<SectionType?> _showCreateCustomTypeDialog() {
+    final nameController = TextEditingController();
+    final iconController = TextEditingController(text: '🧁');
+    ScaleType selectedScale = ScaleType.volume;
+
+    return showDialog<SectionType>(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setDialogState) => AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          title: const Text('Свой тип секции'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              TextField(
+                controller: nameController,
+                autofocus: true,
+                decoration: const InputDecoration(
+                  labelText: 'Название',
+                  hintText: 'Например, Маршмеллоу',
+                ),
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: iconController,
+                decoration: const InputDecoration(
+                  labelText: 'Иконка (эмодзи)',
+                  hintText: '🍡',
+                ),
+              ),
+              const SizedBox(height: 16),
+              const Text(
+                'Как масштабировать',
+                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+              ),
+              RadioListTile<ScaleType>(
+                dense: true,
+                contentPadding: EdgeInsets.zero,
+                title: const Text('По объёму (d² × h)'),
+                value: ScaleType.volume,
+                groupValue: selectedScale,
+                onChanged: (v) =>
+                    setDialogState(() => selectedScale = v!),
+              ),
+              RadioListTile<ScaleType>(
+                dense: true,
+                contentPadding: EdgeInsets.zero,
+                title: const Text('По площади (d²)'),
+                value: ScaleType.area,
+                groupValue: selectedScale,
+                onChanged: (v) =>
+                    setDialogState(() => selectedScale = v!),
+              ),
+              RadioListTile<ScaleType>(
+                dense: true,
+                contentPadding: EdgeInsets.zero,
+                title: const Text('Фикс (не меняется)'),
+                value: ScaleType.fixed,
+                groupValue: selectedScale,
+                onChanged: (v) =>
+                    setDialogState(() => selectedScale = v!),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: const Text('Отмена'),
+            ),
+            FilledButton(
+              onPressed: () {
+                final name = nameController.text.trim();
+                final icon = iconController.text.trim();
+                if (name.isEmpty || icon.isEmpty) return;
+                Navigator.pop(
+                  ctx,
+                  SectionType(
+                    name: name,
+                    icon: icon,
+                    scaleType: selectedScale,
+                  ),
+                );
+              },
+              style: FilledButton.styleFrom(
+                backgroundColor: const Color(0xFFFF6B8A),
+              ),
+              child: const Text('Создать'),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -88,6 +227,29 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
     setState(() {
       _sections[sectionIndex].ingredients.removeAt(ingIndex);
     });
+  }
+
+  void _addTag() {
+    final raw = _tagInputController.text.trim();
+    if (raw.isEmpty) return;
+    // Поддержка ввода нескольких тегов через запятую.
+    final newTags = raw
+        .split(',')
+        .map((t) => t.trim())
+        .where((t) => t.isNotEmpty && !_tags.contains(t))
+        .toList();
+    if (newTags.isEmpty) {
+      _tagInputController.clear();
+      return;
+    }
+    setState(() {
+      _tags.addAll(newTags);
+      _tagInputController.clear();
+    });
+  }
+
+  void _removeTag(String tag) {
+    setState(() => _tags.remove(tag));
   }
 
   void _save() {
@@ -150,9 +312,62 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
       height: height,
       weight: weight,
       notes: _notesController.text.trim(),
+      tags: List.unmodifiable(_tags),
+      imagePath: _imagePath,
       sections: cleanSections,
     );
     Navigator.of(context).pop(recipe);
+  }
+
+  Future<void> _pickImage(ImageSource source) async {
+    final path = await ImagePickerService.pickAndPersist(source: source);
+    if (path != null && mounted) {
+      setState(() => _imagePath = path);
+    }
+  }
+
+  void _showImageActions() {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (ctx) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.photo_library_outlined),
+              title: const Text('Из галереи'),
+              onTap: () {
+                Navigator.pop(ctx);
+                _pickImage(ImageSource.gallery);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.photo_camera_outlined),
+              title: const Text('Сделать фото'),
+              onTap: () {
+                Navigator.pop(ctx);
+                _pickImage(ImageSource.camera);
+              },
+            ),
+            if (_imagePath.isNotEmpty)
+              ListTile(
+                leading: const Icon(Icons.delete_outline, color: Colors.red),
+                title: const Text(
+                  'Убрать фото',
+                  style: TextStyle(color: Colors.red),
+                ),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  setState(() => _imagePath = '');
+                },
+              ),
+          ],
+        ),
+      ),
+    );
   }
 
   void _showError(String msg) {
@@ -188,6 +403,54 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // Фото-обложка (опционально)
+            Center(
+              child: GestureDetector(
+                onTap: _showImageActions,
+                child: Container(
+                  width: 120,
+                  height: 120,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Theme.of(context).colorScheme.surface,
+                    border: Border.all(
+                      color: const Color(0xFFFF6B8A).withValues(alpha: 0.3),
+                      width: 2,
+                    ),
+                    image: _imagePath.isNotEmpty
+                        ? DecorationImage(
+                            image: FileImage(File(_imagePath)),
+                            fit: BoxFit.cover,
+                          )
+                        : null,
+                  ),
+                  child: _imagePath.isEmpty
+                      ? const Center(
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                Icons.add_a_photo_outlined,
+                                color: Color(0xFFE85D75),
+                                size: 28,
+                              ),
+                              SizedBox(height: 4),
+                              Text(
+                                'Фото',
+                                style: TextStyle(
+                                  color: Color(0xFFE85D75),
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ],
+                          ),
+                        )
+                      : null,
+                ),
+              ),
+            ),
+            const SizedBox(height: 20),
+
             const Text(
               'Название',
               style: TextStyle(fontWeight: FontWeight.w600),
@@ -265,6 +528,44 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
                     'Например: испечь при 170°C 35 мин. Бисквит — за день до сборки.',
               ),
             ),
+            const SizedBox(height: 20),
+
+            const Text(
+              'Теги (необязательно)',
+              style: TextStyle(fontWeight: FontWeight.w600),
+            ),
+            const SizedBox(height: 8),
+            TextField(
+              controller: _tagInputController,
+              textInputAction: TextInputAction.done,
+              onSubmitted: (_) => _addTag(),
+              decoration: InputDecoration(
+                hintText: 'шоколадный, без глютена',
+                helperText: 'Введи тег и нажми Enter (или через запятую)',
+                suffixIcon: IconButton(
+                  icon: const Icon(Icons.add),
+                  onPressed: _addTag,
+                ),
+              ),
+            ),
+            if (_tags.isNotEmpty) ...[
+              const SizedBox(height: 8),
+              Wrap(
+                spacing: 6,
+                runSpacing: 6,
+                children: _tags.map((tag) {
+                  return InputChip(
+                    label: Text(tag),
+                    onDeleted: () => _removeTag(tag),
+                    deleteIconColor: Colors.grey.shade500,
+                    backgroundColor: const Color(0xFFFF6B8A).withValues(
+                      alpha: 0.1,
+                    ),
+                    labelStyle: const TextStyle(fontSize: 13),
+                  );
+                }).toList(),
+              ),
+            ],
             const SizedBox(height: 28),
 
             // Секции
@@ -408,12 +709,36 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
                                   children: [
                                     Expanded(
                                       flex: 3,
-                                      child: TextField(
-                                        controller: ing.nameController,
-                                        decoration: const InputDecoration(
-                                          hintText: 'Ингредиент',
-                                          isDense: true,
+                                      child: Autocomplete<String>(
+                                        initialValue: TextEditingValue(
+                                          text: ing.nameController.text,
                                         ),
+                                        optionsBuilder: (tev) {
+                                          if (tev.text.isEmpty) {
+                                            return const Iterable<String>.empty();
+                                          }
+                                          final q = tev.text.toLowerCase();
+                                          return _ingredientSuggestions.where(
+                                            (n) =>
+                                                n.toLowerCase().contains(q) &&
+                                                n.toLowerCase() != q,
+                                          ).take(5);
+                                        },
+                                        fieldViewBuilder:
+                                            (ctx, ctrl, fn, submit) {
+                                          // Подменяем наш controller на тот,
+                                          // которым владеет Autocomplete:
+                                          // его текст уйдёт в _save().
+                                          ing.nameController = ctrl;
+                                          return TextField(
+                                            controller: ctrl,
+                                            focusNode: fn,
+                                            decoration: const InputDecoration(
+                                              hintText: 'Ингредиент',
+                                              isDense: true,
+                                            ),
+                                          );
+                                        },
                                       ),
                                     ),
                                     const SizedBox(width: 8),
@@ -491,7 +816,42 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
 
 class _SectionPicker extends StatelessWidget {
   final Function(SectionType) onSelect;
-  const _SectionPicker({required this.onSelect});
+  final VoidCallback onCreateCustom;
+  final List<SectionType> customTypes;
+  const _SectionPicker({
+    required this.onSelect,
+    required this.onCreateCustom,
+    required this.customTypes,
+  });
+
+  Widget _chip(SectionType type, BuildContext context) {
+    return GestureDetector(
+      onTap: () => onSelect(type),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        decoration: BoxDecoration(
+          color: Theme.of(context).brightness == Brightness.dark
+              ? const Color(0xFF3A2A2A)
+              : const Color(0xFFFFF0F0),
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(
+            color: const Color(0xFFFF6B8A).withValues(alpha: 0.3),
+          ),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(type.icon, style: const TextStyle(fontSize: 18)),
+            const SizedBox(width: 6),
+            Text(
+              type.name,
+              style: const TextStyle(fontWeight: FontWeight.w500),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -509,38 +869,45 @@ class _SectionPicker extends StatelessWidget {
           Wrap(
             spacing: 8,
             runSpacing: 10,
-            children: SectionType.presets.map((type) {
-              return GestureDetector(
-                onTap: () => onSelect(type),
+            children: [
+              ...SectionType.presets.map((t) => _chip(t, context)),
+              ...customTypes.map((t) => _chip(t, context)),
+              GestureDetector(
+                onTap: onCreateCustom,
                 child: Container(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 14,
                     vertical: 10,
                   ),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFFFF0F0),
+                    color: Colors.transparent,
                     borderRadius: BorderRadius.circular(14),
                     border: Border.all(
-                      color: const Color(0xFFFF6B8A).withValues(alpha: 0.3),
+                      color: const Color(0xFFFF6B8A),
+                      style: BorderStyle.solid,
                     ),
                   ),
-                  child: Row(
+                  child: const Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Text(type.icon, style: const TextStyle(fontSize: 18)),
-                      const SizedBox(width: 6),
+                      Icon(
+                        Icons.add,
+                        size: 18,
+                        color: Color(0xFFE85D75),
+                      ),
+                      SizedBox(width: 4),
                       Text(
-                        type.name,
-                        style: const TextStyle(
-                          fontWeight: FontWeight.w500,
-                          color: Colors.black87,
+                        'Свой тип',
+                        style: TextStyle(
+                          fontWeight: FontWeight.w600,
+                          color: Color(0xFFE85D75),
                         ),
                       ),
                     ],
                   ),
                 ),
-              );
-            }).toList(),
+              ),
+            ],
           ),
         ],
       ),
@@ -557,7 +924,9 @@ class _SectionInput {
 }
 
 class _IngredientInput {
-  final TextEditingController nameController;
+  // Не final: при использовании Autocomplete его внутренний controller
+  // подменяет наш — так его текст автоматически попадает в save().
+  TextEditingController nameController;
   final TextEditingController amountController;
   _IngredientInput({String name = '', String amount = ''})
     : nameController = TextEditingController(text: name),
