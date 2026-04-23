@@ -1,17 +1,53 @@
-# tortio
+# Tortio
 
-A new Flutter project.
+Flutter-приложение для кондитеров. Хранит рецепты тортов и автоматически пересчитывает количество ингредиентов при изменении размера формы (диаметр × высота) или итогового веса.
 
-## Getting Started
+## Возможности
 
-This project is a starting point for a Flutter application.
+- **Рецепт = набор секций** одного из 10 типов: Бисквит, Крем, Начинка, Покрытие, Ганаш, Пропитка, Мусс, Безе, Глазурь, Декор. У каждого типа свой режим масштабирования (по объёму, по площади или фиксированный).
+- **Пересчёт по размеру** — задаёшь новый диаметр и высоту, ингредиенты пересчитываются по объёму/площади/остаются как есть в зависимости от типа секции.
+- **Пересчёт по весу** — задаёшь целевой вес, fixed-секции (декор) корректно исключаются из расчёта.
+- **Список покупок** — суммирует одинаковые ингредиенты по всем секциям масштабированного рецепта.
+- **Поделиться** — формирует читаемый текст для отправки коллеге через любой мессенджер.
+- **Заметки** — свободное поле для шагов приготовления / комментариев.
+- **Поиск** — фильтр по названию для коллекции из 5+ рецептов.
+- **Auto-update** — приложение само проверяет GitHub Releases и предлагает скачать новую версию (Android-only).
 
-A few resources to get you started if this is your first Flutter project:
+Все измерения — **только в граммах**.
 
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
+## Установка
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+Скачать последнюю `app-release.apk` на странице [Releases](https://github.com/ShadowOfTime1/tortio/releases/latest) и открыть на Android-устройстве (потребуется разрешить установку из неизвестных источников).
+
+## Сборка из исходников
+
+Требования: Flutter stable (Dart `^3.11.4`), Android SDK для APK.
+
+```bash
+flutter pub get
+flutter analyze
+flutter test
+flutter build apk --release
+```
+
+APK окажется в `build/app/outputs/flutter-apk/app-release.apk`.
+
+## Релизный пайплайн
+
+Локально:
+
+```bash
+./release.sh <version> "<message>"
+```
+
+Скрипт обновляет версию в `pubspec.yaml`, делает коммит, пушит, ставит тег `v<version>` и пушит его. Тег триггерит GitHub Actions workflow, который собирает подписанный APK и публикует Release с auto-generated changelog.
+
+Для подписи нужны GitHub Actions secrets: `KEYSTORE_BASE64`, `STORE_PASSWORD`, `KEY_PASSWORD`, `KEY_ALIAS`.
+
+## CI
+
+Каждый push в `main` и pull request прогоняет `flutter analyze` + `flutter test` (см. `.github/workflows/ci.yml`).
+
+## История изменений
+
+См. [CHANGELOG.md](CHANGELOG.md).

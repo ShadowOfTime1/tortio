@@ -64,6 +64,7 @@ class Recipe {
   final double diameter;
   final double height;
   final double weight;
+  final String notes;
   final List<RecipeSection> sections;
 
   Recipe({
@@ -72,6 +73,7 @@ class Recipe {
     required this.diameter,
     required this.height,
     this.weight = 0,
+    this.notes = '',
     required this.sections,
   });
 

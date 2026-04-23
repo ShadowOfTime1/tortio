@@ -4,18 +4,33 @@ import '../models/recipe.dart';
 
 class StorageService {
   static const String _key = 'recipes';
+  static const String _backupKey = 'recipes_backup';
 
   static Future<List<Recipe>> loadRecipes() async {
     final prefs = await SharedPreferences.getInstance();
-    final jsonString = prefs.getString(_key);
-    if (jsonString == null) return [];
+    return _tryLoad(prefs, _key) ?? _tryLoad(prefs, _backupKey) ?? [];
+  }
 
-    final List<dynamic> jsonList = json.decode(jsonString);
-    return jsonList.map((j) => _recipeFromJson(j)).toList();
+  static List<Recipe>? _tryLoad(SharedPreferences prefs, String key) {
+    final jsonString = prefs.getString(key);
+    if (jsonString == null) return null;
+    try {
+      final List<dynamic> jsonList = json.decode(jsonString);
+      return jsonList.map((j) => _recipeFromJson(j)).toList();
+    } catch (_) {
+      return null;
+    }
   }
 
   static Future<void> saveRecipes(List<Recipe> recipes) async {
     final prefs = await SharedPreferences.getInstance();
+    // Сохраняем предыдущее значение в backup перед записью нового —
+    // если новый JSON окажется битым, на следующем старте loadRecipes
+    // поднимет рецепты из бэкапа, а не вернёт пустой список.
+    final previous = prefs.getString(_key);
+    if (previous != null) {
+      await prefs.setString(_backupKey, previous);
+    }
     final jsonList = recipes.map((r) => _recipeToJson(r)).toList();
     await prefs.setString(_key, json.encode(jsonList));
   }
@@ -27,6 +42,7 @@ class StorageService {
       'diameter': r.diameter,
       'height': r.height,
       'weight': r.weight,
+      'notes': r.notes,
       'sections': r.sections
           .map(
             (s) => {
@@ -55,6 +71,7 @@ class StorageService {
       diameter: (j['diameter'] as num).toDouble(),
       height: (j['height'] as num).toDouble(),
       weight: (j['weight'] as num?)?.toDouble() ?? 0,
+      notes: (j['notes'] as String?) ?? '',
       sections: (j['sections'] as List).map((s) {
         final scaleType = ScaleType.values[s['scaleType'] as int];
         return RecipeSection(

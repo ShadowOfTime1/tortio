@@ -14,6 +14,7 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
   late final TextEditingController _diameterController;
   late final TextEditingController _heightController;
   late final TextEditingController _weightController;
+  late final TextEditingController _notesController;
   final List<_SectionInput> _sections = [];
   bool get _isEditing => widget.existingRecipe != null;
 
@@ -40,6 +41,7 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
     _weightController = TextEditingController(
       text: r != null && r.weight > 0 ? '${r.weight}' : '',
     );
+    _notesController = TextEditingController(text: r?.notes ?? '');
     if (r != null) {
       for (final section in r.sections) {
         final sectionInput = _SectionInput(type: section.type);
@@ -64,7 +66,6 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
           Navigator.pop(ctx);
           setState(() => _sections.add(_SectionInput(type: type)));
         },
-        usedSections: _sections.map((s) => s.type.name).toSet(),
       ),
     );
   }
@@ -112,6 +113,7 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
       diameter: diameter,
       height: height,
       weight: weight,
+      notes: _notesController.text.trim(),
       sections: _sections.map((s) {
         return RecipeSection(
           type: s.type,
@@ -223,6 +225,22 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
                 hintText: '2000',
                 suffixText: 'г',
                 labelText: 'Вес',
+              ),
+            ),
+            const SizedBox(height: 20),
+
+            const Text(
+              'Заметки / шаги (необязательно)',
+              style: TextStyle(fontWeight: FontWeight.w600),
+            ),
+            const SizedBox(height: 8),
+            TextField(
+              controller: _notesController,
+              maxLines: 5,
+              minLines: 3,
+              decoration: const InputDecoration(
+                hintText:
+                    'Например: испечь при 170°C 35 мин. Бисквит — за день до сборки.',
               ),
             ),
             const SizedBox(height: 28),
@@ -426,8 +444,7 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
 
 class _SectionPicker extends StatelessWidget {
   final Function(SectionType) onSelect;
-  final Set<String> usedSections;
-  const _SectionPicker({required this.onSelect, required this.usedSections});
+  const _SectionPicker({required this.onSelect});
 
   @override
   Widget build(BuildContext context) {
@@ -446,23 +463,18 @@ class _SectionPicker extends StatelessWidget {
             spacing: 8,
             runSpacing: 10,
             children: SectionType.presets.map((type) {
-              final used = usedSections.contains(type.name);
               return GestureDetector(
-                onTap: used ? null : () => onSelect(type),
+                onTap: () => onSelect(type),
                 child: Container(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 14,
                     vertical: 10,
                   ),
                   decoration: BoxDecoration(
-                    color: used
-                        ? Colors.grey.shade200
-                        : const Color(0xFFFFF0F0),
+                    color: const Color(0xFFFFF0F0),
                     borderRadius: BorderRadius.circular(14),
                     border: Border.all(
-                      color: used
-                          ? Colors.grey.shade300
-                          : const Color(0xFFFF6B8A).withValues(alpha: 0.3),
+                      color: const Color(0xFFFF6B8A).withValues(alpha: 0.3),
                     ),
                   ),
                   child: Row(
@@ -472,9 +484,9 @@ class _SectionPicker extends StatelessWidget {
                       const SizedBox(width: 6),
                       Text(
                         type.name,
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontWeight: FontWeight.w500,
-                          color: used ? Colors.grey : Colors.black87,
+                          color: Colors.black87,
                         ),
                       ),
                     ],

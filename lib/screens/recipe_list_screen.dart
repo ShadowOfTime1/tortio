@@ -16,6 +16,8 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
   List<Recipe> _recipes = [];
   bool _loaded = false;
   String _version = '...';
+  final TextEditingController _searchController = TextEditingController();
+  String _searchQuery = '';
 
   final List<List<Color>> _cardGradients = [
     [const Color(0xFFFF9A9E), const Color(0xFFFAD0C4)],
@@ -64,15 +66,18 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
     }
   }
 
-  void _editRecipe(int index) async {
+  void _editRecipe(Recipe recipe) async {
     final updated = await Navigator.of(context).push<Recipe>(
       MaterialPageRoute(
-        builder: (_) => AddRecipeScreen(existingRecipe: _recipes[index]),
+        builder: (_) => AddRecipeScreen(existingRecipe: recipe),
       ),
     );
     if (updated != null) {
-      setState(() => _recipes[index] = updated);
-      _saveRecipes();
+      final index = _recipes.indexWhere((r) => r.id == recipe.id);
+      if (index != -1) {
+        setState(() => _recipes[index] = updated);
+        _saveRecipes();
+      }
     }
   }
 
@@ -82,14 +87,13 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
     ).push(MaterialPageRoute(builder: (_) => ScalerScreen(recipe: recipe)));
   }
 
-  void _confirmDelete(int index) {
-    final name = _recipes[index].title;
+  void _confirmDelete(Recipe recipe) {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         title: const Text('Удалить рецепт?'),
-        content: Text('«$name» будет удалён.'),
+        content: Text('«${recipe.title}» будет удалён.'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
@@ -98,7 +102,7 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
           FilledButton(
             onPressed: () {
               Navigator.pop(ctx);
-              setState(() => _recipes.removeAt(index));
+              setState(() => _recipes.removeWhere((r) => r.id == recipe.id));
               _saveRecipes();
             },
             style: FilledButton.styleFrom(backgroundColor: Colors.red.shade400),
@@ -163,6 +167,28 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
                 ],
               ),
             ),
+            if (_loaded && _recipes.length >= 5)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
+                child: TextField(
+                  controller: _searchController,
+                  decoration: InputDecoration(
+                    hintText: 'Поиск по названию',
+                    prefixIcon: const Icon(Icons.search, size: 20),
+                    suffixIcon: _searchQuery.isEmpty
+                        ? null
+                        : IconButton(
+                            icon: const Icon(Icons.close, size: 18),
+                            onPressed: () {
+                              _searchController.clear();
+                              setState(() => _searchQuery = '');
+                            },
+                          ),
+                    isDense: true,
+                  ),
+                  onChanged: (v) => setState(() => _searchQuery = v.trim()),
+                ),
+              ),
             Expanded(
               child: !_loaded
                   ? const Center(child: CircularProgressIndicator())
@@ -216,12 +242,31 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
     );
   }
 
+  List<Recipe> get _visibleRecipes {
+    if (_searchQuery.isEmpty) return _recipes;
+    final q = _searchQuery.toLowerCase();
+    return _recipes.where((r) => r.title.toLowerCase().contains(q)).toList();
+  }
+
   Widget _buildList() {
+    final visible = _visibleRecipes;
+    if (visible.isEmpty) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Text(
+            'По «$_searchQuery» ничего не найдено',
+            style: TextStyle(color: Colors.grey.shade500, fontSize: 15),
+            textAlign: TextAlign.center,
+          ),
+        ),
+      );
+    }
     return ListView.builder(
       padding: const EdgeInsets.fromLTRB(16, 0, 16, 100),
-      itemCount: _recipes.length,
+      itemCount: visible.length,
       itemBuilder: (context, i) {
-        final r = _recipes[i];
+        final r = visible[i];
         final gradient = _cardGradients[i % _cardGradients.length];
 
         return Padding(
@@ -289,12 +334,12 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
                     Column(
                       children: [
                         IconButton(
-                          onPressed: () => _editRecipe(i),
+                          onPressed: () => _editRecipe(r),
                           icon: const Icon(Icons.edit_outlined, size: 20),
                           color: Colors.grey.shade500,
                         ),
                         IconButton(
-                          onPressed: () => _confirmDelete(i),
+                          onPressed: () => _confirmDelete(r),
                           icon: const Icon(Icons.delete_outline, size: 20),
                           color: Colors.red.shade300,
                         ),
