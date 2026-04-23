@@ -19,3 +19,10 @@
 
 # share_plus (Android intent helpers)
 -keep class dev.fluttercommunity.plus.share.** { *; }
+
+# Flutter ссылается на Play Core SDK для deferred components, но мы его
+# не используем. Подавляем R8 missing class warnings, иначе release-билд
+# падает с "Missing class com.google.android.play.core...".
+-dontwarn com.google.android.play.core.**
+-keep class com.google.android.play.core.** { *; }
+-keep class io.flutter.embedding.engine.deferredcomponents.** { *; }
