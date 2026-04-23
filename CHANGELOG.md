@@ -2,6 +2,11 @@
 
 Все значимые изменения по версиям. Формат — обратный хронологический.
 
+## v1.10.1 — 2026-04-23
+
+- **CI** — новый workflow на push в `main` и pull request: прогоняет `flutter analyze` + `flutter test`.
+- **Release workflow** обновлён до actions без Node 20 deprecation: `actions/checkout@v6`, `actions/setup-java@v5`, `softprops/action-gh-release@v3`.
+
 ## v1.10.0 — 2026-04-23
 
 - **Несколько секций одного типа** в рецепте (например, два разных крема). Раньше второй крем добавить было нельзя.
