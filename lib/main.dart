@@ -28,6 +28,23 @@ class TortioApp extends StatelessWidget {
           theme: buildLightTheme(),
           darkTheme: buildDarkTheme(),
           themeMode: ThemeService.instance.mode,
+          // Заворачиваем всё в AnnotatedRegion, чтобы система рисовала иконки
+          // статус-бара контрастно фону: тёмные иконки на светлой теме,
+          // светлые на тёмной. Без этого в светлой теме часы/wifi/батарея
+          // невидимы (белые на бежевом).
+          builder: (context, child) {
+            final brightness = Theme.of(context).brightness;
+            return AnnotatedRegion<SystemUiOverlayStyle>(
+              value: SystemUiOverlayStyle(
+                statusBarColor: Colors.transparent,
+                statusBarIconBrightness: brightness == Brightness.dark
+                    ? Brightness.light
+                    : Brightness.dark,
+                statusBarBrightness: brightness, // iOS
+              ),
+              child: child!,
+            );
+          },
           home: const MainWrapper(),
         );
       },

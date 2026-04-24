@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/recipe.dart';
 import '../services/storage_service.dart';
+import '../widgets/dot_ornament.dart';
 import 'add_recipe_screen.dart';
 import 'scaler_screen.dart';
 import 'settings_screen.dart';
@@ -263,10 +264,13 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SafeArea(
-        child: Column(
-          children: [
-            _isSelectionMode ? _buildSelectionHeader() : _buildHeader(),
+      body: Stack(
+        children: [
+          const Positioned.fill(child: DotOrnament()),
+          SafeArea(
+            child: Column(
+              children: [
+                _isSelectionMode ? _buildSelectionHeader() : _buildHeader(),
             if (_loaded && _recipes.length >= 5)
               Padding(
                 padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
@@ -333,6 +337,8 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
             ),
           ],
         ),
+      ),
+        ],
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: _addRecipe,

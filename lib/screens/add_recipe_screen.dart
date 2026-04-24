@@ -7,6 +7,7 @@ import '../services/image_picker_service.dart';
 import '../services/ingredient_history.dart';
 import '../services/storage_service.dart';
 import '../utils.dart';
+import '../widgets/dot_ornament.dart';
 
 class AddRecipeScreen extends StatefulWidget {
   final Recipe? existingRecipe;
@@ -881,19 +882,7 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
       ),
       body: Stack(
         children: [
-          // Фоновый орнамент: точечная сетка как на пергаментной бумаге.
-          // Лёгкая, не отвлекает, но даёт фону текстуру.
-          Positioned.fill(
-            child: IgnorePointer(
-              child: CustomPaint(
-                painter: _DotOrnamentPainter(
-                  Theme.of(context).brightness == Brightness.dark
-                      ? Colors.white.withValues(alpha: 0.05)
-                      : const Color(0xFFE85D75).withValues(alpha: 0.10),
-                ),
-              ),
-            ),
-          ),
+          const Positioned.fill(child: DotOrnament()),
           SingleChildScrollView(
             padding: const EdgeInsets.all(20),
             child: Column(
@@ -1332,31 +1321,4 @@ class _TierInput {
     : diameterController = TextEditingController(text: diameter),
       heightController = TextEditingController(text: height),
       labelController = TextEditingController(text: label);
-}
-
-/// Рисует мелкую точечную сетку (стиль «пергаментная бумага»).
-/// Точки в шахматном порядке: одна строка по сетке, следующая со смещением
-/// на полшага — так глаз воспринимает узор, а не строки.
-class _DotOrnamentPainter extends CustomPainter {
-  final Color color;
-  const _DotOrnamentPainter(this.color);
-
-  static const double _spacing = 22.0;
-  static const double _radius = 1.6;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()..color = color;
-    var rowIdx = 0;
-    for (var y = _spacing / 2; y < size.height; y += _spacing) {
-      final offsetX = (rowIdx % 2 == 0) ? 0.0 : _spacing / 2;
-      for (var x = offsetX + _spacing / 2; x < size.width; x += _spacing) {
-        canvas.drawCircle(Offset(x, y), _radius, paint);
-      }
-      rowIdx++;
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant _DotOrnamentPainter old) => old.color != color;
 }
