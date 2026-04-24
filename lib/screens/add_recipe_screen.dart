@@ -31,6 +31,7 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
   List<String> _ingredientSuggestions = const [];
   String _imagePath = '';
   int _rating = 0;
+  final ScrollController _scrollController = ScrollController();
   bool get _isEditing => widget.existingRecipe != null;
 
   /// Раскрываем «Дополнительно» при редактировании, если что-то заполнено.
@@ -291,6 +292,17 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
         _TierInput(diameter: '${newD.round()}', height: '${prevH.round()}'),
       );
     });
+    // Скроллим к новому ярусу после rebuild — иначе пользователь не увидит,
+    // что ярус добавился (он внизу формы, ниже видимой области), и думает
+    // что кнопка не сработала.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!_scrollController.hasClients) return;
+      _scrollController.animateTo(
+        _scrollController.position.maxScrollExtent,
+        duration: const Duration(milliseconds: 350),
+        curve: Curves.easeOut,
+      );
+    });
   }
 
   void _removeTier(_TierInput tier) {
@@ -379,12 +391,21 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
     }
 
     final additionalTiers = <TierData>[];
-    for (final t in _additionalTiers) {
+    final droppedTierNumbers = <int>[];
+    for (var i = 0; i < _additionalTiers.length; i++) {
+      final t = _additionalTiers[i];
+      final tierNumber = i + 2; // ярус 2, 3, ...
       final tierD = parseNumber(t.diameterController.text) ?? 0;
       final tierH = parseNumber(t.heightController.text) ?? 0;
-      if (tierD <= 0 || tierH <= 0) continue; // пустой ярус
+      if (tierD <= 0 || tierH <= 0) {
+        droppedTierNumbers.add(tierNumber);
+        continue;
+      }
       final tierSections = _buildCleanSections(t.sections);
-      if (tierSections.isEmpty) continue;
+      if (tierSections.isEmpty) {
+        droppedTierNumbers.add(tierNumber);
+        continue;
+      }
       additionalTiers.add(
         TierData(
           diameter: tierD,
@@ -395,10 +416,17 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
       );
     }
 
+    if (droppedTierNumbers.isNotEmpty) {
+      _showError(
+        'Ярус(ы) ${droppedTierNumbers.join(", ")} пропущены: '
+        'нет ингредиентов с весом > 0 или не заполнены размеры',
+      );
+      return;
+    }
+
+    final existing = widget.existingRecipe;
     final recipe = Recipe(
-      id:
-          widget.existingRecipe?.id ??
-          DateTime.now().millisecondsSinceEpoch.toString(),
+      id: existing?.id ?? DateTime.now().millisecondsSinceEpoch.toString(),
       title: title,
       diameter: diameter,
       height: height,
@@ -409,6 +437,11 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
       rating: _rating,
       sections: cleanSections,
       additionalTiers: additionalTiers,
+      // Сохраняем личную статистику и закрепление при редактировании.
+      // Без этого Save затирал бы их в дефолты (0/0/false).
+      cookCount: existing?.cookCount ?? 0,
+      lastCookedAt: existing?.lastCookedAt ?? 0,
+      pinned: existing?.pinned ?? false,
     );
     Navigator.of(context).pop(recipe);
   }
@@ -912,6 +945,7 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
         children: [
           const Positioned.fill(child: DotOrnament()),
           SingleChildScrollView(
+            controller: _scrollController,
             padding: const EdgeInsets.all(20),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
