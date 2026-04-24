@@ -33,6 +33,17 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
   int _rating = 0;
   bool get _isEditing => widget.existingRecipe != null;
 
+  /// Раскрываем «Дополнительно» при редактировании, если что-то заполнено.
+  /// Для нового рецепта — всегда свёрнуто.
+  bool get _hasAdvancedData {
+    final r = widget.existingRecipe;
+    if (r == null) return false;
+    return r.weight > 0 ||
+        r.notes.isNotEmpty ||
+        r.rating > 0 ||
+        r.tags.isNotEmpty;
+  }
+
   final List<List<Color>> _sectionColors = [
     [const Color(0xFFFF9A9E), const Color(0xFFFAD0C4)],
     [const Color(0xFFA18CD1), const Color(0xFFFBC2EB)],
@@ -998,113 +1009,140 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
                     ),
                   ],
                 ),
-                const SizedBox(height: 16),
-
-                const Text(
-                  'Вес (необязательно)',
-                  style: TextStyle(fontWeight: FontWeight.w600),
-                ),
                 const SizedBox(height: 8),
-                TextField(
-                  controller: _weightController,
-                  keyboardType: TextInputType.number,
-                  decoration: const InputDecoration(
-                    hintText: '2000',
-                    suffixText: 'г',
-                    labelText: 'Вес',
-                  ),
-                ),
-                const SizedBox(height: 20),
 
-                const Text(
-                  'Заметки / шаги (необязательно)',
-                  style: TextStyle(fontWeight: FontWeight.w600),
-                ),
-                const SizedBox(height: 8),
-                TextField(
-                  controller: _notesController,
-                  maxLines: 5,
-                  minLines: 3,
-                  decoration: const InputDecoration(
-                    hintText:
-                        'Например: испечь при 170°C 35 мин. Бисквит — за день до сборки.',
+                // Вес / заметки / оценка / теги — спрятаны под «Дополнительно»
+                // чтобы новички не пугались количества полей. При редактировании
+                // существующего рецепта с данными — раскрыто автоматически.
+                Theme(
+                  data: Theme.of(context).copyWith(
+                    dividerColor: Colors.transparent,
                   ),
-                ),
-                const SizedBox(height: 20),
-
-                Row(
-                  children: [
-                    const Text(
-                      'Оценка',
+                  child: ExpansionTile(
+                    tilePadding: EdgeInsets.zero,
+                    childrenPadding: EdgeInsets.zero,
+                    initiallyExpanded: _hasAdvancedData,
+                    title: const Text(
+                      'Дополнительно',
                       style: TextStyle(fontWeight: FontWeight.w600),
                     ),
-                    const Spacer(),
-                    ...List.generate(5, (i) {
-                      final filled = i < _rating;
-                      return IconButton(
-                        icon: Icon(
-                          filled ? Icons.star : Icons.star_border,
-                          color: const Color(0xFFE85D75),
-                          size: 28,
-                        ),
-                        onPressed: () => setState(() {
-                          // Тап по той же звезде, что уже выбрана = снять оценку.
-                          _rating = (_rating == i + 1) ? 0 : i + 1;
-                        }),
-                        padding: const EdgeInsets.symmetric(horizontal: 2),
-                        constraints: const BoxConstraints(),
-                        visualDensity: VisualDensity.compact,
-                      );
-                    }),
-                    if (_rating > 0)
-                      TextButton(
-                        onPressed: () => setState(() => _rating = 0),
-                        child: const Text(
-                          'Снять',
-                          style: TextStyle(fontSize: 12),
+                    subtitle: Text(
+                      'вес, заметки, оценка, теги',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey.shade500,
+                      ),
+                    ),
+                    children: [
+                      const SizedBox(height: 4),
+                      const Text(
+                        'Вес (необязательно)',
+                        style: TextStyle(fontWeight: FontWeight.w600),
+                      ),
+                      const SizedBox(height: 8),
+                      TextField(
+                        controller: _weightController,
+                        keyboardType: TextInputType.number,
+                        decoration: const InputDecoration(
+                          hintText: '2000',
+                          suffixText: 'г',
+                          labelText: 'Вес',
                         ),
                       ),
-                  ],
+                      const SizedBox(height: 20),
+                      const Text(
+                        'Заметки / шаги (необязательно)',
+                        style: TextStyle(fontWeight: FontWeight.w600),
+                      ),
+                      const SizedBox(height: 8),
+                      TextField(
+                        controller: _notesController,
+                        maxLines: 5,
+                        minLines: 3,
+                        decoration: const InputDecoration(
+                          hintText:
+                              'Например: испечь при 170°C 35 мин. Бисквит — за день до сборки.',
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                      Row(
+                        children: [
+                          const Text(
+                            'Оценка',
+                            style: TextStyle(fontWeight: FontWeight.w600),
+                          ),
+                          const Spacer(),
+                          ...List.generate(5, (i) {
+                            final filled = i < _rating;
+                            return IconButton(
+                              icon: Icon(
+                                filled ? Icons.star : Icons.star_border,
+                                color: const Color(0xFFE85D75),
+                                size: 28,
+                              ),
+                              onPressed: () => setState(() {
+                                _rating = (_rating == i + 1) ? 0 : i + 1;
+                              }),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 2,
+                              ),
+                              constraints: const BoxConstraints(),
+                              visualDensity: VisualDensity.compact,
+                            );
+                          }),
+                          if (_rating > 0)
+                            TextButton(
+                              onPressed: () => setState(() => _rating = 0),
+                              child: const Text(
+                                'Снять',
+                                style: TextStyle(fontSize: 12),
+                              ),
+                            ),
+                        ],
+                      ),
+                      const SizedBox(height: 20),
+                      const Text(
+                        'Теги (необязательно)',
+                        style: TextStyle(fontWeight: FontWeight.w600),
+                      ),
+                      const SizedBox(height: 8),
+                      TextField(
+                        controller: _tagInputController,
+                        textInputAction: TextInputAction.done,
+                        onSubmitted: (_) => _addTag(),
+                        decoration: InputDecoration(
+                          hintText: 'шоколадный, без глютена',
+                          helperText:
+                              'Введи тег и нажми Enter (или через запятую)',
+                          suffixIcon: IconButton(
+                            icon: const Icon(Icons.add),
+                            onPressed: _addTag,
+                          ),
+                        ),
+                      ),
+                      if (_tags.isNotEmpty) ...[
+                        const SizedBox(height: 8),
+                        Wrap(
+                          spacing: 6,
+                          runSpacing: 6,
+                          children: _tags.map((tag) {
+                            return InputChip(
+                              label: Text(tag),
+                              onDeleted: () => _removeTag(tag),
+                              deleteIconColor: Colors.grey.shade500,
+                              backgroundColor: const Color(
+                                0xFFFF6B8A,
+                              ).withValues(alpha: 0.1),
+                              labelStyle: const TextStyle(fontSize: 13),
+                            );
+                          }).toList(),
+                        ),
+                      ],
+                      const SizedBox(height: 8),
+                    ],
+                  ),
                 ),
                 const SizedBox(height: 20),
-
-                const Text(
-                  'Теги (необязательно)',
-                  style: TextStyle(fontWeight: FontWeight.w600),
-                ),
-                const SizedBox(height: 8),
-                TextField(
-                  controller: _tagInputController,
-                  textInputAction: TextInputAction.done,
-                  onSubmitted: (_) => _addTag(),
-                  decoration: InputDecoration(
-                    hintText: 'шоколадный, без глютена',
-                    helperText: 'Введи тег и нажми Enter (или через запятую)',
-                    suffixIcon: IconButton(
-                      icon: const Icon(Icons.add),
-                      onPressed: _addTag,
-                    ),
-                  ),
-                ),
-                if (_tags.isNotEmpty) ...[
-                  const SizedBox(height: 8),
-                  Wrap(
-                    spacing: 6,
-                    runSpacing: 6,
-                    children: _tags.map((tag) {
-                      return InputChip(
-                        label: Text(tag),
-                        onDeleted: () => _removeTag(tag),
-                        deleteIconColor: Colors.grey.shade500,
-                        backgroundColor: const Color(
-                          0xFFFF6B8A,
-                        ).withValues(alpha: 0.1),
-                        labelStyle: const TextStyle(fontSize: 13),
-                      );
-                    }).toList(),
-                  ),
-                ],
-                const SizedBox(height: 28),
 
                 // Секции
                 Row(

@@ -208,22 +208,7 @@ class _ScalerScreenState extends State<ScalerScreen> {
                             color: Colors.white,
                           ),
                         ),
-                        IconButton(
-                          tooltip: 'В PDF',
-                          onPressed: () => _exportPdf(recipe, [scaled]),
-                          icon: const Icon(
-                            Icons.picture_as_pdf_outlined,
-                            color: Colors.white,
-                          ),
-                        ),
-                        IconButton(
-                          tooltip: 'Поделиться',
-                          onPressed: () => _shareRecipe(recipe, scaled),
-                          icon: const Icon(
-                            Icons.share_outlined,
-                            color: Colors.white,
-                          ),
-                        ),
+                        _buildExportMenu(recipe, [scaled], scaled),
                       ],
                     ),
                   ),
@@ -505,6 +490,45 @@ class _ScalerScreenState extends State<ScalerScreen> {
   // Делегируем форматирование в utils.formatGrams — там ещё запятая для RU.
   String _formatWeight(double g) => formatGrams(g);
 
+  Widget _buildExportMenu(
+    Recipe recipe,
+    List<List<RecipeSection>> scaledByTier,
+    List<RecipeSection> flatScaled,
+  ) {
+    return PopupMenuButton<String>(
+      tooltip: 'Экспорт',
+      icon: const Icon(Icons.ios_share, color: Colors.white),
+      onSelected: (action) {
+        switch (action) {
+          case 'share':
+            _shareRecipe(recipe, flatScaled);
+          case 'pdf':
+            _exportPdf(recipe, scaledByTier);
+        }
+      },
+      itemBuilder: (_) => const [
+        PopupMenuItem(
+          value: 'share',
+          child: ListTile(
+            leading: Icon(Icons.share_outlined),
+            title: Text('Поделиться текстом'),
+            dense: true,
+            contentPadding: EdgeInsets.zero,
+          ),
+        ),
+        PopupMenuItem(
+          value: 'pdf',
+          child: ListTile(
+            leading: Icon(Icons.picture_as_pdf_outlined),
+            title: Text('Сохранить как PDF'),
+            dense: true,
+            contentPadding: EdgeInsets.zero,
+          ),
+        ),
+      ],
+    );
+  }
+
   void _markCooked(Recipe recipe) {
     final updated = recipe.markCooked();
     widget.onRecipeUpdated?.call(updated);
@@ -646,22 +670,7 @@ class _ScalerScreenState extends State<ScalerScreen> {
                             color: Colors.white,
                           ),
                         ),
-                        IconButton(
-                          tooltip: 'В PDF',
-                          onPressed: () => _exportPdf(recipe, scaledByTier),
-                          icon: const Icon(
-                            Icons.picture_as_pdf_outlined,
-                            color: Colors.white,
-                          ),
-                        ),
-                        IconButton(
-                          tooltip: 'Поделиться',
-                          onPressed: () => _shareRecipe(recipe, flatScaled),
-                          icon: const Icon(
-                            Icons.share_outlined,
-                            color: Colors.white,
-                          ),
-                        ),
+                        _buildExportMenu(recipe, scaledByTier, flatScaled),
                       ],
                     ),
                     Padding(

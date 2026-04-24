@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/recipe.dart';
+import '../services/sample_recipe.dart';
 import '../services/storage_service.dart';
 import '../widgets/dot_ornament.dart';
 import 'add_recipe_screen.dart';
@@ -378,9 +379,29 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
             'Добавьте свой первый торт!',
             style: TextStyle(fontSize: 15, color: Colors.grey.shade500),
           ),
+          const SizedBox(height: 24),
+          OutlinedButton.icon(
+            onPressed: _addSampleRecipe,
+            icon: const Icon(Icons.auto_awesome, size: 18),
+            label: const Text('Создать примерный рецепт'),
+            style: OutlinedButton.styleFrom(
+              foregroundColor: const Color(0xFFE85D75),
+              side: const BorderSide(color: Color(0xFFE85D75)),
+              shape: const StadiumBorder(),
+              padding: const EdgeInsets.symmetric(
+                horizontal: 18,
+                vertical: 10,
+              ),
+            ),
+          ),
         ],
       ),
     );
+  }
+
+  Future<void> _addSampleRecipe() async {
+    setState(() => _recipes.add(buildSampleRecipe()));
+    _saveRecipes();
   }
 
   List<Recipe> get _visibleRecipes {
