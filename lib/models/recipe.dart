@@ -93,6 +93,8 @@ class Recipe {
   // Дополнительные ярусы. Пустой список = одноярусный торт (backward compat).
   // Ярус 1 хранится в root-полях (diameter/height/sections), ярусы 2+ — здесь.
   final List<TierData> additionalTiers;
+  // Личный рейтинг рецепта 0-5. 0 = не оценено (звёзды не показываются).
+  final int rating;
 
   Recipe({
     required this.id,
@@ -105,6 +107,7 @@ class Recipe {
     this.imagePath = '',
     required this.sections,
     this.additionalTiers = const [],
+    this.rating = 0,
   });
 
   /// Все ярусы торта: первый собирается из root-полей, остальные из

@@ -60,6 +60,7 @@ class ImportExportService {
           // Сбрасываем imagePath — путь от другого устройства к нашему файлу
           // не приведёт. Картинки в JSON-импорте не передаются.
           imagePath: '',
+          rating: r.rating,
           sections: r.sections,
           additionalTiers: r.additionalTiers,
         ),
@@ -93,6 +94,7 @@ class ImportExportService {
       'notes': r.notes,
       'tags': r.tags,
       'imagePath': r.imagePath,
+      if (r.rating > 0) 'rating': r.rating,
       if (r.additionalTiers.isNotEmpty)
         'additionalTiers': r.additionalTiers.map(_tierToMap).toList(),
       'sections': r.sections.map(_sectionToMap).toList(),
@@ -109,6 +111,7 @@ class ImportExportService {
       notes: (j['notes'] as String?) ?? '',
       tags: (j['tags'] as List?)?.map((t) => t as String).toList() ?? const [],
       imagePath: (j['imagePath'] as String?) ?? '',
+      rating: (j['rating'] as int?) ?? 0,
       sections: (j['sections'] as List).map(_sectionFromMap).toList(),
       additionalTiers:
           (j['additionalTiers'] as List?)

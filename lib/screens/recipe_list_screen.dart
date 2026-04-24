@@ -7,7 +7,7 @@ import 'add_recipe_screen.dart';
 import 'scaler_screen.dart';
 import 'settings_screen.dart';
 
-enum SortOrder { manual, newest, oldest, alpha }
+enum SortOrder { manual, newest, oldest, alpha, rating }
 
 class RecipeListScreen extends StatefulWidget {
   const RecipeListScreen({super.key});
@@ -66,6 +66,7 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
     SortOrder.newest => 'Новые сначала',
     SortOrder.oldest => 'Старые сначала',
     SortOrder.alpha => 'По алфавиту',
+    SortOrder.rating => 'По рейтингу',
   };
 
   Future<void> _loadRecipes() async {
@@ -184,6 +185,7 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
       notes: recipe.notes,
       tags: List<String>.from(recipe.tags),
       imagePath: recipe.imagePath,
+      rating: recipe.rating,
       sections: recipe.sections.map(_cloneSection).toList(),
       additionalTiers: recipe.additionalTiers
           .map(
@@ -384,6 +386,9 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
         filtered.sort(
           (a, b) => a.title.toLowerCase().compareTo(b.title.toLowerCase()),
         );
+      case SortOrder.rating:
+        // Высокие первыми; рецепты без оценки уходят в конец.
+        filtered.sort((a, b) => b.rating.compareTo(a.rating));
     }
     return filtered;
   }
@@ -670,6 +675,20 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
                                   fontWeight: FontWeight.w700,
                                   color: Colors.white,
                                   letterSpacing: 0.5,
+                                ),
+                              ),
+                            ),
+                          ],
+                          if (r.rating > 0) ...[
+                            const SizedBox(width: 6),
+                            Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: List.generate(
+                                r.rating,
+                                (_) => const Icon(
+                                  Icons.star,
+                                  color: Color(0xFFE85D75),
+                                  size: 14,
                                 ),
                               ),
                             ),

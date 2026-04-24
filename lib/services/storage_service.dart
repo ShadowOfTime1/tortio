@@ -67,6 +67,7 @@ class StorageService {
       'notes': r.notes,
       'tags': r.tags,
       'imagePath': r.imagePath,
+      if (r.rating > 0) 'rating': r.rating,
       if (r.additionalTiers.isNotEmpty)
         'additionalTiers': r.additionalTiers.map(_tierToJson).toList(),
       'sections': r.sections.map(_sectionToJson).toList(),
@@ -83,6 +84,7 @@ class StorageService {
       notes: (j['notes'] as String?) ?? '',
       tags: (j['tags'] as List?)?.map((t) => t as String).toList() ?? const [],
       imagePath: (j['imagePath'] as String?) ?? '',
+      rating: (j['rating'] as int?) ?? 0,
       sections: (j['sections'] as List).map(_sectionFromJson).toList(),
       additionalTiers:
           (j['additionalTiers'] as List?)

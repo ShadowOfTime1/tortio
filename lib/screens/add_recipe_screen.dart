@@ -29,6 +29,7 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
   List<SectionType> _customTypes = [];
   List<String> _ingredientSuggestions = const [];
   String _imagePath = '';
+  int _rating = 0;
   bool get _isEditing => widget.existingRecipe != null;
 
   final List<List<Color>> _sectionColors = [
@@ -58,6 +59,7 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
     _tagInputController = TextEditingController();
     if (r != null) _tags.addAll(r.tags);
     _imagePath = r?.imagePath ?? '';
+    _rating = r?.rating ?? 0;
     _loadCustomTypes();
     _loadIngredientHistory();
     if (r != null) {
@@ -375,6 +377,7 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
       notes: _notesController.text.trim(),
       tags: List.unmodifiable(_tags),
       imagePath: _imagePath,
+      rating: _rating,
       sections: cleanSections,
       additionalTiers: additionalTiers,
     );
@@ -1047,6 +1050,42 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
                     hintText:
                         'Например: испечь при 170°C 35 мин. Бисквит — за день до сборки.',
                   ),
+                ),
+                const SizedBox(height: 20),
+
+                Row(
+                  children: [
+                    const Text(
+                      'Оценка',
+                      style: TextStyle(fontWeight: FontWeight.w600),
+                    ),
+                    const Spacer(),
+                    ...List.generate(5, (i) {
+                      final filled = i < _rating;
+                      return IconButton(
+                        icon: Icon(
+                          filled ? Icons.star : Icons.star_border,
+                          color: const Color(0xFFE85D75),
+                          size: 28,
+                        ),
+                        onPressed: () => setState(() {
+                          // Тап по той же звезде, что уже выбрана = снять оценку.
+                          _rating = (_rating == i + 1) ? 0 : i + 1;
+                        }),
+                        padding: const EdgeInsets.symmetric(horizontal: 2),
+                        constraints: const BoxConstraints(),
+                        visualDensity: VisualDensity.compact,
+                      );
+                    }),
+                    if (_rating > 0)
+                      TextButton(
+                        onPressed: () => setState(() => _rating = 0),
+                        child: const Text(
+                          'Снять',
+                          style: TextStyle(fontSize: 12),
+                        ),
+                      ),
+                  ],
                 ),
                 const SizedBox(height: 20),
 
