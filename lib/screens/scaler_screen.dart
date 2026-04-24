@@ -5,6 +5,7 @@ import 'package:share_plus/share_plus.dart';
 import '../models/recipe.dart';
 import '../models/scaler.dart';
 import '../services/app_settings.dart';
+import '../services/pdf_export_service.dart';
 import '../services/shopping_list.dart';
 import '../utils.dart';
 
@@ -184,6 +185,14 @@ class _ScalerScreenState extends State<ScalerScreen> {
                           onPressed: () => _showShoppingList(scaled),
                           icon: const Icon(
                             Icons.shopping_basket_outlined,
+                            color: Colors.white,
+                          ),
+                        ),
+                        IconButton(
+                          tooltip: 'В PDF',
+                          onPressed: () => _exportPdf(recipe, [scaled]),
+                          icon: const Icon(
+                            Icons.picture_as_pdf_outlined,
                             color: Colors.white,
                           ),
                         ),
@@ -474,6 +483,23 @@ class _ScalerScreenState extends State<ScalerScreen> {
   // Делегируем форматирование в utils.formatGrams — там ещё запятая для RU.
   String _formatWeight(double g) => formatGrams(g);
 
+  Future<void> _exportPdf(
+    Recipe recipe,
+    List<List<RecipeSection>> scaledByTier,
+  ) async {
+    try {
+      await PdfExportService.exportScaledRecipe(
+        recipe: recipe,
+        scaledByTier: scaledByTier,
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Ошибка PDF: $e')));
+    }
+  }
+
   /// Scaler-screen для multi-tier рецептов: каждый ярус с собственным
   /// слайдером диаметра и собственными scaled-секциями. Высоты остаются
   /// оригинальными, режим «по весу» отключён (вес — характеристика всего
@@ -564,6 +590,14 @@ class _ScalerScreenState extends State<ScalerScreen> {
                           onPressed: () => _showShoppingList(flatScaled),
                           icon: const Icon(
                             Icons.shopping_basket_outlined,
+                            color: Colors.white,
+                          ),
+                        ),
+                        IconButton(
+                          tooltip: 'В PDF',
+                          onPressed: () => _exportPdf(recipe, scaledByTier),
+                          icon: const Icon(
+                            Icons.picture_as_pdf_outlined,
                             color: Colors.white,
                           ),
                         ),
