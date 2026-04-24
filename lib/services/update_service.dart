@@ -7,6 +7,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:open_filex/open_filex.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class UpdateException implements Exception {
   final String message;
@@ -23,6 +24,9 @@ class UpdateService {
     // Auto-update механизм работает только на Android (через APK install).
     // На iOS / desktop / web баннер бесполезен — install не сработает.
     if (kIsWeb || !Platform.isAndroid) return null;
+    // Уважаем выключатель «Автоматически проверять обновления» из Settings.
+    final prefs = await SharedPreferences.getInstance();
+    if (prefs.getBool('auto_update_check') == false) return null;
     try {
       final info = await PackageInfo.fromPlatform();
       final currentVersion = info.version.trim();

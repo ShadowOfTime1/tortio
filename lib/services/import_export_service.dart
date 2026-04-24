@@ -13,9 +13,10 @@ class ImportExportService {
     final jsonString = _toJson(recipes);
 
     final dir = await getTemporaryDirectory();
-    final dateStr = DateTime.now()
-        .toIso8601String()
-        .substring(0, 10); // YYYY-MM-DD
+    final dateStr = DateTime.now().toIso8601String().substring(
+      0,
+      10,
+    ); // YYYY-MM-DD
     final filePath = '${dir.path}/tortio-export-$dateStr.json';
     final file = File(filePath);
     await file.writeAsString(jsonString);
@@ -33,10 +34,7 @@ class ImportExportService {
   /// существующим (без замены). Возвращает число добавленных рецептов.
   /// Выбрасывает исключение на битом JSON.
   static Future<int> importRecipes() async {
-    const typeGroup = XTypeGroup(
-      label: 'JSON',
-      extensions: ['json'],
-    );
+    const typeGroup = XTypeGroup(label: 'JSON', extensions: ['json']);
     final file = await openFile(acceptedTypeGroups: [typeGroup]);
     if (file == null) return 0;
 

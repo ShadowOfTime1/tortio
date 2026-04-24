@@ -16,6 +16,8 @@ String formatNumber(double v) {
 /// Форматирует вес в граммах для отображения: до 1000 г — целые граммы,
 /// от 1000 — килограммы с одной десятичной (RU-стиль с запятой).
 String formatGrams(double g) {
-  if (g >= 1000) return '${(g / 1000).toStringAsFixed(1).replaceAll('.', ',')} кг';
+  if (g >= 1000) {
+    return '${(g / 1000).toStringAsFixed(1).replaceAll('.', ',')} кг';
+  }
   return '${g.round()} г';
 }

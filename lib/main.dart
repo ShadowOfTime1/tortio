@@ -9,9 +9,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   // Лочимся в портрет: ни UI не задизайнен под landscape, ни системную
   // подсказку «повернуть» Android тогда не показывает (она перекрывала FAB).
-  await SystemChrome.setPreferredOrientations([
-    DeviceOrientation.portraitUp,
-  ]);
+  await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
   await ThemeService.instance.load();
   runApp(const TortioApp());
 }

@@ -22,9 +22,7 @@ ThemeData buildLightTheme() {
     ),
     cardTheme: CardThemeData(
       elevation: 0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       color: Colors.white,
     ),
     floatingActionButtonTheme: const FloatingActionButtonThemeData(
@@ -46,10 +44,7 @@ ThemeData buildLightTheme() {
         borderRadius: BorderRadius.circular(14),
         borderSide: const BorderSide(color: _seed, width: 2),
       ),
-      contentPadding: const EdgeInsets.symmetric(
-        horizontal: 16,
-        vertical: 14,
-      ),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
     ),
   );
 }
@@ -71,9 +66,7 @@ ThemeData buildDarkTheme() {
     ),
     cardTheme: CardThemeData(
       elevation: 0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       color: surface,
     ),
     floatingActionButtonTheme: const FloatingActionButtonThemeData(
@@ -95,19 +88,12 @@ ThemeData buildDarkTheme() {
         borderRadius: BorderRadius.circular(14),
         borderSide: const BorderSide(color: _seed, width: 2),
       ),
-      contentPadding: const EdgeInsets.symmetric(
-        horizontal: 16,
-        vertical: 14,
-      ),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
     ),
     dialogTheme: DialogThemeData(
       backgroundColor: surface,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
     ),
-    bottomSheetTheme: const BottomSheetThemeData(
-      backgroundColor: surface,
-    ),
+    bottomSheetTheme: const BottomSheetThemeData(backgroundColor: surface),
   );
 }

@@ -28,11 +28,13 @@ class CustomTypesService {
   static Future<void> save(List<SectionType> types) async {
     final prefs = await SharedPreferences.getInstance();
     final jsonList = types
-        .map((t) => {
-              'name': t.name,
-              'icon': t.icon,
-              'scaleType': t.scaleType.index,
-            })
+        .map(
+          (t) => {
+            'name': t.name,
+            'icon': t.icon,
+            'scaleType': t.scaleType.index,
+          },
+        )
         .toList();
     await prefs.setString(_key, json.encode(jsonList));
   }

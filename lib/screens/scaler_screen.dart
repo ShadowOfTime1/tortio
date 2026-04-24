@@ -472,18 +472,12 @@ class _ScalerScreenState extends State<ScalerScreen> {
                   const SizedBox(width: 8),
                   const Text(
                     'Список покупок',
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                   ),
                   const Spacer(),
                   Text(
                     'итого ${_formatWeight(total)}',
-                    style: TextStyle(
-                      fontSize: 13,
-                      color: Colors.grey.shade600,
-                    ),
+                    style: TextStyle(fontSize: 13, color: Colors.grey.shade600),
                   ),
                 ],
               ),
@@ -501,10 +495,8 @@ class _ScalerScreenState extends State<ScalerScreen> {
                   child: ListView.separated(
                     shrinkWrap: true,
                     itemCount: items.length,
-                    separatorBuilder: (_, _) => Divider(
-                      height: 1,
-                      color: Colors.grey.shade200,
-                    ),
+                    separatorBuilder: (_, _) =>
+                        Divider(height: 1, color: Colors.grey.shade200),
                     itemBuilder: (_, i) {
                       final e = items[i];
                       return Padding(
@@ -722,9 +714,7 @@ class _ScalerScreenState extends State<ScalerScreen> {
                 child: Text(
                   '$d',
                   style: TextStyle(
-                    color: selected
-                        ? const Color(0xFFE85D75)
-                        : Colors.white,
+                    color: selected ? const Color(0xFFE85D75) : Colors.white,
                     fontSize: 13,
                     fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
                   ),
