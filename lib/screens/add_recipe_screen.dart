@@ -881,42 +881,15 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
       ),
       body: Stack(
         children: [
-          // Декоративные мягкие пятна в углах — чтобы фон не казался пустым,
-          // оставаясь субтильным и не отвлекая от формы.
-          Positioned(
-            top: -60,
-            right: -60,
+          // Фоновый орнамент: точечная сетка как на пергаментной бумаге.
+          // Лёгкая, не отвлекает, но даёт фону текстуру.
+          Positioned.fill(
             child: IgnorePointer(
-              child: Container(
-                width: 220,
-                height: 220,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  gradient: RadialGradient(
-                    colors: [
-                      const Color(0xFFFF6B8A).withValues(alpha: 0.18),
-                      const Color(0xFFFF6B8A).withValues(alpha: 0),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ),
-          Positioned(
-            bottom: -80,
-            left: -50,
-            child: IgnorePointer(
-              child: Container(
-                width: 220,
-                height: 220,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  gradient: RadialGradient(
-                    colors: [
-                      const Color(0xFFFF8E53).withValues(alpha: 0.15),
-                      const Color(0xFFFF8E53).withValues(alpha: 0),
-                    ],
-                  ),
+              child: CustomPaint(
+                painter: _DotOrnamentPainter(
+                  Theme.of(context).brightness == Brightness.dark
+                      ? Colors.white.withValues(alpha: 0.05)
+                      : const Color(0xFFE85D75).withValues(alpha: 0.10),
                 ),
               ),
             ),
@@ -1359,4 +1332,31 @@ class _TierInput {
     : diameterController = TextEditingController(text: diameter),
       heightController = TextEditingController(text: height),
       labelController = TextEditingController(text: label);
+}
+
+/// Рисует мелкую точечную сетку (стиль «пергаментная бумага»).
+/// Точки в шахматном порядке: одна строка по сетке, следующая со смещением
+/// на полшага — так глаз воспринимает узор, а не строки.
+class _DotOrnamentPainter extends CustomPainter {
+  final Color color;
+  const _DotOrnamentPainter(this.color);
+
+  static const double _spacing = 22.0;
+  static const double _radius = 1.6;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()..color = color;
+    var rowIdx = 0;
+    for (var y = _spacing / 2; y < size.height; y += _spacing) {
+      final offsetX = (rowIdx % 2 == 0) ? 0.0 : _spacing / 2;
+      for (var x = offsetX + _spacing / 2; x < size.width; x += _spacing) {
+        canvas.drawCircle(Offset(x, y), _radius, paint);
+      }
+      rowIdx++;
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _DotOrnamentPainter old) => old.color != color;
 }
