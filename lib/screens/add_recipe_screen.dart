@@ -1289,9 +1289,43 @@ class _SectionPicker extends StatelessWidget {
     );
   }
 
+  /// Сгруппировано тематически — новичку проще понять, что для чего.
+  static const Map<String, List<String>> _categoryOrder = {
+    'Основа': ['Бисквит', 'Безе'],
+    'Кремы и начинки': ['Крем', 'Начинка', 'Мусс'],
+    'Покрытия и пропитки': ['Покрытие', 'Ганаш', 'Пропитка', 'Глазурь'],
+    'Декор': ['Декор'],
+  };
+
+  List<SectionType> _byCategory(String name) {
+    final names = _categoryOrder[name] ?? const [];
+    return [
+      for (final n in names)
+        SectionType.presets.firstWhere(
+          (t) => t.name == n,
+          orElse: () => SectionType.presets.first,
+        ),
+    ];
+  }
+
+  Widget _categoryHeader(String text) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 16, bottom: 8),
+      child: Text(
+        text.toUpperCase(),
+        style: const TextStyle(
+          fontSize: 11,
+          fontWeight: FontWeight.w700,
+          color: Color(0xFFE85D75),
+          letterSpacing: 0.6,
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return SingleChildScrollView(
       padding: const EdgeInsets.fromLTRB(20, 20, 20, 40),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -1301,45 +1335,56 @@ class _SectionPicker extends StatelessWidget {
             'Выберите секцию',
             style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           ),
-          const SizedBox(height: 16),
-          Wrap(
-            spacing: 8,
-            runSpacing: 10,
-            children: [
-              ...SectionType.presets.map((t) => _chip(t, context)),
-              ...customTypes.map((t) => _chip(t, context, isCustom: true)),
-              GestureDetector(
-                onTap: onCreateCustom,
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 14,
-                    vertical: 10,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.transparent,
-                    borderRadius: BorderRadius.circular(14),
-                    border: Border.all(
-                      color: const Color(0xFFFF6B8A),
-                      style: BorderStyle.solid,
-                    ),
-                  ),
-                  child: const Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(Icons.add, size: 18, color: Color(0xFFE85D75)),
-                      SizedBox(width: 4),
-                      Text(
-                        'Свой тип',
-                        style: TextStyle(
-                          fontWeight: FontWeight.w600,
-                          color: Color(0xFFE85D75),
-                        ),
+          for (final entry in _categoryOrder.entries) ...[
+            _categoryHeader(entry.key),
+            Wrap(
+              spacing: 8,
+              runSpacing: 10,
+              children: _byCategory(entry.key)
+                  .map((t) => _chip(t, context))
+                  .toList(),
+            ),
+          ],
+          if (customTypes.isNotEmpty) ...[
+            _categoryHeader('Свои типы'),
+            Wrap(
+              spacing: 8,
+              runSpacing: 10,
+              children: customTypes
+                  .map((t) => _chip(t, context, isCustom: true))
+                  .toList(),
+            ),
+          ],
+          const SizedBox(height: 20),
+          Center(
+            child: GestureDetector(
+              onTap: onCreateCustom,
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 18,
+                  vertical: 12,
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.transparent,
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: const Color(0xFFFF6B8A)),
+                ),
+                child: const Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.add, size: 18, color: Color(0xFFE85D75)),
+                    SizedBox(width: 6),
+                    Text(
+                      'Создать свой тип',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w600,
+                        color: Color(0xFFE85D75),
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
-            ],
+            ),
           ),
         ],
       ),

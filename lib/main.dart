@@ -4,6 +4,7 @@ import 'screens/recipe_list_screen.dart';
 import 'services/theme_service.dart';
 import 'services/update_service.dart';
 import 'theme.dart';
+import 'widgets/welcome_dialog.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -69,6 +70,10 @@ class _MainWrapperState extends State<MainWrapper> {
   void initState() {
     super.initState();
     _checkUpdate();
+    // После первой отрисовки покажем приветствие новому пользователю.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) maybeShowWelcome(context);
+    });
   }
 
   void _checkUpdate() async {
