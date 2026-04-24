@@ -724,7 +724,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   String _themeLabel(ThemeMode m) => switch (m) {
-    ThemeMode.system => 'Авто (как в системе)',
+    ThemeMode.system => 'Авто (день — светлая, вечер — тёмная)',
     ThemeMode.light => 'Светлая',
     ThemeMode.dark => 'Тёмная',
   };

@@ -12,6 +12,16 @@ class ThemeService extends ChangeNotifier {
   ThemeMode _mode = ThemeMode.system;
   ThemeMode get mode => _mode;
 
+  /// Если выбрано «Авто» — возвращаем light/dark по времени суток
+  /// (06:00–20:00 = light, иначе dark), а не как в системе. Кондитеры обычно
+  /// работают днём при ярком освещении, вечером удобнее тёмная.
+  /// Если выбрано Light/Dark явно — возвращаем как есть.
+  ThemeMode get effectiveMode {
+    if (_mode != ThemeMode.system) return _mode;
+    final hour = DateTime.now().hour;
+    return (hour >= 6 && hour < 20) ? ThemeMode.light : ThemeMode.dark;
+  }
+
   Future<void> load() async {
     final prefs = await SharedPreferences.getInstance();
     final raw = prefs.getString(_key);

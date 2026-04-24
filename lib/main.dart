@@ -27,7 +27,7 @@ class TortioApp extends StatelessWidget {
           debugShowCheckedModeBanner: false,
           theme: buildLightTheme(),
           darkTheme: buildDarkTheme(),
-          themeMode: ThemeService.instance.mode,
+          themeMode: ThemeService.instance.effectiveMode,
           // Заворачиваем всё в AnnotatedRegion, чтобы система рисовала иконки
           // статус-бара контрастно фону: тёмные иконки на светлой теме,
           // светлые на тёмной. Без этого в светлой теме часы/wifi/батарея

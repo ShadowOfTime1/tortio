@@ -8,6 +8,7 @@ import '../services/app_settings.dart';
 import '../services/pdf_export_service.dart';
 import '../services/shopping_list.dart';
 import '../utils.dart';
+import '../widgets/dot_ornament.dart';
 
 enum ScaleMode { size, weight }
 
@@ -132,10 +133,13 @@ class _ScalerScreenState extends State<ScalerScreen> {
         .fold<double>(0, (sum, i) => sum + i.amount);
 
     return Scaffold(
-      body: SafeArea(
-        child: Column(
-          children: [
-            // Верхний блок: либо градиент, либо фото-обложка с затемнением.
+      body: Stack(
+        children: [
+          const Positioned.fill(child: DotOrnament()),
+          SafeArea(
+            child: Column(
+              children: [
+                // Верхний блок: либо градиент, либо фото-обложка с затемнением.
             Container(
               width: double.infinity,
               decoration: BoxDecoration(
@@ -493,6 +497,8 @@ class _ScalerScreenState extends State<ScalerScreen> {
           ],
         ),
       ),
+        ],
+      ),
     );
   }
 
@@ -568,10 +574,13 @@ class _ScalerScreenState extends State<ScalerScreen> {
         .fold<double>(0, (sum, i) => sum + i.amount);
 
     return Scaffold(
-      body: SafeArea(
-        child: Column(
-          children: [
-            // Шапка с фото или градиентом
+      body: Stack(
+        children: [
+          const Positioned.fill(child: DotOrnament()),
+          SafeArea(
+            child: Column(
+              children: [
+                // Шапка с фото или градиентом
             Container(
               width: double.infinity,
               decoration: BoxDecoration(
@@ -721,6 +730,8 @@ class _ScalerScreenState extends State<ScalerScreen> {
             ),
           ],
         ),
+      ),
+        ],
       ),
     );
   }

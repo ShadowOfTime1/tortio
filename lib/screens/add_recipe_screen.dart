@@ -262,7 +262,24 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
   }
 
   void _addTier() {
-    setState(() => _additionalTiers.add(_TierInput()));
+    // Дефолт нового яруса = размер предыдущего минус 4 см диаметра (типичный
+    // step для свадебных тортов), та же высота. Поля editable как обычно.
+    double prevD;
+    double prevH;
+    if (_additionalTiers.isEmpty) {
+      prevD = parseNumber(_diameterController.text) ?? 20;
+      prevH = parseNumber(_heightController.text) ?? 10;
+    } else {
+      final prev = _additionalTiers.last;
+      prevD = parseNumber(prev.diameterController.text) ?? 20;
+      prevH = parseNumber(prev.heightController.text) ?? 10;
+    }
+    final newD = (prevD - 4).clamp(10, 50);
+    setState(() {
+      _additionalTiers.add(
+        _TierInput(diameter: '${newD.round()}', height: '${prevH.round()}'),
+      );
+    });
   }
 
   void _removeTier(_TierInput tier) {
