@@ -1,6 +1,5 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/recipe.dart';
 import '../services/storage_service.dart';
@@ -20,11 +19,13 @@ class RecipeListScreen extends StatefulWidget {
 class _RecipeListScreenState extends State<RecipeListScreen> {
   List<Recipe> _recipes = [];
   bool _loaded = false;
-  String _version = '...';
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
   String? _selectedTag;
   SortOrder _sortOrder = SortOrder.manual;
+  final Set<String> _selectedIds = {};
+
+  bool get _isSelectionMode => _selectedIds.isNotEmpty;
 
   final List<List<Color>> _cardGradients = [
     [const Color(0xFFFF9A9E), const Color(0xFFFAD0C4)],
@@ -39,7 +40,6 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
   void initState() {
     super.initState();
     _loadRecipes();
-    _loadVersion();
     _loadSortOrder();
   }
 
@@ -67,15 +67,6 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
     SortOrder.oldest => 'Старые сначала',
     SortOrder.alpha => 'По алфавиту',
   };
-
-  void _loadVersion() async {
-    try {
-      final info = await PackageInfo.fromPlatform();
-      if (mounted) setState(() => _version = info.version);
-    } catch (e) {
-      if (mounted) setState(() => _version = '?');
-    }
-  }
 
   Future<void> _loadRecipes() async {
     final recipes = await StorageService.loadRecipes();
@@ -128,6 +119,63 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
     // Settings might have изменил рецепты (импорт / удаление / откат) —
     // перезагружаем список после возврата.
     await _loadRecipes();
+  }
+
+  void _toggleSelected(Recipe recipe) {
+    setState(() {
+      if (_selectedIds.contains(recipe.id)) {
+        _selectedIds.remove(recipe.id);
+      } else {
+        _selectedIds.add(recipe.id);
+      }
+    });
+  }
+
+  void _enterSelection(Recipe recipe) {
+    setState(() => _selectedIds.add(recipe.id));
+  }
+
+  void _exitSelection() {
+    setState(_selectedIds.clear);
+  }
+
+  Future<void> _deleteSelected() async {
+    final count = _selectedIds.length;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
+        title: Text('Удалить $count рецепт(ов)?'),
+        content: const Text(
+          'Все выбранные рецепты будут удалены безвозвратно.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Отмена'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            style: FilledButton.styleFrom(
+              backgroundColor: Colors.red.shade400,
+            ),
+            child: const Text('Удалить'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+    setState(() {
+      _recipes.removeWhere((r) => _selectedIds.contains(r.id));
+      _selectedIds.clear();
+    });
+    _saveRecipes();
+    if (!mounted) return;
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text('Удалено: $count')));
   }
 
   void _duplicateRecipe(Recipe recipe) {
@@ -193,89 +241,14 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
       body: SafeArea(
         child: Column(
           children: [
-            Container(
-              padding: const EdgeInsets.fromLTRB(24, 20, 16, 16),
-              child: Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(10),
-                    decoration: BoxDecoration(
-                      gradient: const LinearGradient(
-                        colors: [Color(0xFFFF6B8A), Color(0xFFFF8E53)],
-                      ),
-                      borderRadius: BorderRadius.circular(14),
-                      boxShadow: [
-                        BoxShadow(
-                          color: const Color(0xFFFF6B8A).withValues(alpha: 0.3),
-                          blurRadius: 12,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
-                    ),
-                    child: const Icon(
-                      Icons.cake,
-                      color: Colors.white,
-                      size: 24,
-                    ),
-                  ),
-                  const SizedBox(width: 14),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          'Tortio',
-                          style: TextStyle(
-                            fontSize: 26,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        Text(
-                          'v$_version • Калькулятор рецептов',
-                          style: const TextStyle(
-                            fontSize: 13,
-                            color: Colors.grey,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  PopupMenuButton<SortOrder>(
-                    tooltip: 'Сортировка: ${_sortLabel(_sortOrder)}',
-                    icon: const Icon(Icons.swap_vert),
-                    onSelected: _setSortOrder,
-                    itemBuilder: (_) => SortOrder.values.map((o) {
-                      return PopupMenuItem(
-                        value: o,
-                        child: ListTile(
-                          leading: Icon(
-                            _sortOrder == o
-                                ? Icons.radio_button_checked
-                                : Icons.radio_button_off,
-                            size: 20,
-                          ),
-                          title: Text(_sortLabel(o)),
-                          dense: true,
-                          contentPadding: EdgeInsets.zero,
-                        ),
-                      );
-                    }).toList(),
-                  ),
-                  IconButton(
-                    tooltip: 'Настройки',
-                    icon: const Icon(Icons.settings_outlined),
-                    onPressed: _openSettings,
-                  ),
-                ],
-              ),
-            ),
+            _isSelectionMode ? _buildSelectionHeader() : _buildHeader(),
             if (_loaded && _recipes.length >= 5)
               Padding(
                 padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
                 child: TextField(
                   controller: _searchController,
                   decoration: InputDecoration(
-                    hintText: 'Поиск по названию',
+                    hintText: 'Поиск по названию или ингредиенту',
                     prefixIcon: const Icon(Icons.search, size: 20),
                     suffixIcon: _searchQuery.isEmpty
                         ? null
@@ -382,7 +355,13 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
   List<Recipe> get _visibleRecipes {
     final q = _searchQuery.toLowerCase();
     final filtered = _recipes.where((r) {
-      if (q.isNotEmpty && !r.title.toLowerCase().contains(q)) return false;
+      if (q.isNotEmpty) {
+        final inTitle = r.title.toLowerCase().contains(q);
+        final inIngredients = r.allIngredients.any(
+          (i) => i.name.toLowerCase().contains(q),
+        );
+        if (!inTitle && !inIngredients) return false;
+      }
       if (_selectedTag != null && !r.tags.contains(_selectedTag)) return false;
       return true;
     }).toList();
@@ -401,6 +380,104 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
         );
     }
     return filtered;
+  }
+
+  Widget _buildHeader() {
+    return Container(
+      padding: const EdgeInsets.fromLTRB(24, 20, 16, 16),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                colors: [Color(0xFFFF6B8A), Color(0xFFFF8E53)],
+              ),
+              borderRadius: BorderRadius.circular(14),
+              boxShadow: [
+                BoxShadow(
+                  color: const Color(0xFFFF6B8A).withValues(alpha: 0.3),
+                  blurRadius: 12,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: const Icon(Icons.cake, color: Colors.white, size: 24),
+          ),
+          const SizedBox(width: 14),
+          const Expanded(
+            child: Text(
+              'Tortio',
+              style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
+            ),
+          ),
+          PopupMenuButton<SortOrder>(
+            tooltip: 'Сортировка: ${_sortLabel(_sortOrder)}',
+            icon: const Icon(Icons.swap_vert),
+            onSelected: _setSortOrder,
+            itemBuilder: (_) => SortOrder.values.map((o) {
+              return PopupMenuItem(
+                value: o,
+                child: ListTile(
+                  leading: Icon(
+                    _sortOrder == o
+                        ? Icons.radio_button_checked
+                        : Icons.radio_button_off,
+                    size: 20,
+                  ),
+                  title: Text(_sortLabel(o)),
+                  dense: true,
+                  contentPadding: EdgeInsets.zero,
+                ),
+              );
+            }).toList(),
+          ),
+          IconButton(
+            tooltip: 'Настройки',
+            icon: const Icon(Icons.settings_outlined),
+            onPressed: _openSettings,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSelectionHeader() {
+    return Container(
+      padding: const EdgeInsets.fromLTRB(8, 12, 16, 12),
+      color: const Color(0xFFFF6B8A).withValues(alpha: 0.12),
+      child: Row(
+        children: [
+          IconButton(
+            tooltip: 'Отменить выбор',
+            icon: const Icon(Icons.close),
+            onPressed: _exitSelection,
+          ),
+          Expanded(
+            child: Text(
+              'Выбрано: ${_selectedIds.length}',
+              style: const TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+          IconButton(
+            tooltip: 'Удалить выбранные',
+            icon: const Icon(Icons.delete_outline, color: Colors.red),
+            onPressed: _deleteSelected,
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Рецепт «свежий», если создан меньше 24 часов назад.
+  /// Recipe.id = millisecondsSinceEpoch на момент создания.
+  bool _isFresh(Recipe r) {
+    final created = int.tryParse(r.id) ?? 0;
+    if (created == 0) return false;
+    return DateTime.now().millisecondsSinceEpoch - created < 86400000;
   }
 
   List<String> get _allTags {
@@ -454,10 +531,12 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
     }
     // Drag-to-reorder доступен только когда фильтры выключены и сортировка
     // ручная — иначе индексы в видимом списке не соответствуют _recipes.
+    // В режиме выбора drag отключён, чтобы long-press не конфликтовал с tap.
     final canReorder =
         _searchQuery.isEmpty &&
         _selectedTag == null &&
-        _sortOrder == SortOrder.manual;
+        _sortOrder == SortOrder.manual &&
+        !_isSelectionMode;
 
     if (!canReorder) {
       return ListView.builder(
@@ -492,22 +571,34 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
 
   Widget _buildRecipeCard(Recipe r, int i) {
     final gradient = _cardGradients[i % _cardGradients.length];
+    final selected = _selectedIds.contains(r.id);
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: GestureDetector(
-        onTap: () => _openRecipe(r),
+        onTap: () {
+          if (_isSelectionMode) {
+            _toggleSelected(r);
+          } else {
+            _openRecipe(r);
+          }
+        },
         child: Container(
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(20),
             gradient: LinearGradient(
               colors: [
-                gradient[0].withValues(alpha: 0.3),
-                gradient[1].withValues(alpha: 0.2),
+                gradient[0].withValues(alpha: selected ? 0.6 : 0.3),
+                gradient[1].withValues(alpha: selected ? 0.5 : 0.2),
               ],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
-            border: Border.all(color: gradient[0].withValues(alpha: 0.3)),
+            border: Border.all(
+              color: selected
+                  ? const Color(0xFFE85D75)
+                  : gradient[0].withValues(alpha: 0.3),
+              width: selected ? 2 : 1,
+            ),
           ),
           child: Padding(
             padding: const EdgeInsets.all(16),
@@ -546,12 +637,41 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        r.title,
-                        style: const TextStyle(
-                          fontSize: 17,
-                          fontWeight: FontWeight.w600,
-                        ),
+                      Row(
+                        children: [
+                          Flexible(
+                            child: Text(
+                              r.title,
+                              style: const TextStyle(
+                                fontSize: 17,
+                                fontWeight: FontWeight.w600,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          if (_isFresh(r)) ...[
+                            const SizedBox(width: 6),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 6,
+                                vertical: 2,
+                              ),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFE85D75),
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                              child: const Text(
+                                'NEW',
+                                style: TextStyle(
+                                  fontSize: 9,
+                                  fontWeight: FontWeight.w700,
+                                  color: Colors.white,
+                                  letterSpacing: 0.5,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ],
                       ),
                       const SizedBox(height: 4),
                       Text(
@@ -601,6 +721,8 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
                         _editRecipe(r);
                       case 'duplicate':
                         _duplicateRecipe(r);
+                      case 'select':
+                        _enterSelection(r);
                       case 'delete':
                         _deleteWithUndo(r);
                     }
@@ -620,6 +742,15 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
                       child: ListTile(
                         leading: Icon(Icons.copy_outlined),
                         title: Text('Дублировать'),
+                        dense: true,
+                        contentPadding: EdgeInsets.zero,
+                      ),
+                    ),
+                    PopupMenuItem(
+                      value: 'select',
+                      child: ListTile(
+                        leading: Icon(Icons.check_box_outlined),
+                        title: Text('Выбрать (массовое удаление)'),
                         dense: true,
                         contentPadding: EdgeInsets.zero,
                       ),

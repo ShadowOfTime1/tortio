@@ -225,6 +225,51 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   Future<void> _deleteCustomType(SectionType type) async {
+    // Если тип используется в каких-то рецептах — предупредить.
+    final all = await StorageService.loadRecipes();
+    final usedIn = all
+        .where(
+          (r) => r.sections.any((s) => s.type.name == type.name),
+        )
+        .toList();
+    if (!mounted) return;
+
+    if (usedIn.isNotEmpty) {
+      final preview = usedIn.take(5).map((r) => '• ${r.title}').join('\n');
+      final more = usedIn.length > 5
+          ? '\n... и ещё ${usedIn.length - 5}'
+          : '';
+      final confirmed = await showDialog<bool>(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          title: Text('Удалить тип «${type.name}»?'),
+          content: Text(
+            'Этот тип используется в ${usedIn.length} рецепте(ах):\n\n'
+            '$preview$more\n\n'
+            'Уже сохранённые секции продолжат работать как есть. '
+            'Но добавить новые секции этого типа будет нельзя.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: const Text('Отмена'),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.pop(ctx, true),
+              style: FilledButton.styleFrom(
+                backgroundColor: Colors.red.shade400,
+              ),
+              child: const Text('Всё равно удалить'),
+            ),
+          ],
+        ),
+      );
+      if (confirmed != true) return;
+    }
+
     final updated = _customTypes.where((t) => t.name != type.name).toList();
     await CustomTypesService.save(updated);
     if (mounted) setState(() => _customTypes = updated);
