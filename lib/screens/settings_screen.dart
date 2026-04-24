@@ -3,11 +3,13 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../models/recipe.dart';
+import '../services/app_settings.dart';
 import '../services/custom_types_service.dart';
 import '../services/import_export_service.dart';
 import '../services/stats.dart';
 import '../services/storage_service.dart';
 import '../services/theme_service.dart';
+import '../services/update_service.dart';
 import '../utils.dart';
 
 class SettingsScreen extends StatefulWidget {
@@ -22,6 +24,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
   bool _autoUpdateCheck = true;
   List<SectionType> _customTypes = [];
   bool _canRestoreImport = false;
+  String _defaultScaleMode = AppSettings.defaultScaleMode;
+  final TextEditingController _diametersController = TextEditingController();
+  bool _checkingUpdate = false;
 
   @override
   void initState() {
@@ -29,17 +34,27 @@ class _SettingsScreenState extends State<SettingsScreen> {
     _load();
   }
 
+  @override
+  void dispose() {
+    _diametersController.dispose();
+    super.dispose();
+  }
+
   Future<void> _load() async {
     final info = await PackageInfo.fromPlatform();
     final prefs = await SharedPreferences.getInstance();
     final types = await CustomTypesService.load();
     final hasSnapshot = await StorageService.hasImportSnapshot();
+    final diameters = await AppSettings.loadQuickDiameters();
+    final scaleMode = await AppSettings.loadDefaultScaleMode();
     if (!mounted) return;
     setState(() {
       _version = info.version;
       _autoUpdateCheck = prefs.getBool('auto_update_check') ?? true;
       _customTypes = types;
       _canRestoreImport = hasSnapshot;
+      _defaultScaleMode = scaleMode;
+      _diametersController.text = diameters.join(', ');
     });
   }
 
@@ -47,6 +62,86 @@ class _SettingsScreenState extends State<SettingsScreen> {
     setState(() => _autoUpdateCheck = v);
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('auto_update_check', v);
+  }
+
+  Future<void> _saveDiameters() async {
+    final list = AppSettings.parseQuickDiameters(_diametersController.text);
+    await AppSettings.saveQuickDiameters(list);
+    if (!mounted) return;
+    setState(() => _diametersController.text = list.join(', '));
+    _toast('Quick-диаметры сохранены');
+  }
+
+  Future<void> _setDefaultScaleMode(String mode) async {
+    setState(() => _defaultScaleMode = mode);
+    await AppSettings.saveDefaultScaleMode(mode);
+  }
+
+  Future<void> _checkUpdateNow() async {
+    if (_checkingUpdate) return;
+    setState(() => _checkingUpdate = true);
+    // Временно «включаем» auto-check, чтобы UpdateService не отказался.
+    final prefs = await SharedPreferences.getInstance();
+    final saved = prefs.getBool('auto_update_check');
+    await prefs.setBool('auto_update_check', true);
+    try {
+      final update = await UpdateService.checkForUpdate();
+      if (!mounted) return;
+      if (update == null) {
+        _toast('Установлена последняя версия');
+      } else {
+        _toast(
+          'Доступна v${update.version}. Открой приложение заново — '
+          'появится баннер с обновлением.',
+        );
+      }
+    } finally {
+      // Возвращаем как было.
+      if (saved == null) {
+        await prefs.remove('auto_update_check');
+      } else {
+        await prefs.setBool('auto_update_check', saved);
+      }
+      if (mounted) setState(() => _checkingUpdate = false);
+    }
+  }
+
+  Future<void> _resetSettings() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
+        title: const Text('Сбросить настройки?'),
+        content: const Text(
+          'Тема, сортировка, авто-проверка обновлений, default-режим '
+          'пересчёта и quick-диаметры вернутся к дефолтам. Рецепты и '
+          'кастомные типы секций НЕ затронутся.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Отмена'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            style: FilledButton.styleFrom(
+              backgroundColor: const Color(0xFFFF6B8A),
+            ),
+            child: const Text('Сбросить'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+
+    await AppSettings.resetSettings();
+    // Подтянуть тему обратно к default (system).
+    await ThemeService.instance.load();
+    if (!mounted) return;
+    await _load();
+    _toast('Настройки сброшены');
   }
 
   Future<void> _exportRecipes() async {
@@ -411,6 +506,56 @@ class _SettingsScreenState extends State<SettingsScreen> {
             onTap: _addCustomType,
           ),
 
+          // === Пересчёт ===
+          _groupHeader('Пересчёт'),
+          ListTile(
+            dense: true,
+            title: const Text('Quick-диаметры'),
+            subtitle: TextField(
+              controller: _diametersController,
+              keyboardType: TextInputType.number,
+              decoration: const InputDecoration(
+                hintText: '16, 18, 20, 22, 24, 26',
+                isDense: true,
+              ),
+              onSubmitted: (_) => _saveDiameters(),
+            ),
+            trailing: IconButton(
+              icon: const Icon(Icons.check, color: Color(0xFFE85D75)),
+              tooltip: 'Сохранить',
+              onPressed: _saveDiameters,
+            ),
+          ),
+          _groupSubLabel(
+            'Эти числа показываются как кнопки-чипы под слайдером диаметра '
+            'на экране пересчёта.',
+          ),
+          const SizedBox(height: 8),
+          RadioGroup<String>(
+            groupValue: _defaultScaleMode,
+            onChanged: (v) {
+              if (v != null) _setDefaultScaleMode(v);
+            },
+            child: const Column(
+              children: [
+                RadioListTile<String>(
+                  dense: true,
+                  title: Text('По умолчанию: По размеру'),
+                  value: 'size',
+                ),
+                RadioListTile<String>(
+                  dense: true,
+                  title: Text('По умолчанию: По весу'),
+                  subtitle: Text(
+                    'Только если у рецепта указан вес',
+                    style: TextStyle(fontSize: 11),
+                  ),
+                  value: 'weight',
+                ),
+              ],
+            ),
+          ),
+
           // === Обновления ===
           _groupHeader('Обновления'),
           SwitchListTile(
@@ -420,6 +565,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
             value: _autoUpdateCheck,
             onChanged: _setAutoUpdate,
+          ),
+          ListTile(
+            leading: _checkingUpdate
+                ? const SizedBox(
+                    width: 24,
+                    height: 24,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : const Icon(Icons.refresh),
+            title: const Text('Проверить обновление сейчас'),
+            onTap: _checkingUpdate ? null : _checkUpdateNow,
           ),
 
           // === Резервные копии ===
@@ -454,6 +610,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
           // === Опасная зона ===
           _groupHeader('Опасная зона', color: Colors.red),
+          ListTile(
+            leading: const Icon(Icons.refresh, color: Color(0xFFFF6B8A)),
+            title: const Text(
+              'Сбросить настройки до дефолтов',
+              style: TextStyle(color: Color(0xFFE85D75)),
+            ),
+            subtitle: const Text(
+              'Тема, сортировка, авто-обновление, default режим, '
+              'quick-диаметры. Рецепты не трогаются.',
+            ),
+            onTap: _resetSettings,
+          ),
           ListTile(
             leading: const Icon(
               Icons.delete_forever_outlined,
@@ -502,6 +670,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
           color: color ?? const Color(0xFFE85D75),
           letterSpacing: 0.6,
         ),
+      ),
+    );
+  }
+
+  Widget _groupSubLabel(String text) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
+      child: Text(
+        text,
+        style: TextStyle(fontSize: 11, color: Colors.grey.shade500),
       ),
     );
   }

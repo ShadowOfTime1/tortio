@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:share_plus/share_plus.dart';
 import '../models/recipe.dart';
 import '../models/scaler.dart';
+import '../services/app_settings.dart';
 import '../services/shopping_list.dart';
 import '../utils.dart';
 
@@ -22,6 +23,7 @@ class _ScalerScreenState extends State<ScalerScreen> {
   late double _newDiameter;
   late double _newWeight;
   ScaleMode _mode = ScaleMode.size;
+  List<int> _quickDiameters = AppSettings.defaultQuickDiameters;
 
   late final TextEditingController _diameterController;
   late final TextEditingController _weightController;
@@ -35,6 +37,21 @@ class _ScalerScreenState extends State<ScalerScreen> {
       text: '${_newDiameter.round()}',
     );
     _weightController = TextEditingController(text: '${_newWeight.round()}');
+    _loadSettings();
+  }
+
+  Future<void> _loadSettings() async {
+    final diameters = await AppSettings.loadQuickDiameters();
+    final defaultMode = await AppSettings.loadDefaultScaleMode();
+    if (!mounted) return;
+    setState(() {
+      _quickDiameters = diameters;
+      // Если у рецепта нет weight'а, режим "по весу" недоступен — игнорим
+      // настройку и оставляем size.
+      if (defaultMode == 'weight' && widget.recipe.weight > 0) {
+        _mode = ScaleMode.weight;
+      }
+    });
   }
 
   void _onDiameterSlider(double v) {
@@ -688,12 +705,12 @@ class _ScalerScreenState extends State<ScalerScreen> {
           ),
         ),
         const SizedBox(height: 4),
-        // Быстрые кнопки для частых диаметров форм
+        // Быстрые кнопки для частых диаметров форм (настраиваются в Settings)
         Wrap(
           spacing: 6,
           runSpacing: 4,
           alignment: WrapAlignment.center,
-          children: const [16, 18, 20, 22, 24, 26].map((d) {
+          children: _quickDiameters.map((d) {
             final selected = _newDiameter.round() == d;
             return GestureDetector(
               onTap: () {

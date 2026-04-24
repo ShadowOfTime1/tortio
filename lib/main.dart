@@ -57,6 +57,9 @@ class _MainWrapperState extends State<MainWrapper> {
   void _checkUpdate() async {
     final update = await UpdateService.checkForUpdate();
     if (update != null && mounted) {
+      // Лёгкий haptic — пользователь почувствует, что что-то появилось
+      // на экране, даже если телефон лежит экраном вниз.
+      HapticFeedback.lightImpact();
       setState(() => _update = update);
     }
   }
