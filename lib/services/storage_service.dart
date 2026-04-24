@@ -67,25 +67,9 @@ class StorageService {
       'notes': r.notes,
       'tags': r.tags,
       'imagePath': r.imagePath,
-      'sections': r.sections
-          .map(
-            (s) => {
-              'typeName': s.type.name,
-              'typeIcon': s.type.icon,
-              'scaleType': s.type.scaleType.index,
-              'notes': s.notes,
-              'ingredients': s.ingredients
-                  .map(
-                    (i) => {
-                      'name': i.name,
-                      'amount': i.amount,
-                      'scaleType': i.scaleType.index,
-                    },
-                  )
-                  .toList(),
-            },
-          )
-          .toList(),
+      if (r.additionalTiers.isNotEmpty)
+        'additionalTiers': r.additionalTiers.map(_tierToJson).toList(),
+      'sections': r.sections.map(_sectionToJson).toList(),
     };
   }
 
@@ -99,22 +83,65 @@ class StorageService {
       notes: (j['notes'] as String?) ?? '',
       tags: (j['tags'] as List?)?.map((t) => t as String).toList() ?? const [],
       imagePath: (j['imagePath'] as String?) ?? '',
-      sections: (j['sections'] as List).map((s) {
-        final scaleType = ScaleType.values[s['scaleType'] as int];
-        return RecipeSection(
-          type: SectionType(
-            name: s['typeName'],
-            icon: s['typeIcon'],
-            scaleType: scaleType,
-          ),
-          notes: (s['notes'] as String?) ?? '',
-          ingredients: (s['ingredients'] as List).map((i) {
-            return Ingredient(
-              name: i['name'],
-              amount: (i['amount'] as num).toDouble(),
-              scaleType: ScaleType.values[i['scaleType'] as int],
-            );
-          }).toList(),
+      sections: (j['sections'] as List).map(_sectionFromJson).toList(),
+      additionalTiers: (j['additionalTiers'] as List?)
+              ?.map((t) => _tierFromJson(t as Map<String, dynamic>))
+              .toList() ??
+          const [],
+    );
+  }
+
+  static Map<String, dynamic> _tierToJson(TierData t) {
+    return {
+      'diameter': t.diameter,
+      'height': t.height,
+      'label': t.label,
+      'sections': t.sections.map(_sectionToJson).toList(),
+    };
+  }
+
+  static TierData _tierFromJson(Map<String, dynamic> j) {
+    return TierData(
+      diameter: (j['diameter'] as num).toDouble(),
+      height: (j['height'] as num).toDouble(),
+      label: (j['label'] as String?) ?? '',
+      sections: (j['sections'] as List).map(_sectionFromJson).toList(),
+    );
+  }
+
+  static Map<String, dynamic> _sectionToJson(RecipeSection s) {
+    return {
+      'typeName': s.type.name,
+      'typeIcon': s.type.icon,
+      'scaleType': s.type.scaleType.index,
+      'notes': s.notes,
+      'ingredients': s.ingredients
+          .map(
+            (i) => {
+              'name': i.name,
+              'amount': i.amount,
+              'scaleType': i.scaleType.index,
+            },
+          )
+          .toList(),
+    };
+  }
+
+  static RecipeSection _sectionFromJson(dynamic raw) {
+    final s = raw as Map<String, dynamic>;
+    final scaleType = ScaleType.values[s['scaleType'] as int];
+    return RecipeSection(
+      type: SectionType(
+        name: s['typeName'],
+        icon: s['typeIcon'],
+        scaleType: scaleType,
+      ),
+      notes: (s['notes'] as String?) ?? '',
+      ingredients: (s['ingredients'] as List).map((i) {
+        return Ingredient(
+          name: i['name'],
+          amount: (i['amount'] as num).toDouble(),
+          scaleType: ScaleType.values[i['scaleType'] as int],
         );
       }).toList(),
     );

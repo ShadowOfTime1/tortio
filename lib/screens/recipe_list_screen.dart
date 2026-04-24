@@ -188,26 +188,36 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
       notes: recipe.notes,
       tags: List<String>.from(recipe.tags),
       imagePath: recipe.imagePath,
-      sections: recipe.sections
+      sections: recipe.sections.map(_cloneSection).toList(),
+      additionalTiers: recipe.additionalTiers
           .map(
-            (s) => RecipeSection(
-              type: s.type,
-              notes: s.notes,
-              ingredients: s.ingredients
-                  .map(
-                    (i) => Ingredient(
-                      name: i.name,
-                      amount: i.amount,
-                      scaleType: i.scaleType,
-                    ),
-                  )
-                  .toList(),
+            (t) => TierData(
+              diameter: t.diameter,
+              height: t.height,
+              label: t.label,
+              sections: t.sections.map(_cloneSection).toList(),
             ),
           )
           .toList(),
     );
     setState(() => _recipes.add(copy));
     _saveRecipes();
+  }
+
+  RecipeSection _cloneSection(RecipeSection s) {
+    return RecipeSection(
+      type: s.type,
+      notes: s.notes,
+      ingredients: s.ingredients
+          .map(
+            (i) => Ingredient(
+              name: i.name,
+              amount: i.amount,
+              scaleType: i.scaleType,
+            ),
+          )
+          .toList(),
+    );
   }
 
   void _deleteWithUndo(Recipe recipe) {

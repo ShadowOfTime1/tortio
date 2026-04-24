@@ -24,6 +24,7 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
   late final TextEditingController _notesController;
   late final TextEditingController _tagInputController;
   final List<_SectionInput> _sections = [];
+  final List<_TierInput> _additionalTiers = [];
   final List<String> _tags = [];
   List<SectionType> _customTypes = [];
   List<String> _ingredientSuggestions = const [];
@@ -61,18 +62,30 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
     _loadIngredientHistory();
     if (r != null) {
       for (final section in r.sections) {
-        final sectionInput = _SectionInput(
-          type: section.type,
-          notes: section.notes,
+        _sections.add(_sectionToInput(section));
+      }
+      for (final tier in r.additionalTiers) {
+        final tierInput = _TierInput(
+          diameter: '${tier.diameter}',
+          height: '${tier.height}',
+          label: tier.label,
         );
-        for (final ing in section.ingredients) {
-          sectionInput.ingredients.add(
-            _IngredientInput(name: ing.name, amount: '${ing.amount}'),
-          );
+        for (final s in tier.sections) {
+          tierInput.sections.add(_sectionToInput(s));
         }
-        _sections.add(sectionInput);
+        _additionalTiers.add(tierInput);
       }
     }
+  }
+
+  _SectionInput _sectionToInput(RecipeSection s) {
+    final input = _SectionInput(type: s.type, notes: s.notes);
+    for (final ing in s.ingredients) {
+      input.ingredients.add(
+        _IngredientInput(name: ing.name, amount: '${ing.amount}'),
+      );
+    }
+    return input;
   }
 
   Future<void> _loadCustomTypes() async {
@@ -87,7 +100,8 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
     }
   }
 
-  void _addSection() {
+  void _addSection({List<_SectionInput>? toList}) {
+    final target = toList ?? _sections;
     showModalBottomSheet(
       context: context,
       shape: const RoundedRectangleBorder(
@@ -98,7 +112,7 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
         customTypes: _customTypes,
         onSelect: (type) {
           Navigator.pop(ctx);
-          setState(() => _sections.add(_SectionInput(type: type)));
+          setState(() => target.add(_SectionInput(type: type)));
         },
         onCreateCustom: () async {
           Navigator.pop(ctx);
@@ -109,7 +123,7 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
             if (mounted) {
               setState(() {
                 _customTypes = updated;
-                _sections.add(_SectionInput(type: created));
+                target.add(_SectionInput(type: created));
               });
             }
           }
@@ -232,20 +246,54 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
     );
   }
 
-  void _removeSection(int index) {
-    setState(() => _sections.removeAt(index));
+
+  void _addIngredient(_SectionInput section) {
+    setState(() => section.ingredients.add(_IngredientInput()));
   }
 
-  void _addIngredient(int sectionIndex) {
-    setState(() {
-      _sections[sectionIndex].ingredients.add(_IngredientInput());
-    });
+  void _removeIngredient(_SectionInput section, int ingIndex) {
+    setState(() => section.ingredients.removeAt(ingIndex));
   }
 
-  void _removeIngredient(int sectionIndex, int ingIndex) {
-    setState(() {
-      _sections[sectionIndex].ingredients.removeAt(ingIndex);
-    });
+  void _removeSectionFrom(List<_SectionInput> list, _SectionInput section) {
+    setState(() => list.remove(section));
+  }
+
+  void _addTier() {
+    setState(() => _additionalTiers.add(_TierInput()));
+  }
+
+  void _removeTier(_TierInput tier) {
+    setState(() => _additionalTiers.remove(tier));
+  }
+
+  /// Чистит секции списка от пустых ингредиентов и пустых секций,
+  /// возвращает список `RecipeSection`. Используется для tier 1 и tier 2+.
+  List<RecipeSection> _buildCleanSections(List<_SectionInput> list) {
+    return list
+        .map((s) {
+          final ingredients = s.ingredients
+              .where(
+                (ing) =>
+                    ing.nameController.text.trim().isNotEmpty &&
+                    (parseNumber(ing.amountController.text) ?? 0) > 0,
+              )
+              .map((ing) {
+                return Ingredient(
+                  name: ing.nameController.text.trim(),
+                  amount: parseNumber(ing.amountController.text) ?? 0,
+                  scaleType: s.type.scaleType,
+                );
+              })
+              .toList();
+          return RecipeSection(
+            type: s.type,
+            ingredients: ingredients,
+            notes: s.notesController.text.trim(),
+          );
+        })
+        .where((s) => s.ingredients.isNotEmpty)
+        .toList();
   }
 
   void _addTag() {
@@ -290,36 +338,31 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
       return;
     }
 
-    // Дропаем пустые ингредиенты (пустое имя или вес ≤ 0) и пустые секции,
-    // чтобы не сохранять мусор. Если после очистки рецепт пустой — ошибка.
-    final cleanSections = _sections
-        .map((s) {
-          final ingredients = s.ingredients
-              .where(
-                (ing) =>
-                    ing.nameController.text.trim().isNotEmpty &&
-                    (parseNumber(ing.amountController.text) ?? 0) > 0,
-              )
-              .map((ing) {
-                return Ingredient(
-                  name: ing.nameController.text.trim(),
-                  amount: parseNumber(ing.amountController.text) ?? 0,
-                  scaleType: s.type.scaleType,
-                );
-              })
-              .toList();
-          return RecipeSection(
-            type: s.type,
-            ingredients: ingredients,
-            notes: s.notesController.text.trim(),
-          );
-        })
-        .where((s) => s.ingredients.isNotEmpty)
-        .toList();
+    // Чистим: пустые ингредиенты (без имени или вес ≤ 0) и пустые секции
+    // дропаются. Если после очистки tier 1 пустой — ошибка. Tier 2+ просто
+    // отбрасываются если пустые.
+    final cleanSections = _buildCleanSections(_sections);
 
     if (cleanSections.isEmpty) {
       _showError('Заполните хотя бы один ингредиент с весом > 0');
       return;
+    }
+
+    final additionalTiers = <TierData>[];
+    for (final t in _additionalTiers) {
+      final tierD = parseNumber(t.diameterController.text) ?? 0;
+      final tierH = parseNumber(t.heightController.text) ?? 0;
+      if (tierD <= 0 || tierH <= 0) continue; // пустой ярус
+      final tierSections = _buildCleanSections(t.sections);
+      if (tierSections.isEmpty) continue;
+      additionalTiers.add(
+        TierData(
+          diameter: tierD,
+          height: tierH,
+          label: t.labelController.text.trim(),
+          sections: tierSections,
+        ),
+      );
     }
 
     final recipe = Recipe(
@@ -334,6 +377,7 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
       tags: List.unmodifiable(_tags),
       imagePath: _imagePath,
       sections: cleanSections,
+      additionalTiers: additionalTiers,
     );
     Navigator.of(context).pop(recipe);
   }
@@ -398,6 +442,223 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
               ),
           ],
         ),
+      ),
+    );
+  }
+
+  /// Карточка одного дополнительного яруса (ярус 2+).
+  /// Tier 1 живёт в основной форме, эти — отдельные складные блоки.
+  Widget _buildAdditionalTier(int idx, _TierInput tier) {
+    final tierNumber = idx + 2; // 0 → "Ярус 2", 1 → "Ярус 3"
+    return Container(
+      margin: const EdgeInsets.only(top: 12, bottom: 4),
+      padding: const EdgeInsets.fromLTRB(16, 12, 12, 16),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surface,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: const Color(0xFFFF6B8A).withValues(alpha: 0.3),
+          width: 1.5,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Header: "Ярус N" + label + delete
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 4,
+                ),
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFFFF6B8A), Color(0xFFFF8E53)],
+                  ),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  'Ярус $tierNumber',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w700,
+                    fontSize: 13,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: TextField(
+                  controller: tier.labelController,
+                  decoration: const InputDecoration(
+                    hintText: 'Название (опц): низ, верх...',
+                    isDense: true,
+                  ),
+                ),
+              ),
+              IconButton(
+                tooltip: 'Удалить ярус',
+                icon: const Icon(Icons.close, color: Colors.red),
+                onPressed: () => _removeTier(tier),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          // Размеры
+          Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  controller: tier.diameterController,
+                  keyboardType: TextInputType.number,
+                  decoration: const InputDecoration(
+                    labelText: 'Диаметр',
+                    suffixText: 'см',
+                    isDense: true,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: TextField(
+                  controller: tier.heightController,
+                  keyboardType: TextInputType.number,
+                  decoration: const InputDecoration(
+                    labelText: 'Высота',
+                    suffixText: 'см',
+                    isDense: true,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          // Состав яруса
+          Row(
+            children: [
+              const Text(
+                'Состав яруса',
+                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+              ),
+              const Spacer(),
+              FilledButton.icon(
+                onPressed: () => _addSection(toList: tier.sections),
+                icon: const Icon(Icons.add, size: 16),
+                label: const Text('Секция'),
+                style: FilledButton.styleFrom(
+                  backgroundColor: const Color(0xFFFF6B8A),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 8,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          if (tier.sections.isEmpty)
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              child: Text(
+                'Добавь хотя бы одну секцию (бисквит/крем/...)',
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Colors.grey.shade500,
+                  fontStyle: FontStyle.italic,
+                ),
+              ),
+            )
+          else
+            ...tier.sections.map((s) => _buildSimpleSectionCard(s, tier)),
+        ],
+      ),
+    );
+  }
+
+  /// Упрощённая карточка секции для tier 2+: без drag, без autocomplete.
+  /// Полировка до уровня tier 1 запланирована в v2.1.0.
+  Widget _buildSimpleSectionCard(_SectionInput section, _TierInput tier) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.fromLTRB(12, 8, 8, 8),
+      decoration: BoxDecoration(
+        color: const Color(0xFFFF6B8A).withValues(alpha: 0.05),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Text(section.type.icon, style: const TextStyle(fontSize: 18)),
+              const SizedBox(width: 6),
+              Expanded(
+                child: Text(
+                  section.type.name,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 14,
+                  ),
+                ),
+              ),
+              IconButton(
+                onPressed: () => _removeSectionFrom(tier.sections, section),
+                icon: const Icon(Icons.close, size: 16),
+                color: Colors.grey,
+                visualDensity: VisualDensity.compact,
+              ),
+            ],
+          ),
+          ...section.ingredients.asMap().entries.map((e) {
+            final ii = e.key;
+            final ing = e.value;
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 6),
+              child: Row(
+                children: [
+                  Expanded(
+                    flex: 3,
+                    child: TextField(
+                      controller: ing.nameController,
+                      decoration: const InputDecoration(
+                        hintText: 'Ингредиент',
+                        isDense: true,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    flex: 2,
+                    child: TextField(
+                      controller: ing.amountController,
+                      keyboardType: TextInputType.number,
+                      decoration: const InputDecoration(
+                        hintText: '0',
+                        suffixText: 'г',
+                        isDense: true,
+                      ),
+                    ),
+                  ),
+                  IconButton(
+                    onPressed: () => _removeIngredient(section, ii),
+                    icon: const Icon(Icons.close, size: 14),
+                    color: Colors.grey.shade400,
+                    visualDensity: VisualDensity.compact,
+                  ),
+                ],
+              ),
+            );
+          }),
+          TextButton.icon(
+            onPressed: () => _addIngredient(section),
+            icon: const Icon(Icons.add, size: 14, color: Color(0xFFE85D75)),
+            label: const Text(
+              'Ингредиент',
+              style: TextStyle(color: Color(0xFFE85D75), fontSize: 13),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -654,7 +915,7 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
                     ),
                     const Spacer(),
                     FilledButton.icon(
-                      onPressed: _addSection,
+                      onPressed: () => _addSection(),
                       icon: const Icon(Icons.add, size: 18),
                       label: const Text('Секция'),
                       style: FilledButton.styleFrom(
@@ -794,7 +1055,10 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
                                       ),
                                     ),
                                     IconButton(
-                                      onPressed: () => _removeSection(si),
+                                      onPressed: () => _removeSectionFrom(
+                                        _sections,
+                                        section,
+                                      ),
                                       icon: const Icon(Icons.close, size: 18),
                                       color: Colors.grey,
                                     ),
@@ -909,7 +1173,10 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
                                               ),
                                               IconButton(
                                                 onPressed: () =>
-                                                    _removeIngredient(si, ii),
+                                                    _removeIngredient(
+                                                      section,
+                                                      ii,
+                                                    ),
                                                 icon: const Icon(
                                                   Icons.close,
                                                   size: 16,
@@ -922,7 +1189,7 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
                                       },
                                     ),
                                     TextButton.icon(
-                                      onPressed: () => _addIngredient(si),
+                                      onPressed: () => _addIngredient(section),
                                       icon: Icon(
                                         Icons.add,
                                         size: 16,
@@ -970,6 +1237,31 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
                       );
                     },
                   ),
+                // Дополнительные ярусы (для многоярусных тортов)
+                ..._additionalTiers.asMap().entries.map(
+                  (e) => _buildAdditionalTier(e.key, e.value),
+                ),
+                const SizedBox(height: 8),
+                Center(
+                  child: OutlinedButton.icon(
+                    onPressed: _addTier,
+                    icon: const Icon(Icons.layers_outlined),
+                    label: Text(
+                      _additionalTiers.isEmpty
+                          ? 'Добавить ещё один ярус'
+                          : 'Ещё один ярус',
+                    ),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: const Color(0xFFE85D75),
+                      side: const BorderSide(color: Color(0xFFE85D75)),
+                      shape: const StadiumBorder(),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 20,
+                        vertical: 12,
+                      ),
+                    ),
+                  ),
+                ),
                 const SizedBox(height: 80),
               ],
             ),
@@ -1140,4 +1432,17 @@ class _IngredientInput {
   _IngredientInput({String name = '', String amount = ''})
     : nameController = TextEditingController(text: name),
       amountController = TextEditingController(text: amount);
+}
+
+/// Доп.ярус (ярус 2+). Tier 1 хранится в root-полях формы.
+class _TierInput {
+  final TextEditingController diameterController;
+  final TextEditingController heightController;
+  final TextEditingController labelController;
+  final List<_SectionInput> sections = [];
+
+  _TierInput({String diameter = '20', String height = '10', String label = ''})
+    : diameterController = TextEditingController(text: diameter),
+      heightController = TextEditingController(text: height),
+      labelController = TextEditingController(text: label);
 }

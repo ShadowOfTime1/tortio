@@ -63,6 +63,23 @@ class RecipeSection {
   });
 }
 
+/// Один ярус торта со своим размером и составом.
+/// Многоярусный торт = `Recipe` (root-уровень = ярус 1) + `additionalTiers`
+/// (ярусы 2+).
+class TierData {
+  final double diameter;
+  final double height;
+  final String label; // опционально — «Низ», «Верх», «Малый ярус»
+  final List<RecipeSection> sections;
+
+  TierData({
+    required this.diameter,
+    required this.height,
+    this.label = '',
+    required this.sections,
+  });
+}
+
 class Recipe {
   final String id;
   final String title;
@@ -73,6 +90,9 @@ class Recipe {
   final List<String> tags;
   final String imagePath;
   final List<RecipeSection> sections;
+  // Дополнительные ярусы. Пустой список = одноярусный торт (backward compat).
+  // Ярус 1 хранится в root-полях (diameter/height/sections), ярусы 2+ — здесь.
+  final List<TierData> additionalTiers;
 
   Recipe({
     required this.id,
@@ -84,8 +104,24 @@ class Recipe {
     this.tags = const [],
     this.imagePath = '',
     required this.sections,
+    this.additionalTiers = const [],
   });
 
+  /// Все ярусы торта: первый собирается из root-полей, остальные из
+  /// `additionalTiers`. Никогда не пустой — всегда хотя бы один ярус.
+  List<TierData> get allTiers => [
+    TierData(
+      diameter: diameter,
+      height: height,
+      sections: sections,
+      label: '',
+    ),
+    ...additionalTiers,
+  ];
+
+  bool get isMultiTier => additionalTiers.isNotEmpty;
+
+  /// Все ингредиенты со всех ярусов, для shopping list / stats.
   List<Ingredient> get allIngredients =>
-      sections.expand((s) => s.ingredients).toList();
+      allTiers.expand((t) => t.sections).expand((s) => s.ingredients).toList();
 }

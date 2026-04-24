@@ -48,6 +48,89 @@ void main() {
       expect(loaded.first.sections.first.ingredients.first.name, 'Мука');
     });
 
+    test('одноярусный рецепт сохраняется без поля additionalTiers', () async {
+      await StorageService.saveRecipes([sampleRecipe()]);
+      final prefs = await SharedPreferences.getInstance();
+      final raw = prefs.getString('recipes')!;
+      // Поле включаем только если ярусов > 1, иначе мусорим JSON старым клиентам.
+      expect(raw.contains('additionalTiers'), isFalse);
+    });
+
+    test('многоярусный рецепт round-trip', () async {
+      final r = Recipe(
+        id: 'multi',
+        title: 'Свадебный',
+        diameter: 28,
+        height: 12,
+        weight: 5000,
+        sections: [
+          RecipeSection(
+            type: SectionType(
+              name: 'Бисквит',
+              icon: '🍰',
+              scaleType: ScaleType.volume,
+            ),
+            ingredients: [
+              Ingredient(name: 'Мука', amount: 800, scaleType: ScaleType.volume),
+            ],
+          ),
+        ],
+        additionalTiers: [
+          TierData(
+            diameter: 22,
+            height: 10,
+            label: 'Средний',
+            sections: [
+              RecipeSection(
+                type: SectionType(
+                  name: 'Крем',
+                  icon: '🍦',
+                  scaleType: ScaleType.volume,
+                ),
+                ingredients: [
+                  Ingredient(
+                    name: 'Сливки',
+                    amount: 400,
+                    scaleType: ScaleType.volume,
+                  ),
+                ],
+              ),
+            ],
+          ),
+          TierData(
+            diameter: 16,
+            height: 8,
+            label: 'Верх',
+            sections: [],
+          ),
+        ],
+      );
+      await StorageService.saveRecipes([r]);
+      final loaded = await StorageService.loadRecipes();
+      expect(loaded.length, 1);
+      expect(loaded.first.allTiers.length, 3);
+      expect(loaded.first.additionalTiers.length, 2);
+      expect(loaded.first.additionalTiers[0].label, 'Средний');
+      expect(loaded.first.additionalTiers[0].diameter, 22);
+      expect(
+        loaded.first.additionalTiers[0].sections.first.ingredients.first.amount,
+        400,
+      );
+      expect(loaded.first.additionalTiers[1].sections, isEmpty);
+    });
+
+    test('старый JSON без additionalTiers → загружается одноярусным', () async {
+      const oldJson =
+          '[{"id":"old","title":"Простой","diameter":20,"height":10,'
+          '"weight":1000,"sections":[{"typeName":"Бисквит","typeIcon":"🍰",'
+          '"scaleType":0,"ingredients":[{"name":"Мука","amount":150,"scaleType":0}]}]}]';
+      SharedPreferences.setMockInitialValues({'recipes': oldJson});
+      final loaded = await StorageService.loadRecipes();
+      expect(loaded.first.additionalTiers, isEmpty);
+      expect(loaded.first.isMultiTier, isFalse);
+      expect(loaded.first.allTiers.length, 1);
+    });
+
     test('старый JSON без поля notes → загружается с notes=""', () async {
       // Эмулируем рецепт, сохранённый до v1.10.0 (без notes).
       const oldJson =
