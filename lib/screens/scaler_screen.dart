@@ -394,7 +394,7 @@ class _ScalerScreenState extends State<ScalerScreen> {
                                 ),
                                 if (changed)
                                   Text(
-                                    '${orig.amount}  →  ',
+                                    '${formatNumber(orig.amount)}  →  ',
                                     style: TextStyle(
                                       fontSize: 12,
                                       color: Colors.grey.shade400,
@@ -402,7 +402,7 @@ class _ScalerScreenState extends State<ScalerScreen> {
                                     ),
                                   ),
                                 Text(
-                                  '${curr.amount} г',
+                                  '${formatNumber(curr.amount)} г',
                                   style: TextStyle(
                                     fontSize: 16,
                                     fontWeight: FontWeight.w700,
@@ -443,10 +443,8 @@ class _ScalerScreenState extends State<ScalerScreen> {
     );
   }
 
-  String _formatWeight(double g) {
-    if (g >= 1000) return '${(g / 1000).toStringAsFixed(1)} кг';
-    return '${g.round()} г';
-  }
+  // Делегируем форматирование в utils.formatGrams — там ещё запятая для RU.
+  String _formatWeight(double g) => formatGrams(g);
 
   void _showShoppingList(List<RecipeSection> scaled) {
     final items = aggregateIngredients(scaled).entries.toList()
@@ -793,7 +791,7 @@ class _ScalerScreenState extends State<ScalerScreen> {
         ),
         const SizedBox(height: 10),
         Text(
-          'Оригинал: ${recipe.weight >= 1000 ? '${(recipe.weight / 1000).toStringAsFixed(1)} кг' : '${recipe.weight.round()} г'}',
+          'Оригинал: ${formatGrams(recipe.weight)}',
           style: TextStyle(
             color: Colors.white.withValues(alpha: 0.8),
             fontSize: 13,
@@ -811,9 +809,7 @@ class _ScalerScreenState extends State<ScalerScreen> {
             min: 100,
             max: 20000,
             divisions: 199,
-            label: _newWeight >= 1000
-                ? '${(_newWeight / 1000).toStringAsFixed(1)} кг'
-                : '${_newWeight.round()} г',
+            label: formatGrams(_newWeight),
             onChanged: _onWeightSlider,
           ),
         ),

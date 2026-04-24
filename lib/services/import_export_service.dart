@@ -67,6 +67,9 @@ class ImportExportService {
       );
     }
 
+    // Снимаем snapshot до изменений — пользователь сможет откатить через
+    // "Отменить последний импорт" в меню.
+    await StorageService.saveImportSnapshot();
     await StorageService.saveRecipes([...existing, ...renumbered]);
     return renumbered.length;
   }

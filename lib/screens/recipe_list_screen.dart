@@ -4,8 +4,10 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/recipe.dart';
 import '../services/import_export_service.dart';
+import '../services/stats.dart';
 import '../services/storage_service.dart';
 import '../services/theme_service.dart';
+import '../utils.dart';
 import 'add_recipe_screen.dart';
 import 'scaler_screen.dart';
 
@@ -26,6 +28,7 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
   String _searchQuery = '';
   String? _selectedTag;
   SortOrder _sortOrder = SortOrder.manual;
+  bool _canRestoreImport = false;
 
   final List<List<Color>> _cardGradients = [
     [const Color(0xFFFF9A9E), const Color(0xFFFAD0C4)],
@@ -42,6 +45,13 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
     _loadRecipes();
     _loadVersion();
     _loadSortOrder();
+    _refreshRestoreFlag();
+  }
+
+  Future<void> _refreshRestoreFlag() async {
+    final has = await StorageService.hasImportSnapshot();
+    if (!mounted) return;
+    setState(() => _canRestoreImport = has);
   }
 
   Future<void> _loadSortOrder() async {
@@ -150,9 +160,14 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
         );
       } else {
         await _loadRecipes();
+        await _refreshRestoreFlag();
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Импортировано рецептов: $count')),
+            SnackBar(
+              content: Text(
+                'Импортировано: $count. Откатить — через ⋮ меню.',
+              ),
+            ),
           );
         }
       }
@@ -163,6 +178,117 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
         );
       }
     }
+  }
+
+  void _showStats() {
+    final stats = computeStats(_recipes);
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (ctx) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: const [
+                  Icon(
+                    Icons.bar_chart_outlined,
+                    color: Color(0xFFE85D75),
+                  ),
+                  SizedBox(width: 8),
+                  Text(
+                    'Статистика',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              _statRow('Рецептов', '${stats.recipeCount}'),
+              _statRow(
+                'Ингредиентов всего',
+                '${stats.totalIngredientCount}',
+              ),
+              if (stats.totalWeight > 0)
+                _statRow(
+                  'Сумма весов рецептов',
+                  formatGrams(stats.totalWeight),
+                ),
+              const SizedBox(height: 16),
+              if (stats.topIngredients.isNotEmpty) ...[
+                Text(
+                  'ТОП ИНГРЕДИЕНТОВ',
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.grey.shade500,
+                    letterSpacing: 0.5,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                ...stats.topIngredients.map(
+                  (e) => _statRow(e.key, '×${e.value}'),
+                ),
+                const SizedBox(height: 12),
+              ],
+              if (stats.topTags.isNotEmpty) ...[
+                Text(
+                  'ТОП ТЕГОВ',
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.grey.shade500,
+                    letterSpacing: 0.5,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                ...stats.topTags.map(
+                  (e) => _statRow(e.key, '×${e.value}'),
+                ),
+              ],
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _statRow(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(label, style: const TextStyle(fontSize: 14)),
+          ),
+          Text(
+            value,
+            style: const TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w700,
+              color: Color(0xFFE85D75),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _restoreImport() async {
+    await StorageService.restoreImportSnapshot();
+    await _loadRecipes();
+    await _refreshRestoreFlag();
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Импорт откачен — рецепты восстановлены')),
+    );
   }
 
   void _duplicateRecipe(Recipe recipe) {
@@ -288,10 +414,14 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
                     icon: const Icon(Icons.more_vert),
                     onSelected: (action) {
                       switch (action) {
+                        case 'stats':
+                          _showStats();
                         case 'export':
                           _exportRecipes();
                         case 'import':
                           _importRecipes();
+                        case 'restore_import':
+                          _restoreImport();
                         case 'sort_manual':
                           _setSortOrder(SortOrder.manual);
                         case 'sort_newest':
@@ -316,6 +446,15 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
                       );
                       return [
                         const PopupMenuItem(
+                          value: 'stats',
+                          child: ListTile(
+                            leading: Icon(Icons.bar_chart_outlined),
+                            title: Text('Статистика'),
+                            dense: true,
+                            contentPadding: EdgeInsets.zero,
+                          ),
+                        ),
+                        const PopupMenuItem(
                           value: 'export',
                           child: ListTile(
                             leading: Icon(Icons.upload_file_outlined),
@@ -333,6 +472,19 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
                             contentPadding: EdgeInsets.zero,
                           ),
                         ),
+                        if (_canRestoreImport)
+                          const PopupMenuItem(
+                            value: 'restore_import',
+                            child: ListTile(
+                              leading: Icon(Icons.undo, color: Colors.orange),
+                              title: Text(
+                                'Откатить последний импорт',
+                                style: TextStyle(color: Colors.orange),
+                              ),
+                              dense: true,
+                              contentPadding: EdgeInsets.zero,
+                            ),
+                          ),
                         const PopupMenuDivider(),
                         PopupMenuItem(
                           enabled: false,

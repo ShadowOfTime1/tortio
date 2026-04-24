@@ -5,6 +5,7 @@ import '../models/recipe.dart';
 class StorageService {
   static const String _key = 'recipes';
   static const String _backupKey = 'recipes_backup';
+  static const String _importSnapshotKey = 'pre_import_backup';
 
   static Future<List<Recipe>> loadRecipes() async {
     final prefs = await SharedPreferences.getInstance();
@@ -33,6 +34,27 @@ class StorageService {
     }
     final jsonList = recipes.map((r) => _recipeToJson(r)).toList();
     await prefs.setString(_key, json.encode(jsonList));
+  }
+
+  /// Снимок текущей коллекции, чтобы можно было откатить недавний импорт.
+  /// Если рецептов не было — сохраняет пустой массив, чтобы restore мог
+  /// корректно обнулить.
+  static Future<void> saveImportSnapshot() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_importSnapshotKey, prefs.getString(_key) ?? '[]');
+  }
+
+  static Future<bool> hasImportSnapshot() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.containsKey(_importSnapshotKey);
+  }
+
+  static Future<void> restoreImportSnapshot() async {
+    final prefs = await SharedPreferences.getInstance();
+    final snap = prefs.getString(_importSnapshotKey);
+    if (snap == null) return;
+    await prefs.setString(_key, snap);
+    await prefs.remove(_importSnapshotKey);
   }
 
   static Map<String, dynamic> _recipeToJson(Recipe r) {
