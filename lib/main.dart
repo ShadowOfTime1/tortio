@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'screens/recipe_list_screen.dart';
 import 'services/theme_service.dart';
 import 'services/update_service.dart';
@@ -6,6 +7,11 @@ import 'theme.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  // Лочимся в портрет: ни UI не задизайнен под landscape, ни системную
+  // подсказку «повернуть» Android тогда не показывает (она перекрывала FAB).
+  await SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+  ]);
   await ThemeService.instance.load();
   runApp(const TortioApp());
 }
