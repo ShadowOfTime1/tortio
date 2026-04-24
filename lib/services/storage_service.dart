@@ -70,6 +70,7 @@ class StorageService {
       if (r.rating > 0) 'rating': r.rating,
       if (r.cookCount > 0) 'cookCount': r.cookCount,
       if (r.lastCookedAt > 0) 'lastCookedAt': r.lastCookedAt,
+      if (r.pinned) 'pinned': true,
       if (r.additionalTiers.isNotEmpty)
         'additionalTiers': r.additionalTiers.map(_tierToJson).toList(),
       'sections': r.sections.map(_sectionToJson).toList(),
@@ -89,6 +90,7 @@ class StorageService {
       rating: (j['rating'] as int?) ?? 0,
       cookCount: (j['cookCount'] as int?) ?? 0,
       lastCookedAt: (j['lastCookedAt'] as int?) ?? 0,
+      pinned: (j['pinned'] as bool?) ?? false,
       sections: (j['sections'] as List).map(_sectionFromJson).toList(),
       additionalTiers:
           (j['additionalTiers'] as List?)

@@ -99,6 +99,8 @@ class Recipe {
   final int cookCount;
   // Когда последний раз нажал — millisecondsSinceEpoch. 0 = никогда.
   final int lastCookedAt;
+  // Закреплённый рецепт всегда висит сверху списка, поверх любой сортировки.
+  final bool pinned;
 
   Recipe({
     required this.id,
@@ -114,10 +116,20 @@ class Recipe {
     this.rating = 0,
     this.cookCount = 0,
     this.lastCookedAt = 0,
+    this.pinned = false,
   });
 
   /// Возвращает копию с инкрементом cookCount и обновлением lastCookedAt.
   Recipe markCooked() {
+    return _copyWith(
+      cookCount: cookCount + 1,
+      lastCookedAt: DateTime.now().millisecondsSinceEpoch,
+    );
+  }
+
+  Recipe togglePinned() => _copyWith(pinned: !pinned);
+
+  Recipe _copyWith({int? cookCount, int? lastCookedAt, bool? pinned}) {
     return Recipe(
       id: id,
       title: title,
@@ -130,8 +142,9 @@ class Recipe {
       sections: sections,
       additionalTiers: additionalTiers,
       rating: rating,
-      cookCount: cookCount + 1,
-      lastCookedAt: DateTime.now().millisecondsSinceEpoch,
+      cookCount: cookCount ?? this.cookCount,
+      lastCookedAt: lastCookedAt ?? this.lastCookedAt,
+      pinned: pinned ?? this.pinned,
     );
   }
 

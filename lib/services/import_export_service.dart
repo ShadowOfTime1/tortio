@@ -66,6 +66,7 @@ class ImportExportService {
           // backup-restore вместо импорта.
           cookCount: 0,
           lastCookedAt: 0,
+          pinned: false,
           sections: r.sections,
           additionalTiers: r.additionalTiers,
         ),
@@ -102,6 +103,7 @@ class ImportExportService {
       if (r.rating > 0) 'rating': r.rating,
       if (r.cookCount > 0) 'cookCount': r.cookCount,
       if (r.lastCookedAt > 0) 'lastCookedAt': r.lastCookedAt,
+      if (r.pinned) 'pinned': true,
       if (r.additionalTiers.isNotEmpty)
         'additionalTiers': r.additionalTiers.map(_tierToMap).toList(),
       'sections': r.sections.map(_sectionToMap).toList(),
@@ -121,6 +123,7 @@ class ImportExportService {
       rating: (j['rating'] as int?) ?? 0,
       cookCount: (j['cookCount'] as int?) ?? 0,
       lastCookedAt: (j['lastCookedAt'] as int?) ?? 0,
+      pinned: (j['pinned'] as bool?) ?? false,
       sections: (j['sections'] as List).map(_sectionFromMap).toList(),
       additionalTiers:
           (j['additionalTiers'] as List?)

@@ -404,6 +404,13 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
     _saveRecipes();
   }
 
+  void _togglePinned(Recipe recipe) {
+    final idx = _recipes.indexWhere((r) => r.id == recipe.id);
+    if (idx == -1) return;
+    setState(() => _recipes[idx] = recipe.togglePinned());
+    _saveRecipes();
+  }
+
   List<Recipe> get _visibleRecipes {
     final q = _searchQuery.toLowerCase();
     final filtered = _recipes.where((r) {
@@ -438,6 +445,11 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
       case SortOrder.cookedRecently:
         filtered.sort((a, b) => b.lastCookedAt.compareTo(a.lastCookedAt));
     }
+    // Закреплённые всегда сверху, поверх любой сортировки.
+    filtered.sort((a, b) {
+      if (a.pinned == b.pinned) return 0;
+      return a.pinned ? -1 : 1;
+    });
     return filtered;
   }
 
@@ -601,12 +613,14 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
     }
     // Drag-to-reorder доступен только когда фильтры выключены и сортировка
     // ручная — иначе индексы в видимом списке не соответствуют _recipes.
-    // В режиме выбора drag отключён, чтобы long-press не конфликтовал с tap.
+    // Также отключаем при selection-mode и при наличии закреплённых рецептов
+    // (они меняют порядок visible vs _recipes).
     final canReorder =
         _searchQuery.isEmpty &&
         _selectedTag == null &&
         _sortOrder == SortOrder.manual &&
-        !_isSelectionMode;
+        !_isSelectionMode &&
+        !_recipes.any((r) => r.pinned);
 
     if (!canReorder) {
       return ListView.builder(
@@ -709,6 +723,14 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
                     children: [
                       Row(
                         children: [
+                          if (r.pinned) ...[
+                            const Icon(
+                              Icons.push_pin,
+                              size: 14,
+                              color: Color(0xFFE85D75),
+                            ),
+                            const SizedBox(width: 4),
+                          ],
                           Flexible(
                             child: Text(
                               r.title,
@@ -811,6 +833,8 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
                   ),
                   onSelected: (action) {
                     switch (action) {
+                      case 'pin':
+                        _togglePinned(r);
                       case 'edit':
                         _editRecipe(r);
                       case 'duplicate':
@@ -821,8 +845,20 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
                         _deleteWithUndo(r);
                     }
                   },
-                  itemBuilder: (_) => const [
+                  itemBuilder: (_) => [
                     PopupMenuItem(
+                      value: 'pin',
+                      child: ListTile(
+                        leading: Icon(
+                          r.pinned ? Icons.push_pin : Icons.push_pin_outlined,
+                          color: const Color(0xFFE85D75),
+                        ),
+                        title: Text(r.pinned ? 'Открепить' : 'Закрепить'),
+                        dense: true,
+                        contentPadding: EdgeInsets.zero,
+                      ),
+                    ),
+                    const PopupMenuItem(
                       value: 'edit',
                       child: ListTile(
                         leading: Icon(Icons.edit_outlined),
@@ -831,7 +867,7 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
                         contentPadding: EdgeInsets.zero,
                       ),
                     ),
-                    PopupMenuItem(
+                    const PopupMenuItem(
                       value: 'duplicate',
                       child: ListTile(
                         leading: Icon(Icons.copy_outlined),
@@ -840,7 +876,7 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
                         contentPadding: EdgeInsets.zero,
                       ),
                     ),
-                    PopupMenuItem(
+                    const PopupMenuItem(
                       value: 'select',
                       child: ListTile(
                         leading: Icon(Icons.check_box_outlined),
@@ -849,7 +885,7 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
                         contentPadding: EdgeInsets.zero,
                       ),
                     ),
-                    PopupMenuItem(
+                    const PopupMenuItem(
                       value: 'delete',
                       child: ListTile(
                         leading: Icon(Icons.delete_outline, color: Colors.red),

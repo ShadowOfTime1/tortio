@@ -11,6 +11,7 @@ import '../services/storage_service.dart';
 import '../services/theme_service.dart';
 import '../services/update_service.dart';
 import '../utils.dart';
+import '../widgets/welcome_dialog.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -464,6 +465,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
   }
 
+  Future<void> _showWelcomeAgain() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('welcome_seen');
+    if (!mounted) return;
+    await maybeShowWelcome(context);
+  }
+
   Future<void> _openGitHub() async {
     final url = Uri.parse('https://github.com/ShadowOfTime1/tortio');
     if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
@@ -679,6 +687,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
             leading: const Icon(Icons.info_outline),
             title: const Text('Версия'),
             trailing: Text('v$_version', style: const TextStyle(fontSize: 14)),
+          ),
+          ListTile(
+            leading: const Icon(Icons.waving_hand_outlined),
+            title: const Text('Показать приветствие снова'),
+            subtitle: const Text('Краткий тур по приложению'),
+            onTap: _showWelcomeAgain,
           ),
           ListTile(
             leading: const Icon(Icons.code),

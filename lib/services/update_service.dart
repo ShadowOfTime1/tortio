@@ -43,7 +43,7 @@ class UpdateService {
             .trim();
         final downloadUrl = _findApkUrl(data['assets']);
 
-        if (downloadUrl != null && _isNewer(latestTag, currentVersion)) {
+        if (downloadUrl != null && _shouldOfferUpdate(latestTag, currentVersion)) {
           return UpdateInfo(
             version: latestTag,
             downloadUrl: downloadUrl,
@@ -105,28 +105,13 @@ class UpdateService {
     return null;
   }
 
-  static bool _isNewer(String latest, String current) {
-    final latestParts = _versionParts(latest);
-    final currentParts = _versionParts(current);
-    final n = latestParts.length > currentParts.length
-        ? latestParts.length
-        : currentParts.length;
-    for (var i = 0; i < n; i++) {
-      final l = i < latestParts.length ? latestParts[i] : 0;
-      final c = i < currentParts.length ? currentParts[i] : 0;
-      if (l > c) return true;
-      if (l < c) return false;
-    }
-    return false;
-  }
-
-  // Берёт ведущую числовую часть каждого сегмента: "1.10.2-beta" → [1, 10, 2],
-  // "5rc1" → 5, неразборчивый сегмент → 0. Поддерживает > 3 сегментов.
-  static List<int> _versionParts(String v) {
-    return v.split('.').map((s) {
-      final m = RegExp(r'^\d+').firstMatch(s);
-      return m != null ? int.parse(m.group(0)!) : 0;
-    }).toList();
+  /// Решает, показывать ли пользователю баннер обновления.
+  /// Раньше сравнивали semver — но это не работает при смене схемы версий
+  /// (например, переход с v2.7.x → v0.0.1). Теперь любой отличающийся
+  /// от установленной версии тег считается «обновлением» — пусть GitHub
+  /// решает, какая версия latest, а мы лишь отображаем расхождение.
+  static bool _shouldOfferUpdate(String latest, String current) {
+    return latest.trim() != current.trim();
   }
 }
 
