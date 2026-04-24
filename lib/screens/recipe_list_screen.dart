@@ -7,7 +7,7 @@ import 'add_recipe_screen.dart';
 import 'scaler_screen.dart';
 import 'settings_screen.dart';
 
-enum SortOrder { manual, newest, oldest, alpha, rating }
+enum SortOrder { manual, newest, oldest, alpha, rating, cookedOften, cookedRecently }
 
 class RecipeListScreen extends StatefulWidget {
   const RecipeListScreen({super.key});
@@ -67,6 +67,8 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
     SortOrder.oldest => 'Старые сначала',
     SortOrder.alpha => 'По алфавиту',
     SortOrder.rating => 'По рейтингу',
+    SortOrder.cookedOften => 'Чаще готовлю',
+    SortOrder.cookedRecently => 'Недавно готовил',
   };
 
   Future<void> _loadRecipes() async {
@@ -108,9 +110,21 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
   }
 
   void _openRecipe(Recipe recipe) {
-    Navigator.of(
-      context,
-    ).push(MaterialPageRoute(builder: (_) => ScalerScreen(recipe: recipe)));
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => ScalerScreen(
+          recipe: recipe,
+          onRecipeUpdated: (updated) {
+            // Колбэк из «Я приготовил» — обновляем рецепт на месте.
+            final idx = _recipes.indexWhere((r) => r.id == updated.id);
+            if (idx != -1) {
+              setState(() => _recipes[idx] = updated);
+              _saveRecipes();
+            }
+          },
+        ),
+      ),
+    );
   }
 
   Future<void> _openSettings() async {
@@ -186,6 +200,9 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
       tags: List<String>.from(recipe.tags),
       imagePath: recipe.imagePath,
       rating: recipe.rating,
+      // Дубликат — это новый рецепт без истории готовки.
+      cookCount: 0,
+      lastCookedAt: 0,
       sections: recipe.sections.map(_cloneSection).toList(),
       additionalTiers: recipe.additionalTiers
           .map(
@@ -389,6 +406,10 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
       case SortOrder.rating:
         // Высокие первыми; рецепты без оценки уходят в конец.
         filtered.sort((a, b) => b.rating.compareTo(a.rating));
+      case SortOrder.cookedOften:
+        filtered.sort((a, b) => b.cookCount.compareTo(a.cookCount));
+      case SortOrder.cookedRecently:
+        filtered.sort((a, b) => b.lastCookedAt.compareTo(a.lastCookedAt));
     }
     return filtered;
   }
@@ -478,6 +499,20 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
         ],
       ),
     );
+  }
+
+  /// Возвращает читаемый суффикс «· Х дней назад» / «· сегодня» для
+  /// последнего приготовления. Пустая строка если lastCookedAt = 0.
+  String _lastCookedSuffix(Recipe r) {
+    if (r.lastCookedAt == 0) return '';
+    final ms = DateTime.now().millisecondsSinceEpoch - r.lastCookedAt;
+    final days = ms ~/ (24 * 3600 * 1000);
+    if (days == 0) return ' · сегодня';
+    if (days == 1) return ' · вчера';
+    if (days < 7) return ' · $days дн. назад';
+    if (days < 30) return ' · ${days ~/ 7} нед. назад';
+    if (days < 365) return ' · ${days ~/ 30} мес. назад';
+    return ' · ${days ~/ 365} г. назад';
   }
 
   /// Рецепт «свежий», если создан меньше 24 часов назад.
@@ -703,6 +738,16 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
                           fontSize: 13,
                         ),
                       ),
+                      if (r.cookCount > 0) ...[
+                        const SizedBox(height: 2),
+                        Text(
+                          'Готовили ${r.cookCount} раз${_lastCookedSuffix(r)}',
+                          style: TextStyle(
+                            color: Colors.grey.shade500,
+                            fontSize: 12,
+                          ),
+                        ),
+                      ],
                       if (r.tags.isNotEmpty) ...[
                         const SizedBox(height: 6),
                         Wrap(

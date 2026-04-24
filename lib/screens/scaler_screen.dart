@@ -13,7 +13,15 @@ enum ScaleMode { size, weight }
 
 class ScalerScreen extends StatefulWidget {
   final Recipe recipe;
-  const ScalerScreen({super.key, required this.recipe});
+  /// Колбэк когда пользователь нажал «Я приготовил» — родитель должен
+  /// обновить рецепт в списке (cookCount + lastCookedAt).
+  final void Function(Recipe updated)? onRecipeUpdated;
+
+  const ScalerScreen({
+    super.key,
+    required this.recipe,
+    this.onRecipeUpdated,
+  });
 
   @override
   State<ScalerScreen> createState() => _ScalerScreenState();
@@ -185,6 +193,14 @@ class _ScalerScreenState extends State<ScalerScreen> {
                           onPressed: () => _showShoppingList(scaled),
                           icon: const Icon(
                             Icons.shopping_basket_outlined,
+                            color: Colors.white,
+                          ),
+                        ),
+                        IconButton(
+                          tooltip: 'Я приготовил',
+                          onPressed: () => _markCooked(recipe),
+                          icon: const Icon(
+                            Icons.check_circle_outline,
                             color: Colors.white,
                           ),
                         ),
@@ -483,6 +499,26 @@ class _ScalerScreenState extends State<ScalerScreen> {
   // Делегируем форматирование в utils.formatGrams — там ещё запятая для RU.
   String _formatWeight(double g) => formatGrams(g);
 
+  void _markCooked(Recipe recipe) {
+    final updated = recipe.markCooked();
+    widget.onRecipeUpdated?.call(updated);
+    HapticFeedback.lightImpact();
+    ScaffoldMessenger.of(context)
+      ..clearSnackBars()
+      ..showSnackBar(
+        SnackBar(
+          content: Text(
+            updated.cookCount == 1
+                ? 'Записал! Первый раз 🎂'
+                : 'Записал! Готовите ${updated.cookCount}-й раз',
+          ),
+          behavior: SnackBarBehavior.floating,
+          backgroundColor: const Color(0xFFE85D75),
+          duration: const Duration(seconds: 2),
+        ),
+      );
+  }
+
   Future<void> _exportPdf(
     Recipe recipe,
     List<List<RecipeSection>> scaledByTier,
@@ -590,6 +626,14 @@ class _ScalerScreenState extends State<ScalerScreen> {
                           onPressed: () => _showShoppingList(flatScaled),
                           icon: const Icon(
                             Icons.shopping_basket_outlined,
+                            color: Colors.white,
+                          ),
+                        ),
+                        IconButton(
+                          tooltip: 'Я приготовил',
+                          onPressed: () => _markCooked(recipe),
+                          icon: const Icon(
+                            Icons.check_circle_outline,
                             color: Colors.white,
                           ),
                         ),

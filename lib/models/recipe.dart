@@ -95,6 +95,10 @@ class Recipe {
   final List<TierData> additionalTiers;
   // Личный рейтинг рецепта 0-5. 0 = не оценено (звёзды не показываются).
   final int rating;
+  // Сколько раз пользователь нажал «Я приготовил».
+  final int cookCount;
+  // Когда последний раз нажал — millisecondsSinceEpoch. 0 = никогда.
+  final int lastCookedAt;
 
   Recipe({
     required this.id,
@@ -108,7 +112,28 @@ class Recipe {
     required this.sections,
     this.additionalTiers = const [],
     this.rating = 0,
+    this.cookCount = 0,
+    this.lastCookedAt = 0,
   });
+
+  /// Возвращает копию с инкрементом cookCount и обновлением lastCookedAt.
+  Recipe markCooked() {
+    return Recipe(
+      id: id,
+      title: title,
+      diameter: diameter,
+      height: height,
+      weight: weight,
+      notes: notes,
+      tags: tags,
+      imagePath: imagePath,
+      sections: sections,
+      additionalTiers: additionalTiers,
+      rating: rating,
+      cookCount: cookCount + 1,
+      lastCookedAt: DateTime.now().millisecondsSinceEpoch,
+    );
+  }
 
   /// Все ярусы торта: первый собирается из root-полей, остальные из
   /// `additionalTiers`. Никогда не пустой — всегда хотя бы один ярус.
