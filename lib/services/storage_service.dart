@@ -84,7 +84,8 @@ class StorageService {
       tags: (j['tags'] as List?)?.map((t) => t as String).toList() ?? const [],
       imagePath: (j['imagePath'] as String?) ?? '',
       sections: (j['sections'] as List).map(_sectionFromJson).toList(),
-      additionalTiers: (j['additionalTiers'] as List?)
+      additionalTiers:
+          (j['additionalTiers'] as List?)
               ?.map((t) => _tierFromJson(t as Map<String, dynamic>))
               .toList() ??
           const [],

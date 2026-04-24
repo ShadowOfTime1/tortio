@@ -110,9 +110,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         title: const Text('Сбросить настройки?'),
         content: const Text(
           'Тема, сортировка, авто-проверка обновлений, default-режим '
@@ -228,17 +226,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
     // Если тип используется в каких-то рецептах — предупредить.
     final all = await StorageService.loadRecipes();
     final usedIn = all
-        .where(
-          (r) => r.sections.any((s) => s.type.name == type.name),
-        )
+        .where((r) => r.sections.any((s) => s.type.name == type.name))
         .toList();
     if (!mounted) return;
 
     if (usedIn.isNotEmpty) {
       final preview = usedIn.take(5).map((r) => '• ${r.title}').join('\n');
-      final more = usedIn.length > 5
-          ? '\n... и ещё ${usedIn.length - 5}'
-          : '';
+      final more = usedIn.length > 5 ? '\n... и ещё ${usedIn.length - 5}' : '';
       final confirmed = await showDialog<bool>(
         context: context,
         builder: (ctx) => AlertDialog(

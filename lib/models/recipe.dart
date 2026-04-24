@@ -110,12 +110,7 @@ class Recipe {
   /// Все ярусы торта: первый собирается из root-полей, остальные из
   /// `additionalTiers`. Никогда не пустой — всегда хотя бы один ярус.
   List<TierData> get allTiers => [
-    TierData(
-      diameter: diameter,
-      height: height,
-      sections: sections,
-      label: '',
-    ),
+    TierData(diameter: diameter, height: height, sections: sections, label: ''),
     ...additionalTiers,
   ];
 

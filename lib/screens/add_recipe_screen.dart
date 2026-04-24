@@ -246,7 +246,6 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
     );
   }
 
-
   void _addIngredient(_SectionInput section) {
     setState(() => section.ingredients.add(_IngredientInput()));
   }
@@ -557,109 +556,295 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
             ],
           ),
           const SizedBox(height: 8),
-          if (tier.sections.isEmpty)
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 12),
-              child: Text(
-                'Добавь хотя бы одну секцию (бисквит/крем/...)',
-                style: TextStyle(
-                  fontSize: 12,
-                  color: Colors.grey.shade500,
-                  fontStyle: FontStyle.italic,
-                ),
-              ),
-            )
-          else
-            ...tier.sections.map((s) => _buildSimpleSectionCard(s, tier)),
+          _buildSectionsList(tier.sections),
         ],
       ),
     );
   }
 
-  /// Упрощённая карточка секции для tier 2+: без drag, без autocomplete.
-  /// Полировка до уровня tier 1 запланирована в v2.1.0.
-  Widget _buildSimpleSectionCard(_SectionInput section, _TierInput tier) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 8),
-      padding: const EdgeInsets.fromLTRB(12, 8, 8, 8),
-      decoration: BoxDecoration(
-        color: const Color(0xFFFF6B8A).withValues(alpha: 0.05),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Text(section.type.icon, style: const TextStyle(fontSize: 18)),
-              const SizedBox(width: 6),
-              Expanded(
-                child: Text(
-                  section.type.name,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.w600,
-                    fontSize: 14,
-                  ),
-                ),
-              ),
-              IconButton(
-                onPressed: () => _removeSectionFrom(tier.sections, section),
-                icon: const Icon(Icons.close, size: 16),
-                color: Colors.grey,
-                visualDensity: VisualDensity.compact,
-              ),
-            ],
-          ),
-          ...section.ingredients.asMap().entries.map((e) {
-            final ii = e.key;
-            final ing = e.value;
-            return Padding(
-              padding: const EdgeInsets.only(bottom: 6),
-              child: Row(
-                children: [
-                  Expanded(
-                    flex: 3,
-                    child: TextField(
-                      controller: ing.nameController,
-                      decoration: const InputDecoration(
-                        hintText: 'Ингредиент',
-                        isDense: true,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    flex: 2,
-                    child: TextField(
-                      controller: ing.amountController,
-                      keyboardType: TextInputType.number,
-                      decoration: const InputDecoration(
-                        hintText: '0',
-                        suffixText: 'г',
-                        isDense: true,
-                      ),
-                    ),
-                  ),
-                  IconButton(
-                    onPressed: () => _removeIngredient(section, ii),
-                    icon: const Icon(Icons.close, size: 14),
-                    color: Colors.grey.shade400,
-                    visualDensity: VisualDensity.compact,
-                  ),
+  /// Унифицированный рендерер списка секций для любого уровня:
+  /// и tier 1 (через _sections), и tier 2+ (через tier.sections).
+  /// Включает drag-drop секций, drag-drop ингредиентов, Autocomplete
+  /// названий, заметки, empty-state.
+  Widget _buildSectionsList(List<_SectionInput> list) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        if (list.isEmpty)
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(32),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  const Color(0xFFFF6B8A).withValues(alpha: 0.08),
+                  const Color(0xFFFF8E53).withValues(alpha: 0.05),
                 ],
               ),
-            );
-          }),
-          TextButton.icon(
-            onPressed: () => _addIngredient(section),
-            icon: const Icon(Icons.add, size: 14, color: Color(0xFFE85D75)),
-            label: const Text(
-              'Ингредиент',
-              style: TextStyle(color: Color(0xFFE85D75), fontSize: 13),
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(
+                color: const Color(0xFFFF6B8A).withValues(alpha: 0.2),
+              ),
+            ),
+            child: const Column(
+              children: [
+                Text('🧁', style: TextStyle(fontSize: 40)),
+                SizedBox(height: 12),
+                Text('Добавьте секцию', style: TextStyle(color: Colors.grey)),
+                Text(
+                  'Бисквит, крем, начинка...',
+                  style: TextStyle(color: Colors.grey, fontSize: 12),
+                ),
+              ],
             ),
           ),
-        ],
-      ),
+
+        if (list.isNotEmpty)
+          ReorderableListView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            buildDefaultDragHandles: false,
+            itemCount: list.length,
+            onReorder: (oldIdx, newIdx) {
+              setState(() {
+                if (newIdx > oldIdx) newIdx -= 1;
+                final s = list.removeAt(oldIdx);
+                list.insert(newIdx, s);
+              });
+            },
+            itemBuilder: (context, si) {
+              final section = list[si];
+              final colors = _sectionColors[si % _sectionColors.length];
+
+              return Padding(
+                key: ObjectKey(section),
+                padding: const EdgeInsets.only(bottom: 12),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.surface,
+                    borderRadius: BorderRadius.circular(20),
+                    boxShadow: [
+                      BoxShadow(
+                        color: colors[0].withValues(alpha: 0.15),
+                        blurRadius: 10,
+                        offset: const Offset(0, 3),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    children: [
+                      // Заголовок
+                      Container(
+                        padding: const EdgeInsets.fromLTRB(16, 12, 8, 8),
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [
+                              colors[0].withValues(alpha: 0.2),
+                              colors[1].withValues(alpha: 0.1),
+                            ],
+                          ),
+                          borderRadius: const BorderRadius.only(
+                            topLeft: Radius.circular(20),
+                            topRight: Radius.circular(20),
+                          ),
+                        ),
+                        child: Row(
+                          children: [
+                            Text(
+                              section.type.icon,
+                              style: const TextStyle(fontSize: 22),
+                            ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    section.type.name,
+                                    style: const TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                  Text(
+                                    'пересчёт: ${section.type.scaleLabel}',
+                                    style: TextStyle(
+                                      fontSize: 11,
+                                      color: Colors.grey.shade500,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            ReorderableDragStartListener(
+                              index: si,
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 4,
+                                ),
+                                child: Icon(
+                                  Icons.drag_indicator,
+                                  size: 20,
+                                  color: Colors.grey.shade400,
+                                ),
+                              ),
+                            ),
+                            IconButton(
+                              onPressed: () =>
+                                  _removeSectionFrom(list, section),
+                              icon: const Icon(Icons.close, size: 18),
+                              color: Colors.grey,
+                            ),
+                          ],
+                        ),
+                      ),
+
+                      // Ингредиенты
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 8, 8, 0),
+                        child: Column(
+                          children: [
+                            ReorderableListView.builder(
+                              shrinkWrap: true,
+                              physics: const NeverScrollableScrollPhysics(),
+                              buildDefaultDragHandles: false,
+                              itemCount: section.ingredients.length,
+                              onReorder: (oldIdx, newIdx) {
+                                setState(() {
+                                  if (newIdx > oldIdx) newIdx -= 1;
+                                  final i = section.ingredients.removeAt(
+                                    oldIdx,
+                                  );
+                                  section.ingredients.insert(newIdx, i);
+                                });
+                              },
+                              itemBuilder: (context, ii) {
+                                final ing = section.ingredients[ii];
+                                return Padding(
+                                  key: ObjectKey(ing),
+                                  padding: const EdgeInsets.only(bottom: 8),
+                                  child: Row(
+                                    children: [
+                                      ReorderableDragStartListener(
+                                        index: ii,
+                                        child: Padding(
+                                          padding: const EdgeInsets.only(
+                                            right: 4,
+                                          ),
+                                          child: Icon(
+                                            Icons.drag_indicator,
+                                            size: 18,
+                                            color: Colors.grey.shade400,
+                                          ),
+                                        ),
+                                      ),
+                                      Expanded(
+                                        flex: 3,
+                                        child: Autocomplete<String>(
+                                          initialValue: TextEditingValue(
+                                            text: ing.nameController.text,
+                                          ),
+                                          optionsBuilder: (tev) {
+                                            if (tev.text.isEmpty) {
+                                              return const Iterable<
+                                                String
+                                              >.empty();
+                                            }
+                                            final q = tev.text.toLowerCase();
+                                            return _ingredientSuggestions
+                                                .where(
+                                                  (n) =>
+                                                      n.toLowerCase().contains(
+                                                        q,
+                                                      ) &&
+                                                      n.toLowerCase() != q,
+                                                )
+                                                .take(5);
+                                          },
+                                          fieldViewBuilder:
+                                              (ctx, ctrl, fn, submit) {
+                                                ing.nameController = ctrl;
+                                                return TextField(
+                                                  controller: ctrl,
+                                                  focusNode: fn,
+                                                  decoration:
+                                                      const InputDecoration(
+                                                        hintText: 'Ингредиент',
+                                                        isDense: true,
+                                                      ),
+                                                );
+                                              },
+                                        ),
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Expanded(
+                                        flex: 2,
+                                        child: TextField(
+                                          controller: ing.amountController,
+                                          keyboardType: TextInputType.number,
+                                          decoration: const InputDecoration(
+                                            hintText: '0',
+                                            suffixText: 'г',
+                                            isDense: true,
+                                          ),
+                                        ),
+                                      ),
+                                      IconButton(
+                                        onPressed: () =>
+                                            _removeIngredient(section, ii),
+                                        icon: const Icon(Icons.close, size: 16),
+                                        color: Colors.grey.shade400,
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              },
+                            ),
+                            TextButton.icon(
+                              onPressed: () => _addIngredient(section),
+                              icon: Icon(Icons.add, size: 16, color: colors[0]),
+                              label: Text(
+                                'Ингредиент',
+                                style: TextStyle(color: colors[0]),
+                              ),
+                            ),
+                            // Заметка по секции (необязательно)
+                            Padding(
+                              padding: const EdgeInsets.only(
+                                right: 8,
+                                bottom: 4,
+                              ),
+                              child: TextField(
+                                controller: section.notesController,
+                                maxLines: 2,
+                                minLines: 1,
+                                style: const TextStyle(fontSize: 13),
+                                decoration: InputDecoration(
+                                  hintText: 'Заметка к секции (опционально)',
+                                  hintStyle: TextStyle(
+                                    fontSize: 13,
+                                    color: Colors.grey.shade400,
+                                  ),
+                                  isDense: true,
+                                  contentPadding: const EdgeInsets.symmetric(
+                                    horizontal: 10,
+                                    vertical: 8,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                    ],
+                  ),
+                ),
+              );
+            },
+          ),
+      ],
     );
   }
 
@@ -926,317 +1111,7 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
                 ),
                 const SizedBox(height: 12),
 
-                if (_sections.isEmpty)
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(32),
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [
-                          const Color(0xFFFF6B8A).withValues(alpha: 0.08),
-                          const Color(0xFFFF8E53).withValues(alpha: 0.05),
-                        ],
-                      ),
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(
-                        color: const Color(0xFFFF6B8A).withValues(alpha: 0.2),
-                      ),
-                    ),
-                    child: const Column(
-                      children: [
-                        Text('🧁', style: TextStyle(fontSize: 40)),
-                        SizedBox(height: 12),
-                        Text(
-                          'Добавьте секцию',
-                          style: TextStyle(color: Colors.grey),
-                        ),
-                        Text(
-                          'Бисквит, крем, начинка...',
-                          style: TextStyle(color: Colors.grey, fontSize: 12),
-                        ),
-                      ],
-                    ),
-                  ),
-
-                if (_sections.isNotEmpty)
-                  ReorderableListView.builder(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    buildDefaultDragHandles: false,
-                    itemCount: _sections.length,
-                    onReorder: (oldIdx, newIdx) {
-                      setState(() {
-                        if (newIdx > oldIdx) newIdx -= 1;
-                        final s = _sections.removeAt(oldIdx);
-                        _sections.insert(newIdx, s);
-                      });
-                    },
-                    itemBuilder: (context, si) {
-                      final section = _sections[si];
-                      final colors = _sectionColors[si % _sectionColors.length];
-
-                      return Padding(
-                        key: ObjectKey(section),
-                        padding: const EdgeInsets.only(bottom: 12),
-                        child: Container(
-                          decoration: BoxDecoration(
-                            color: Theme.of(context).colorScheme.surface,
-                            borderRadius: BorderRadius.circular(20),
-                            boxShadow: [
-                              BoxShadow(
-                                color: colors[0].withValues(alpha: 0.15),
-                                blurRadius: 10,
-                                offset: const Offset(0, 3),
-                              ),
-                            ],
-                          ),
-                          child: Column(
-                            children: [
-                              // Заголовок
-                              Container(
-                                padding: const EdgeInsets.fromLTRB(
-                                  16,
-                                  12,
-                                  8,
-                                  8,
-                                ),
-                                decoration: BoxDecoration(
-                                  gradient: LinearGradient(
-                                    colors: [
-                                      colors[0].withValues(alpha: 0.2),
-                                      colors[1].withValues(alpha: 0.1),
-                                    ],
-                                  ),
-                                  borderRadius: const BorderRadius.only(
-                                    topLeft: Radius.circular(20),
-                                    topRight: Radius.circular(20),
-                                  ),
-                                ),
-                                child: Row(
-                                  children: [
-                                    Text(
-                                      section.type.icon,
-                                      style: const TextStyle(fontSize: 22),
-                                    ),
-                                    const SizedBox(width: 10),
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            section.type.name,
-                                            style: const TextStyle(
-                                              fontSize: 16,
-                                              fontWeight: FontWeight.w600,
-                                            ),
-                                          ),
-                                          Text(
-                                            'пересчёт: ${section.type.scaleLabel}',
-                                            style: TextStyle(
-                                              fontSize: 11,
-                                              color: Colors.grey.shade500,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                    ReorderableDragStartListener(
-                                      index: si,
-                                      child: Padding(
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 4,
-                                        ),
-                                        child: Icon(
-                                          Icons.drag_indicator,
-                                          size: 20,
-                                          color: Colors.grey.shade400,
-                                        ),
-                                      ),
-                                    ),
-                                    IconButton(
-                                      onPressed: () => _removeSectionFrom(
-                                        _sections,
-                                        section,
-                                      ),
-                                      icon: const Icon(Icons.close, size: 18),
-                                      color: Colors.grey,
-                                    ),
-                                  ],
-                                ),
-                              ),
-
-                              // Ингредиенты
-                              Padding(
-                                padding: const EdgeInsets.fromLTRB(16, 8, 8, 0),
-                                child: Column(
-                                  children: [
-                                    ReorderableListView.builder(
-                                      shrinkWrap: true,
-                                      physics:
-                                          const NeverScrollableScrollPhysics(),
-                                      buildDefaultDragHandles: false,
-                                      itemCount: section.ingredients.length,
-                                      onReorder: (oldIdx, newIdx) {
-                                        setState(() {
-                                          if (newIdx > oldIdx) newIdx -= 1;
-                                          final i = section.ingredients
-                                              .removeAt(oldIdx);
-                                          section.ingredients.insert(newIdx, i);
-                                        });
-                                      },
-                                      itemBuilder: (context, ii) {
-                                        final ing = section.ingredients[ii];
-                                        return Padding(
-                                          key: ObjectKey(ing),
-                                          padding: const EdgeInsets.only(
-                                            bottom: 8,
-                                          ),
-                                          child: Row(
-                                            children: [
-                                              ReorderableDragStartListener(
-                                                index: ii,
-                                                child: Padding(
-                                                  padding:
-                                                      const EdgeInsets.only(
-                                                        right: 4,
-                                                      ),
-                                                  child: Icon(
-                                                    Icons.drag_indicator,
-                                                    size: 18,
-                                                    color: Colors.grey.shade400,
-                                                  ),
-                                                ),
-                                              ),
-                                              Expanded(
-                                                flex: 3,
-                                                child: Autocomplete<String>(
-                                                  initialValue:
-                                                      TextEditingValue(
-                                                        text: ing
-                                                            .nameController
-                                                            .text,
-                                                      ),
-                                                  optionsBuilder: (tev) {
-                                                    if (tev.text.isEmpty) {
-                                                      return const Iterable<
-                                                        String
-                                                      >.empty();
-                                                    }
-                                                    final q = tev.text
-                                                        .toLowerCase();
-                                                    return _ingredientSuggestions
-                                                        .where(
-                                                          (n) =>
-                                                              n
-                                                                  .toLowerCase()
-                                                                  .contains(
-                                                                    q,
-                                                                  ) &&
-                                                              n.toLowerCase() !=
-                                                                  q,
-                                                        )
-                                                        .take(5);
-                                                  },
-                                                  fieldViewBuilder:
-                                                      (ctx, ctrl, fn, submit) {
-                                                        ing.nameController =
-                                                            ctrl;
-                                                        return TextField(
-                                                          controller: ctrl,
-                                                          focusNode: fn,
-                                                          decoration:
-                                                              const InputDecoration(
-                                                                hintText:
-                                                                    'Ингредиент',
-                                                                isDense: true,
-                                                              ),
-                                                        );
-                                                      },
-                                                ),
-                                              ),
-                                              const SizedBox(width: 8),
-                                              Expanded(
-                                                flex: 2,
-                                                child: TextField(
-                                                  controller:
-                                                      ing.amountController,
-                                                  keyboardType:
-                                                      TextInputType.number,
-                                                  decoration:
-                                                      const InputDecoration(
-                                                        hintText: '0',
-                                                        suffixText: 'г',
-                                                        isDense: true,
-                                                      ),
-                                                ),
-                                              ),
-                                              IconButton(
-                                                onPressed: () =>
-                                                    _removeIngredient(
-                                                      section,
-                                                      ii,
-                                                    ),
-                                                icon: const Icon(
-                                                  Icons.close,
-                                                  size: 16,
-                                                ),
-                                                color: Colors.grey.shade400,
-                                              ),
-                                            ],
-                                          ),
-                                        );
-                                      },
-                                    ),
-                                    TextButton.icon(
-                                      onPressed: () => _addIngredient(section),
-                                      icon: Icon(
-                                        Icons.add,
-                                        size: 16,
-                                        color: colors[0],
-                                      ),
-                                      label: Text(
-                                        'Ингредиент',
-                                        style: TextStyle(color: colors[0]),
-                                      ),
-                                    ),
-                                    // Заметка по секции (необязательно)
-                                    Padding(
-                                      padding: const EdgeInsets.only(
-                                        right: 8,
-                                        bottom: 4,
-                                      ),
-                                      child: TextField(
-                                        controller: section.notesController,
-                                        maxLines: 2,
-                                        minLines: 1,
-                                        style: const TextStyle(fontSize: 13),
-                                        decoration: InputDecoration(
-                                          hintText:
-                                              'Заметка к секции (опционально)',
-                                          hintStyle: TextStyle(
-                                            fontSize: 13,
-                                            color: Colors.grey.shade400,
-                                          ),
-                                          isDense: true,
-                                          contentPadding:
-                                              const EdgeInsets.symmetric(
-                                                horizontal: 10,
-                                                vertical: 8,
-                                              ),
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              const SizedBox(height: 4),
-                            ],
-                          ),
-                        ),
-                      );
-                    },
-                  ),
+                _buildSectionsList(_sections),
                 // Дополнительные ярусы (для многоярусных тортов)
                 ..._additionalTiers.asMap().entries.map(
                   (e) => _buildAdditionalTier(e.key, e.value),

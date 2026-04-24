@@ -144,9 +144,7 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         title: Text('Удалить $count рецепт(ов)?'),
         content: const Text(
           'Все выбранные рецепты будут удалены безвозвратно.',
@@ -158,9 +156,7 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
           ),
           FilledButton(
             onPressed: () => Navigator.pop(ctx, true),
-            style: FilledButton.styleFrom(
-              backgroundColor: Colors.red.shade400,
-            ),
+            style: FilledButton.styleFrom(backgroundColor: Colors.red.shade400),
             child: const Text('Удалить'),
           ),
         ],
@@ -466,10 +462,7 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
           Expanded(
             child: Text(
               'Выбрано: ${_selectedIds.length}',
-              style: const TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-              ),
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
             ),
           ),
           IconButton(
