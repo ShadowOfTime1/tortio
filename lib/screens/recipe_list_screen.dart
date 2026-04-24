@@ -636,8 +636,8 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
             borderRadius: BorderRadius.circular(20),
             gradient: LinearGradient(
               colors: [
-                gradient[0].withValues(alpha: selected ? 0.6 : 0.3),
-                gradient[1].withValues(alpha: selected ? 0.5 : 0.2),
+                gradient[0].withValues(alpha: selected ? 1.0 : 0.85),
+                gradient[1].withValues(alpha: selected ? 0.9 : 0.7),
               ],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
@@ -645,7 +645,7 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
             border: Border.all(
               color: selected
                   ? const Color(0xFFE85D75)
-                  : gradient[0].withValues(alpha: 0.3),
+                  : gradient[0].withValues(alpha: 0.5),
               width: selected ? 2 : 1,
             ),
           ),
