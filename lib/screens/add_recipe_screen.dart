@@ -112,14 +112,33 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
             }
           }
         },
+        onEditCustom: (oldType) async {
+          Navigator.pop(ctx);
+          final edited = await _showCreateCustomTypeDialog(initial: oldType);
+          if (edited != null) {
+            final updated = _customTypes
+                .map((t) => t.name == oldType.name ? edited : t)
+                .toList();
+            await CustomTypesService.save(updated);
+            if (mounted) setState(() => _customTypes = updated);
+          }
+        },
+        onDeleteCustom: (type) async {
+          Navigator.pop(ctx);
+          final updated = _customTypes
+              .where((t) => t.name != type.name)
+              .toList();
+          await CustomTypesService.save(updated);
+          if (mounted) setState(() => _customTypes = updated);
+        },
       ),
     );
   }
 
-  Future<SectionType?> _showCreateCustomTypeDialog() {
-    final nameController = TextEditingController();
-    final iconController = TextEditingController(text: '🧁');
-    ScaleType selectedScale = ScaleType.volume;
+  Future<SectionType?> _showCreateCustomTypeDialog({SectionType? initial}) {
+    final nameController = TextEditingController(text: initial?.name ?? '');
+    final iconController = TextEditingController(text: initial?.icon ?? '🧁');
+    ScaleType selectedScale = initial?.scaleType ?? ScaleType.volume;
 
     return showDialog<SectionType>(
       context: context,
@@ -128,7 +147,9 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(20),
           ),
-          title: const Text('Свой тип секции'),
+          title: Text(
+            initial == null ? 'Свой тип секции' : 'Изменить тип секции',
+          ),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -206,7 +227,7 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
               style: FilledButton.styleFrom(
                 backgroundColor: const Color(0xFFFF6B8A),
               ),
-              child: const Text('Создать'),
+              child: Text(initial == null ? 'Создать' : 'Сохранить'),
             ),
           ],
         ),
@@ -321,9 +342,22 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
   }
 
   Future<void> _pickImage(ImageSource source) async {
-    final path = await ImagePickerService.pickAndPersist(source: source);
-    if (path != null && mounted) {
-      setState(() => _imagePath = path);
+    try {
+      final path = await ImagePickerService.pickAndPersist(source: source);
+      if (path != null && mounted) {
+        setState(() => _imagePath = path);
+      }
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            source == ImageSource.camera
+                ? 'Не удалось открыть камеру: $e'
+                : 'Не удалось выбрать фото: $e',
+          ),
+        ),
+      );
     }
   }
 
@@ -876,15 +910,26 @@ class _SectionPicker extends StatelessWidget {
   final Function(SectionType) onSelect;
   final VoidCallback onCreateCustom;
   final List<SectionType> customTypes;
+  final Function(SectionType)? onEditCustom;
+  final Function(SectionType)? onDeleteCustom;
   const _SectionPicker({
     required this.onSelect,
     required this.onCreateCustom,
     required this.customTypes,
+    this.onEditCustom,
+    this.onDeleteCustom,
   });
 
-  Widget _chip(SectionType type, BuildContext context) {
+  Widget _chip(
+    SectionType type,
+    BuildContext context, {
+    bool isCustom = false,
+  }) {
     return GestureDetector(
       onTap: () => onSelect(type),
+      onLongPress: isCustom
+          ? () => _showCustomActions(context, type)
+          : null,
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
         decoration: BoxDecoration(
@@ -905,8 +950,55 @@ class _SectionPicker extends StatelessWidget {
               type.name,
               style: const TextStyle(fontWeight: FontWeight.w500),
             ),
+            if (isCustom) ...[
+              const SizedBox(width: 4),
+              Icon(
+                Icons.edit,
+                size: 12,
+                color: Colors.grey.shade500,
+              ),
+            ],
           ],
         ),
+      ),
+    );
+  }
+
+  void _showCustomActions(BuildContext context, SectionType type) {
+    showDialog<void>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
+        title: Text('${type.icon} ${type.name}'),
+        content: const Text('Кастомный тип секции'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Отмена'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(ctx);
+              if (onDeleteCustom != null) onDeleteCustom!(type);
+            },
+            child: const Text(
+              'Удалить',
+              style: TextStyle(color: Colors.red),
+            ),
+          ),
+          FilledButton(
+            onPressed: () {
+              Navigator.pop(ctx);
+              if (onEditCustom != null) onEditCustom!(type);
+            },
+            style: FilledButton.styleFrom(
+              backgroundColor: const Color(0xFFFF6B8A),
+            ),
+            child: const Text('Изменить'),
+          ),
+        ],
       ),
     );
   }
@@ -929,7 +1021,7 @@ class _SectionPicker extends StatelessWidget {
             runSpacing: 10,
             children: [
               ...SectionType.presets.map((t) => _chip(t, context)),
-              ...customTypes.map((t) => _chip(t, context)),
+              ...customTypes.map((t) => _chip(t, context, isCustom: true)),
               GestureDetector(
                 onTap: onCreateCustom,
                 child: Container(

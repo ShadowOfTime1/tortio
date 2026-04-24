@@ -1,12 +1,15 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../models/recipe.dart';
 import '../services/import_export_service.dart';
 import '../services/storage_service.dart';
 import '../services/theme_service.dart';
 import 'add_recipe_screen.dart';
 import 'scaler_screen.dart';
+
+enum SortOrder { manual, newest, oldest, alpha }
 
 class RecipeListScreen extends StatefulWidget {
   const RecipeListScreen({super.key});
@@ -22,6 +25,7 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
   String? _selectedTag;
+  SortOrder _sortOrder = SortOrder.manual;
 
   final List<List<Color>> _cardGradients = [
     [const Color(0xFFFF9A9E), const Color(0xFFFAD0C4)],
@@ -37,7 +41,33 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
     super.initState();
     _loadRecipes();
     _loadVersion();
+    _loadSortOrder();
   }
+
+  Future<void> _loadSortOrder() async {
+    final prefs = await SharedPreferences.getInstance();
+    final raw = prefs.getString('sort_order');
+    if (!mounted || raw == null) return;
+    setState(() {
+      _sortOrder = SortOrder.values.firstWhere(
+        (s) => s.name == raw,
+        orElse: () => SortOrder.manual,
+      );
+    });
+  }
+
+  Future<void> _setSortOrder(SortOrder o) async {
+    setState(() => _sortOrder = o);
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('sort_order', o.name);
+  }
+
+  String _sortLabel(SortOrder o) => switch (o) {
+    SortOrder.manual => 'Вручную',
+    SortOrder.newest => 'Новые сначала',
+    SortOrder.oldest => 'Старые сначала',
+    SortOrder.alpha => 'По алфавиту',
+  };
 
   void _loadVersion() async {
     try {
@@ -262,28 +292,78 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
                           _exportRecipes();
                         case 'import':
                           _importRecipes();
+                        case 'sort_manual':
+                          _setSortOrder(SortOrder.manual);
+                        case 'sort_newest':
+                          _setSortOrder(SortOrder.newest);
+                        case 'sort_oldest':
+                          _setSortOrder(SortOrder.oldest);
+                        case 'sort_alpha':
+                          _setSortOrder(SortOrder.alpha);
                       }
                     },
-                    itemBuilder: (_) => const [
-                      PopupMenuItem(
-                        value: 'export',
-                        child: ListTile(
-                          leading: Icon(Icons.upload_file_outlined),
-                          title: Text('Экспортировать (JSON)'),
-                          dense: true,
-                          contentPadding: EdgeInsets.zero,
+                    itemBuilder: (_) {
+                      Widget sortItem(SortOrder o) => ListTile(
+                        leading: Icon(
+                          _sortOrder == o
+                              ? Icons.radio_button_checked
+                              : Icons.radio_button_off,
+                          size: 20,
                         ),
-                      ),
-                      PopupMenuItem(
-                        value: 'import',
-                        child: ListTile(
-                          leading: Icon(Icons.download_outlined),
-                          title: Text('Импортировать (JSON)'),
-                          dense: true,
-                          contentPadding: EdgeInsets.zero,
+                        title: Text(_sortLabel(o)),
+                        dense: true,
+                        contentPadding: EdgeInsets.zero,
+                      );
+                      return [
+                        const PopupMenuItem(
+                          value: 'export',
+                          child: ListTile(
+                            leading: Icon(Icons.upload_file_outlined),
+                            title: Text('Экспортировать (JSON)'),
+                            dense: true,
+                            contentPadding: EdgeInsets.zero,
+                          ),
                         ),
-                      ),
-                    ],
+                        const PopupMenuItem(
+                          value: 'import',
+                          child: ListTile(
+                            leading: Icon(Icons.download_outlined),
+                            title: Text('Импортировать (JSON)'),
+                            dense: true,
+                            contentPadding: EdgeInsets.zero,
+                          ),
+                        ),
+                        const PopupMenuDivider(),
+                        PopupMenuItem(
+                          enabled: false,
+                          height: 28,
+                          child: Text(
+                            'СОРТИРОВКА',
+                            style: TextStyle(
+                              fontSize: 11,
+                              color: Colors.grey.shade500,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                        PopupMenuItem(
+                          value: 'sort_manual',
+                          child: sortItem(SortOrder.manual),
+                        ),
+                        PopupMenuItem(
+                          value: 'sort_newest',
+                          child: sortItem(SortOrder.newest),
+                        ),
+                        PopupMenuItem(
+                          value: 'sort_oldest',
+                          child: sortItem(SortOrder.oldest),
+                        ),
+                        PopupMenuItem(
+                          value: 'sort_alpha',
+                          child: sortItem(SortOrder.alpha),
+                        ),
+                      ];
+                    },
                   ),
                 ],
               ),
@@ -402,11 +482,26 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
 
   List<Recipe> get _visibleRecipes {
     final q = _searchQuery.toLowerCase();
-    return _recipes.where((r) {
+    final filtered = _recipes.where((r) {
       if (q.isNotEmpty && !r.title.toLowerCase().contains(q)) return false;
       if (_selectedTag != null && !r.tags.contains(_selectedTag)) return false;
       return true;
     }).toList();
+    // id рецептов = millisecondsSinceEpoch на момент создания, поэтому
+    // лексикографическое сравнение совпадает с хронологическим.
+    switch (_sortOrder) {
+      case SortOrder.manual:
+        return filtered;
+      case SortOrder.newest:
+        filtered.sort((a, b) => b.id.compareTo(a.id));
+      case SortOrder.oldest:
+        filtered.sort((a, b) => a.id.compareTo(b.id));
+      case SortOrder.alpha:
+        filtered.sort(
+          (a, b) => a.title.toLowerCase().compareTo(b.title.toLowerCase()),
+        );
+    }
+    return filtered;
   }
 
   List<String> get _allTags {
@@ -421,20 +516,48 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
   Widget _buildList() {
     final visible = _visibleRecipes;
     if (visible.isEmpty) {
+      final parts = <String>[];
+      if (_searchQuery.isNotEmpty) parts.add('по запросу «$_searchQuery»');
+      if (_selectedTag != null) parts.add('с тегом «$_selectedTag»');
+      final desc = parts.isEmpty
+          ? 'ничего не найдено'
+          : 'нет рецептов ${parts.join(' ')}';
       return Center(
         child: Padding(
           padding: const EdgeInsets.all(24),
-          child: Text(
-            'По «$_searchQuery» ничего не найдено',
-            style: TextStyle(color: Colors.grey.shade500, fontSize: 15),
-            textAlign: TextAlign.center,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                desc,
+                style: TextStyle(color: Colors.grey.shade500, fontSize: 15),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 16),
+              FilledButton.icon(
+                icon: const Icon(Icons.filter_alt_off, size: 18),
+                label: const Text('Сбросить фильтры'),
+                onPressed: () {
+                  _searchController.clear();
+                  setState(() {
+                    _searchQuery = '';
+                    _selectedTag = null;
+                  });
+                },
+                style: FilledButton.styleFrom(
+                  backgroundColor: const Color(0xFFFF6B8A),
+                ),
+              ),
+            ],
           ),
         ),
       );
     }
-    // Drag-to-reorder доступен только когда фильтры выключены —
-    // иначе индексы в видимом списке не соответствуют _recipes.
-    final canReorder = _searchQuery.isEmpty && _selectedTag == null;
+    // Drag-to-reorder доступен только когда фильтры выключены и сортировка
+    // ручная — иначе индексы в видимом списке не соответствуют _recipes.
+    final canReorder = _searchQuery.isEmpty &&
+        _selectedTag == null &&
+        _sortOrder == SortOrder.manual;
 
     if (!canReorder) {
       return ListView.builder(
@@ -541,6 +664,34 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
                               fontSize: 13,
                             ),
                           ),
+                          if (r.tags.isNotEmpty) ...[
+                            const SizedBox(height: 6),
+                            Wrap(
+                              spacing: 4,
+                              runSpacing: 3,
+                              children: r.tags.map((tag) {
+                                return Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 7,
+                                    vertical: 2,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: Colors.black.withValues(
+                                      alpha: 0.05,
+                                    ),
+                                    borderRadius: BorderRadius.circular(6),
+                                  ),
+                                  child: Text(
+                                    tag,
+                                    style: TextStyle(
+                                      fontSize: 11,
+                                      color: Colors.grey.shade700,
+                                    ),
+                                  ),
+                                );
+                              }).toList(),
+                            ),
+                          ],
                         ],
                       ),
                     ),
