@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:share_plus/share_plus.dart';
@@ -97,16 +98,30 @@ class _ScalerScreenState extends State<ScalerScreen> {
       body: SafeArea(
         child: Column(
           children: [
-            // Верхний блок
+            // Верхний блок: либо градиент, либо фото-обложка с затемнением.
             Container(
               width: double.infinity,
-              decoration: const BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [Color(0xFFFF6B8A), Color(0xFFFF8E53)],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-                borderRadius: BorderRadius.only(
+              decoration: BoxDecoration(
+                gradient: recipe.imagePath.isEmpty
+                    ? const LinearGradient(
+                        colors: [Color(0xFFFF6B8A), Color(0xFFFF8E53)],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      )
+                    : null,
+                image: recipe.imagePath.isNotEmpty
+                    ? DecorationImage(
+                        image: FileImage(File(recipe.imagePath)),
+                        fit: BoxFit.cover,
+                        // Затемнение, чтобы белые иконки/текст оставались
+                        // читаемыми на любом фото.
+                        colorFilter: ColorFilter.mode(
+                          Colors.black.withValues(alpha: 0.45),
+                          BlendMode.darken,
+                        ),
+                      )
+                    : null,
+                borderRadius: const BorderRadius.only(
                   bottomLeft: Radius.circular(32),
                   bottomRight: Radius.circular(32),
                 ),

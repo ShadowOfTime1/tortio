@@ -154,32 +154,33 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
                 'Как масштабировать',
                 style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
               ),
-              RadioListTile<ScaleType>(
-                dense: true,
-                contentPadding: EdgeInsets.zero,
-                title: const Text('По объёму (d² × h)'),
-                value: ScaleType.volume,
+              RadioGroup<ScaleType>(
                 groupValue: selectedScale,
                 onChanged: (v) =>
                     setDialogState(() => selectedScale = v!),
-              ),
-              RadioListTile<ScaleType>(
-                dense: true,
-                contentPadding: EdgeInsets.zero,
-                title: const Text('По площади (d²)'),
-                value: ScaleType.area,
-                groupValue: selectedScale,
-                onChanged: (v) =>
-                    setDialogState(() => selectedScale = v!),
-              ),
-              RadioListTile<ScaleType>(
-                dense: true,
-                contentPadding: EdgeInsets.zero,
-                title: const Text('Фикс (не меняется)'),
-                value: ScaleType.fixed,
-                groupValue: selectedScale,
-                onChanged: (v) =>
-                    setDialogState(() => selectedScale = v!),
+                child: const Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    RadioListTile<ScaleType>(
+                      dense: true,
+                      contentPadding: EdgeInsets.zero,
+                      title: Text('По объёму (d² × h)'),
+                      value: ScaleType.volume,
+                    ),
+                    RadioListTile<ScaleType>(
+                      dense: true,
+                      contentPadding: EdgeInsets.zero,
+                      title: Text('По площади (d²)'),
+                      value: ScaleType.area,
+                    ),
+                    RadioListTile<ScaleType>(
+                      dense: true,
+                      contentPadding: EdgeInsets.zero,
+                      title: Text('Фикс (не меняется)'),
+                      value: ScaleType.fixed,
+                    ),
+                  ],
+                ),
               ),
             ],
           ),
@@ -620,14 +621,27 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
                 ),
               ),
 
-            ..._sections.asMap().entries.map((sEntry) {
-              final si = sEntry.key;
-              final section = sEntry.value;
-              final colors = _sectionColors[si % _sectionColors.length];
+            if (_sections.isNotEmpty)
+              ReorderableListView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                buildDefaultDragHandles: false,
+                itemCount: _sections.length,
+                onReorder: (oldIdx, newIdx) {
+                  setState(() {
+                    if (newIdx > oldIdx) newIdx -= 1;
+                    final s = _sections.removeAt(oldIdx);
+                    _sections.insert(newIdx, s);
+                  });
+                },
+                itemBuilder: (context, si) {
+                  final section = _sections[si];
+                  final colors = _sectionColors[si % _sectionColors.length];
 
-              return Padding(
-                padding: const EdgeInsets.only(bottom: 12),
-                child: Container(
+                  return Padding(
+                    key: ObjectKey(section),
+                    padding: const EdgeInsets.only(bottom: 12),
+                    child: Container(
                   decoration: BoxDecoration(
                     color: Theme.of(context).colorScheme.surface,
                     borderRadius: BorderRadius.circular(20),
@@ -684,6 +698,19 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
                                 ],
                               ),
                             ),
+                            ReorderableDragStartListener(
+                              index: si,
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 4,
+                                ),
+                                child: Icon(
+                                  Icons.drag_indicator,
+                                  size: 20,
+                                  color: Colors.grey.shade400,
+                                ),
+                              ),
+                            ),
                             IconButton(
                               onPressed: () => _removeSection(si),
                               icon: const Icon(Icons.close, size: 18),
@@ -698,72 +725,102 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
                         padding: const EdgeInsets.fromLTRB(16, 8, 8, 0),
                         child: Column(
                           children: [
-                            ...section.ingredients.asMap().entries.map((
-                              iEntry,
-                            ) {
-                              final ii = iEntry.key;
-                              final ing = iEntry.value;
-                              return Padding(
-                                padding: const EdgeInsets.only(bottom: 8),
-                                child: Row(
-                                  children: [
-                                    Expanded(
-                                      flex: 3,
-                                      child: Autocomplete<String>(
-                                        initialValue: TextEditingValue(
-                                          text: ing.nameController.text,
-                                        ),
-                                        optionsBuilder: (tev) {
-                                          if (tev.text.isEmpty) {
-                                            return const Iterable<String>.empty();
-                                          }
-                                          final q = tev.text.toLowerCase();
-                                          return _ingredientSuggestions.where(
-                                            (n) =>
-                                                n.toLowerCase().contains(q) &&
-                                                n.toLowerCase() != q,
-                                          ).take(5);
-                                        },
-                                        fieldViewBuilder:
-                                            (ctx, ctrl, fn, submit) {
-                                          // Подменяем наш controller на тот,
-                                          // которым владеет Autocomplete:
-                                          // его текст уйдёт в _save().
-                                          ing.nameController = ctrl;
-                                          return TextField(
-                                            controller: ctrl,
-                                            focusNode: fn,
-                                            decoration: const InputDecoration(
-                                              hintText: 'Ингредиент',
-                                              isDense: true,
-                                            ),
-                                          );
-                                        },
-                                      ),
-                                    ),
-                                    const SizedBox(width: 8),
-                                    Expanded(
-                                      flex: 2,
-                                      child: TextField(
-                                        controller: ing.amountController,
-                                        keyboardType: TextInputType.number,
-                                        decoration: const InputDecoration(
-                                          hintText: '0',
-                                          suffixText: 'г',
-                                          isDense: true,
+                            ReorderableListView.builder(
+                              shrinkWrap: true,
+                              physics: const NeverScrollableScrollPhysics(),
+                              buildDefaultDragHandles: false,
+                              itemCount: section.ingredients.length,
+                              onReorder: (oldIdx, newIdx) {
+                                setState(() {
+                                  if (newIdx > oldIdx) newIdx -= 1;
+                                  final i = section.ingredients
+                                      .removeAt(oldIdx);
+                                  section.ingredients.insert(newIdx, i);
+                                });
+                              },
+                              itemBuilder: (context, ii) {
+                                final ing = section.ingredients[ii];
+                                return Padding(
+                                  key: ObjectKey(ing),
+                                  padding: const EdgeInsets.only(bottom: 8),
+                                  child: Row(
+                                    children: [
+                                      ReorderableDragStartListener(
+                                        index: ii,
+                                        child: Padding(
+                                          padding: const EdgeInsets.only(
+                                            right: 4,
+                                          ),
+                                          child: Icon(
+                                            Icons.drag_indicator,
+                                            size: 18,
+                                            color: Colors.grey.shade400,
+                                          ),
                                         ),
                                       ),
-                                    ),
-                                    IconButton(
-                                      onPressed: () =>
-                                          _removeIngredient(si, ii),
-                                      icon: const Icon(Icons.close, size: 16),
-                                      color: Colors.grey.shade400,
-                                    ),
-                                  ],
-                                ),
-                              );
-                            }),
+                                      Expanded(
+                                        flex: 3,
+                                        child: Autocomplete<String>(
+                                          initialValue: TextEditingValue(
+                                            text: ing.nameController.text,
+                                          ),
+                                          optionsBuilder: (tev) {
+                                            if (tev.text.isEmpty) {
+                                              return const Iterable<String>.empty();
+                                            }
+                                            final q = tev.text.toLowerCase();
+                                            return _ingredientSuggestions
+                                                .where(
+                                                  (n) =>
+                                                      n
+                                                          .toLowerCase()
+                                                          .contains(q) &&
+                                                      n.toLowerCase() != q,
+                                                )
+                                                .take(5);
+                                          },
+                                          fieldViewBuilder:
+                                              (ctx, ctrl, fn, submit) {
+                                                ing.nameController = ctrl;
+                                                return TextField(
+                                                  controller: ctrl,
+                                                  focusNode: fn,
+                                                  decoration:
+                                                      const InputDecoration(
+                                                        hintText: 'Ингредиент',
+                                                        isDense: true,
+                                                      ),
+                                                );
+                                              },
+                                        ),
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Expanded(
+                                        flex: 2,
+                                        child: TextField(
+                                          controller: ing.amountController,
+                                          keyboardType: TextInputType.number,
+                                          decoration: const InputDecoration(
+                                            hintText: '0',
+                                            suffixText: 'г',
+                                            isDense: true,
+                                          ),
+                                        ),
+                                      ),
+                                      IconButton(
+                                        onPressed: () =>
+                                            _removeIngredient(si, ii),
+                                        icon: const Icon(
+                                          Icons.close,
+                                          size: 16,
+                                        ),
+                                        color: Colors.grey.shade400,
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              },
+                            ),
                             TextButton.icon(
                               onPressed: () => _addIngredient(si),
                               icon: Icon(Icons.add, size: 16, color: colors[0]),
@@ -805,7 +862,8 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
                   ),
                 ),
               );
-            }),
+            },
+          ),
             const SizedBox(height: 80),
           ],
         ),
