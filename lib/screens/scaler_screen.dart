@@ -887,10 +887,17 @@ class _ScalerScreenState extends State<ScalerScreen> {
               child: Row(
                 children: [
                   const SizedBox(width: 8),
-                  const Icon(
-                    Icons.height,
-                    size: 18,
-                    color: Color(0xFFE85D75),
+                  const SizedBox(
+                    width: 22,
+                    child: Text(
+                      'В',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700,
+                        color: Color(0xFFE85D75),
+                      ),
+                    ),
                   ),
                   Expanded(
                     child: Slider(
@@ -1261,8 +1268,6 @@ class _ScalerScreenState extends State<ScalerScreen> {
           const SizedBox(height: 4),
           Row(
             children: [
-              const Icon(Icons.height, size: 16, color: Colors.white70),
-              const SizedBox(width: 6),
               Text(
                 'Высота',
                 style: TextStyle(

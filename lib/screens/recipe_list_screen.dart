@@ -280,7 +280,13 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
             ],
           ),
           behavior: SnackBarBehavior.floating,
-          duration: const Duration(seconds: 4),
+          // Поднимаем над FAB «+ Рецепт» — иначе кнопки «Отменить»/✕
+          // попадают в зону FAB, тап перехватывается и undo пропадает.
+          // FAB ~56dp + 16dp нижний gap + ~16dp над FAB = ~88dp.
+          margin: const EdgeInsets.fromLTRB(16, 0, 16, 88),
+          // 6 сек — чтобы пользователь точно успел тапнуть «Отменить»
+          // (стандартные 4 сек короткие, особенно если только что отвлёкся).
+          duration: const Duration(seconds: 6),
         ),
       );
   }
@@ -368,7 +374,7 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
         onPressed: _addRecipe,
         icon: const Icon(Icons.add),
         label: const Text('Рецепт'),
-        backgroundColor: const Color(0xFF9C27B0),
+        backgroundColor: const Color(0xFFFF6B8A),
         foregroundColor: Colors.white,
       ),
     );
@@ -754,13 +760,29 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
                             ),
                             const SizedBox(width: 4),
                           ],
-                          Flexible(
+                          Expanded(
                             child: Text(
                               r.title,
                               style: const TextStyle(
                                 fontSize: 17,
                                 fontWeight: FontWeight.w600,
                               ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 4),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              '⌀ ${r.diameter.round()} см  •  ${r.sections.length} секц.  •  ${r.allIngredients.length} ингр.',
+                              style: TextStyle(
+                                color: Colors.grey.shade600,
+                                fontSize: 13,
+                              ),
+                              maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                             ),
                           ),
@@ -788,27 +810,22 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
                           ],
                           if (r.rating > 0) ...[
                             const SizedBox(width: 6),
-                            Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: List.generate(
-                                r.rating,
-                                (_) => const Icon(
-                                  Icons.star,
-                                  color: Color(0xFFE85D75),
-                                  size: 14,
-                                ),
+                            const Icon(
+                              Icons.star,
+                              color: Color(0xFFE85D75),
+                              size: 13,
+                            ),
+                            const SizedBox(width: 2),
+                            Text(
+                              '${r.rating}',
+                              style: const TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                                color: Color(0xFFE85D75),
                               ),
                             ),
                           ],
                         ],
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        '⌀ ${r.diameter.round()} см  •  ${r.sections.length} секц.  •  ${r.allIngredients.length} ингр.',
-                        style: TextStyle(
-                          color: Colors.grey.shade600,
-                          fontSize: 13,
-                        ),
                       ),
                       if (r.cookCount > 0) ...[
                         const SizedBox(height: 2),

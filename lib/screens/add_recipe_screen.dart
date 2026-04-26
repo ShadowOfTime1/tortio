@@ -33,6 +33,11 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
   int _rating = 0;
   final ScrollController _scrollController = ScrollController();
   bool get _isEditing => widget.existingRecipe != null;
+  // Грязный флаг для подтверждения «Несохранённые изменения. Выйти?» при back.
+  bool _isDirty = false;
+  void _markDirty() {
+    if (!_isDirty) _isDirty = true;
+  }
 
   /// Раскрываем «Дополнительно» при редактировании, если что-то заполнено.
   /// Для нового рецепта — всегда свёрнуто.
@@ -93,6 +98,46 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
         _additionalTiers.add(tierInput);
       }
     }
+    _attachDirtyListeners();
+  }
+
+  void _attachDirtyListeners() {
+    for (final c in [
+      _titleController,
+      _diameterController,
+      _heightController,
+      _weightController,
+      _notesController,
+    ]) {
+      c.addListener(_markDirty);
+    }
+    for (final s in _sections) {
+      _attachSectionListeners(s);
+    }
+    for (final t in _additionalTiers) {
+      _attachTierListeners(t);
+    }
+  }
+
+  void _attachSectionListeners(_SectionInput s) {
+    s.notesController.addListener(_markDirty);
+    for (final ing in s.ingredients) {
+      _attachIngredientListeners(ing);
+    }
+  }
+
+  void _attachIngredientListeners(_IngredientInput ing) {
+    ing.nameController.addListener(_markDirty);
+    ing.amountController.addListener(_markDirty);
+  }
+
+  void _attachTierListeners(_TierInput t) {
+    t.diameterController.addListener(_markDirty);
+    t.heightController.addListener(_markDirty);
+    t.labelController.addListener(_markDirty);
+    for (final s in t.sections) {
+      _attachSectionListeners(s);
+    }
   }
 
   _SectionInput _sectionToInput(RecipeSection s) {
@@ -136,7 +181,10 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
         customTypes: _customTypes,
         onSelect: (type) {
           Navigator.pop(ctx);
-          setState(() => target.add(_SectionInput(type: type)));
+          final s = _SectionInput(type: type);
+          _attachSectionListeners(s);
+          _markDirty();
+          setState(() => target.add(s));
         },
         onCreateCustom: () async {
           Navigator.pop(ctx);
@@ -145,9 +193,12 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
             final updated = [..._customTypes, created];
             await CustomTypesService.save(updated);
             if (mounted) {
+              final s = _SectionInput(type: created);
+              _attachSectionListeners(s);
+              _markDirty();
               setState(() {
                 _customTypes = updated;
-                target.add(_SectionInput(type: created));
+                target.add(s);
               });
             }
           }
@@ -271,14 +322,19 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
   }
 
   void _addIngredient(_SectionInput section) {
-    setState(() => section.ingredients.add(_IngredientInput()));
+    final ing = _IngredientInput();
+    _attachIngredientListeners(ing);
+    _markDirty();
+    setState(() => section.ingredients.add(ing));
   }
 
   void _removeIngredient(_SectionInput section, int ingIndex) {
+    _markDirty();
     setState(() => section.ingredients.removeAt(ingIndex));
   }
 
   void _removeSectionFrom(List<_SectionInput> list, _SectionInput section) {
+    _markDirty();
     setState(() => list.remove(section));
   }
 
@@ -296,10 +352,14 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
       prevH = parseNumber(prev.heightController.text) ?? 10;
     }
     final newD = (prevD - 4).clamp(10, 50);
+    final tier = _TierInput(
+      diameter: '${newD.round()}',
+      height: '${prevH.round()}',
+    );
+    _attachTierListeners(tier);
+    _markDirty();
     setState(() {
-      _additionalTiers.add(
-        _TierInput(diameter: '${newD.round()}', height: '${prevH.round()}'),
-      );
+      _additionalTiers.add(tier);
     });
     // Скроллим к новому ярусу после rebuild — иначе пользователь не увидит,
     // что ярус добавился (он внизу формы, ниже видимой области), и думает
@@ -315,6 +375,7 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
   }
 
   void _removeTier(_TierInput tier) {
+    _markDirty();
     setState(() => _additionalTiers.remove(tier));
   }
 
@@ -361,6 +422,7 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
       _tagInputController.clear();
       return;
     }
+    _markDirty();
     setState(() {
       _tags.addAll(newTags);
       _tagInputController.clear();
@@ -368,6 +430,7 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
   }
 
   void _removeTag(String tag) {
+    _markDirty();
     setState(() => _tags.remove(tag));
   }
 
@@ -456,6 +519,7 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
       lastCookedAt: existing?.lastCookedAt ?? 0,
       pinned: existing?.pinned ?? false,
     );
+    _isDirty = false; // успешное сохранение — back больше не должен пугать
     Navigator.of(context).pop(recipe);
   }
 
@@ -463,6 +527,7 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
     try {
       final path = await ImagePickerService.pickAndPersist(source: source);
       if (path != null && mounted) {
+        _markDirty();
         setState(() => _imagePath = path);
       }
     } catch (e) {
@@ -514,6 +579,7 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
                 ),
                 onTap: () {
                   Navigator.pop(ctx);
+                  _markDirty();
                   setState(() => _imagePath = '');
                 },
               ),
@@ -541,7 +607,8 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header: "Ярус N" + label + delete
+          // Header: бейдж "Ярус N" + крестик. Поле названия — отдельной строкой
+          // ниже, на всю ширину, иначе hint обрезается.
           Row(
             children: [
               Container(
@@ -564,22 +631,21 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
                   ),
                 ),
               ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: TextField(
-                  controller: tier.labelController,
-                  decoration: const InputDecoration(
-                    hintText: 'Название (опц): низ, верх...',
-                    isDense: true,
-                  ),
-                ),
-              ),
+              const Spacer(),
               IconButton(
                 tooltip: 'Удалить ярус',
                 icon: const Icon(Icons.close, color: Colors.red),
                 onPressed: () => _removeTier(tier),
               ),
             ],
+          ),
+          const SizedBox(height: 8),
+          TextField(
+            controller: tier.labelController,
+            decoration: const InputDecoration(
+              hintText: 'Название (опц): низ, середина, верх...',
+              isDense: true,
+            ),
           ),
           const SizedBox(height: 12),
           // Размеры
@@ -593,6 +659,7 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
                     labelText: 'Диаметр',
                     suffixText: 'см',
                     isDense: true,
+                    floatingLabelBehavior: FloatingLabelBehavior.always,
                   ),
                 ),
               ),
@@ -602,9 +669,10 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
                   controller: tier.heightController,
                   keyboardType: TextInputType.number,
                   decoration: const InputDecoration(
-                    labelText: 'Высота',
+                    labelText: 'Высота (опц.)',
                     suffixText: 'см',
                     isDense: true,
+                    floatingLabelBehavior: FloatingLabelBehavior.always,
                   ),
                 ),
               ),
@@ -685,6 +753,7 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
             buildDefaultDragHandles: false,
             itemCount: list.length,
             onReorder: (oldIdx, newIdx) {
+              _markDirty();
               setState(() {
                 if (newIdx > oldIdx) newIdx -= 1;
                 final s = list.removeAt(oldIdx);
@@ -789,6 +858,7 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
                               buildDefaultDragHandles: false,
                               itemCount: section.ingredients.length,
                               onReorder: (oldIdx, newIdx) {
+                                _markDirty();
                                 setState(() {
                                   if (newIdx > oldIdx) newIdx -= 1;
                                   final i = section.ingredients.removeAt(
@@ -818,7 +888,7 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
                                         ),
                                       ),
                                       Expanded(
-                                        flex: 3,
+                                        flex: 5,
                                         child: Autocomplete<String>(
                                           initialValue: TextEditingValue(
                                             text: ing.nameController.text,
@@ -857,7 +927,7 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
                                       ),
                                       const SizedBox(width: 8),
                                       Expanded(
-                                        flex: 2,
+                                        flex: 3,
                                         child: Row(
                                           children: [
                                             Expanded(
@@ -874,17 +944,26 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
                                             const SizedBox(width: 4),
                                             _UnitToggle(
                                               unit: ing.unit,
-                                              onChange: (u) =>
-                                                  setState(() => ing.unit = u),
+                                              onChange: (u) {
+                                                _markDirty();
+                                                setState(() => ing.unit = u);
+                                              },
                                             ),
                                           ],
                                         ),
                                       ),
-                                      IconButton(
-                                        onPressed: () =>
+                                      InkWell(
+                                        onTap: () =>
                                             _removeIngredient(section, ii),
-                                        icon: const Icon(Icons.close, size: 16),
-                                        color: Colors.grey.shade400,
+                                        borderRadius: BorderRadius.circular(14),
+                                        child: Padding(
+                                          padding: const EdgeInsets.all(6),
+                                          child: Icon(
+                                            Icons.close,
+                                            size: 16,
+                                            color: Colors.grey.shade400,
+                                          ),
+                                        ),
                                       ),
                                     ],
                                   ),
@@ -948,9 +1027,41 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
     );
   }
 
+  Future<bool> _confirmDiscard() async {
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Несохранённые изменения'),
+        content: const Text(
+          'Если вы выйдете сейчас — изменения потеряются. Выйти без сохранения?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Остаться'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            style: FilledButton.styleFrom(backgroundColor: Colors.red),
+            child: const Text('Выйти'),
+          ),
+        ],
+      ),
+    );
+    return ok == true;
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return PopScope(
+      canPop: !_isDirty,
+      onPopInvokedWithResult: (didPop, _) async {
+        if (didPop) return;
+        final navigator = Navigator.of(context);
+        final discard = await _confirmDiscard();
+        if (discard && mounted) navigator.pop();
+      },
+      child: Scaffold(
       appBar: AppBar(
         title: Text(_isEditing ? 'Редактировать' : 'Новый рецепт'),
         actions: [
@@ -1066,6 +1177,10 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
                           hintText: '20',
                           suffixText: 'см',
                           labelText: 'Диаметр',
+                          // always — иначе у пустого поля suffix «см»
+                          // схлопывается, поля Диаметр/Высота выглядят
+                          // непоследовательно.
+                          floatingLabelBehavior: FloatingLabelBehavior.always,
                         ),
                       ),
                     ),
@@ -1078,6 +1193,7 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
                           hintText: 'опц.',
                           suffixText: 'см',
                           labelText: 'Высота',
+                          floatingLabelBehavior: FloatingLabelBehavior.always,
                         ),
                       ),
                     ),
@@ -1154,9 +1270,12 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
                                 color: const Color(0xFFE85D75),
                                 size: 28,
                               ),
-                              onPressed: () => setState(() {
-                                _rating = (_rating == i + 1) ? 0 : i + 1;
-                              }),
+                              onPressed: () {
+                                _markDirty();
+                                setState(() {
+                                  _rating = (_rating == i + 1) ? 0 : i + 1;
+                                });
+                              },
                               padding: const EdgeInsets.symmetric(
                                 horizontal: 2,
                               ),
@@ -1166,7 +1285,10 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
                           }),
                           if (_rating > 0)
                             TextButton(
-                              onPressed: () => setState(() => _rating = 0),
+                              onPressed: () {
+                                _markDirty();
+                                setState(() => _rating = 0);
+                              },
                               child: const Text(
                                 'Снять',
                                 style: TextStyle(fontSize: 12),
@@ -1272,6 +1394,7 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
             ),
           ),
         ],
+      ),
       ),
     );
   }
@@ -1510,15 +1633,15 @@ class _UnitToggle extends StatelessWidget {
       onTap: () => onChange(unit == 'г' ? 'шт' : 'г'),
       borderRadius: BorderRadius.circular(8),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
         decoration: BoxDecoration(
           color: const Color(0xFFFF6B8A).withValues(alpha: 0.12),
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(6),
         ),
         child: Text(
           unit,
           style: const TextStyle(
-            fontSize: 12,
+            fontSize: 11,
             fontWeight: FontWeight.w600,
             color: Color(0xFFE85D75),
           ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 const _seed = Color(0xFFE85D75);
 
@@ -19,6 +20,14 @@ ThemeData buildLightTheme() {
       elevation: 0,
       backgroundColor: Colors.transparent,
       scrolledUnderElevation: 0,
+      // Тёмные иконки status bar на светлом фоне — иначе часы/wifi/батарея
+      // невидимы. AppBar по умолчанию ставит light, переопределяя глобальный
+      // AnnotatedRegion из main.dart.
+      systemOverlayStyle: SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: Brightness.dark,
+        statusBarBrightness: Brightness.light,
+      ),
     ),
     cardTheme: CardThemeData(
       elevation: 0,
@@ -63,6 +72,11 @@ ThemeData buildDarkTheme() {
       elevation: 0,
       backgroundColor: Colors.transparent,
       scrolledUnderElevation: 0,
+      systemOverlayStyle: SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: Brightness.light,
+        statusBarBrightness: Brightness.dark,
+      ),
     ),
     cardTheme: CardThemeData(
       elevation: 0,

@@ -680,6 +680,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
             onTap: _clearAll,
           ),
+          const SizedBox(height: 24),
+          const Divider(height: 1),
+          const SizedBox(height: 8),
 
           // === О приложении ===
           _groupHeader('О приложении'),
