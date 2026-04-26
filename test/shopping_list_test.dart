@@ -96,5 +96,24 @@ void main() {
       expect(amountOf(result, 'Яйца', unit: 'г'), 60);
       expect(amountOf(result, 'Яйца', unit: 'шт'), 2);
     });
+
+    test('двойные пробелы внутри имени схлопываются', () {
+      final result = aggregateIngredients([
+        section('A', ScaleType.volume, {'Сахар тростниковый': 100}),
+        section('B', ScaleType.volume, {'Сахар  тростниковый': 50}),
+      ]);
+      expect(result.length, 1);
+      expect(result.first.amount, 150);
+    });
+
+    test('точка/запятая в конце имени игнорируются', () {
+      final result = aggregateIngredients([
+        section('A', ScaleType.volume, {'Сахар.': 100}),
+        section('B', ScaleType.volume, {'Сахар': 50}),
+        section('C', ScaleType.volume, {'Сахар,': 25}),
+      ]);
+      expect(result.length, 1);
+      expect(result.first.amount, 175);
+    });
   });
 }
