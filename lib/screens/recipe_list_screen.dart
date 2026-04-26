@@ -244,20 +244,43 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
     setState(() => _recipes.removeAt(index));
     _saveRecipes();
 
-    ScaffoldMessenger.of(context)
+    final messenger = ScaffoldMessenger.of(context);
+    messenger
       ..clearSnackBars()
       ..showSnackBar(
         SnackBar(
-          content: Text('«${recipe.title}» удалён'),
+          // Кастомный content с двумя кнопками: «Отменить» и X. Стандартный
+          // `action:` берёт только одну кнопку, а пользователю нужен явный
+          // способ закрыть — у некоторых включён accessibility-таймаут,
+          // который растягивает duration SnackBar до минут.
+          content: Row(
+            children: [
+              Expanded(
+                child: Text(
+                  '«${recipe.title}» удалён',
+                  style: const TextStyle(color: Colors.white),
+                ),
+              ),
+              TextButton(
+                onPressed: () {
+                  messenger.hideCurrentSnackBar();
+                  setState(() => _recipes.insert(index, recipe));
+                  _saveRecipes();
+                },
+                style: TextButton.styleFrom(
+                  foregroundColor: const Color(0xFFFFB3C1),
+                ),
+                child: const Text('Отменить'),
+              ),
+              IconButton(
+                tooltip: 'Закрыть',
+                onPressed: messenger.hideCurrentSnackBar,
+                icon: const Icon(Icons.close, size: 18, color: Colors.white70),
+              ),
+            ],
+          ),
           behavior: SnackBarBehavior.floating,
           duration: const Duration(seconds: 4),
-          action: SnackBarAction(
-            label: 'Отменить',
-            onPressed: () {
-              setState(() => _recipes.insert(index, recipe));
-              _saveRecipes();
-            },
-          ),
         ),
       );
   }
