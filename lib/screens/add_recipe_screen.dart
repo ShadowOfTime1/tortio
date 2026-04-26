@@ -60,15 +60,15 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
     final r = widget.existingRecipe;
     _titleController = TextEditingController(text: r?.title ?? '');
     _diameterController = TextEditingController(
-      text: r != null ? '${r.diameter}' : '20',
+      text: r != null ? formatNumber(r.diameter) : '20',
     );
     _heightController = TextEditingController(
       // Высота опциональна. Если у рецепта высота 0 (или новый рецепт) —
       // оставляем поле пустым, пользователь решит сам.
-      text: r != null && r.height > 0 ? '${r.height}' : '',
+      text: r != null && r.height > 0 ? formatNumber(r.height) : '',
     );
     _weightController = TextEditingController(
-      text: r != null && r.weight > 0 ? '${r.weight}' : '',
+      text: r != null && r.weight > 0 ? formatNumber(r.weight) : '',
     );
     _notesController = TextEditingController(text: r?.notes ?? '');
     _tagInputController = TextEditingController();
@@ -83,8 +83,8 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
       }
       for (final tier in r.additionalTiers) {
         final tierInput = _TierInput(
-          diameter: '${tier.diameter}',
-          height: '${tier.height}',
+          diameter: formatNumber(tier.diameter),
+          height: tier.height > 0 ? formatNumber(tier.height) : '',
           label: tier.label,
         );
         for (final s in tier.sections) {
@@ -101,10 +101,10 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
       input.ingredients.add(
         _IngredientInput(
           name: ing.name,
-          // Для штук — целое число, для граммов — как было.
+          // Для штук — целое число, для граммов — без хвостового «.0».
           amount: ing.unit == 'шт'
               ? '${ing.amount.round()}'
-              : '${ing.amount}',
+              : formatNumber(ing.amount),
           unit: ing.unit,
         ),
       );
@@ -1036,12 +1036,27 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
                 ),
                 const SizedBox(height: 20),
 
-                const Text(
-                  'Размеры формы',
-                  style: TextStyle(fontWeight: FontWeight.w600),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.baseline,
+                  textBaseline: TextBaseline.alphabetic,
+                  children: [
+                    const Text(
+                      'Размеры формы',
+                      style: TextStyle(fontWeight: FontWeight.w600),
+                    ),
+                    const SizedBox(width: 6),
+                    Text(
+                      '(высота — опционально)',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey.shade500,
+                      ),
+                    ),
+                  ],
                 ),
                 const SizedBox(height: 8),
                 Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Expanded(
                       child: TextField(
@@ -1063,7 +1078,6 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
                           hintText: 'опц.',
                           suffixText: 'см',
                           labelText: 'Высота',
-                          helperText: 'необязательно',
                         ),
                       ),
                     ),
