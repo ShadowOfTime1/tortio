@@ -63,7 +63,9 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
       text: r != null ? '${r.diameter}' : '20',
     );
     _heightController = TextEditingController(
-      text: r != null ? '${r.height}' : '10',
+      // Высота опциональна. Если у рецепта высота 0 (или новый рецепт) —
+      // оставляем поле пустым, пользователь решит сам.
+      text: r != null && r.height > 0 ? '${r.height}' : '',
     );
     _weightController = TextEditingController(
       text: r != null && r.weight > 0 ? '${r.weight}' : '',
@@ -97,7 +99,14 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
     final input = _SectionInput(type: s.type, notes: s.notes);
     for (final ing in s.ingredients) {
       input.ingredients.add(
-        _IngredientInput(name: ing.name, amount: '${ing.amount}'),
+        _IngredientInput(
+          name: ing.name,
+          // Для штук — целое число, для граммов — как было.
+          amount: ing.unit == 'шт'
+              ? '${ing.amount.round()}'
+              : '${ing.amount}',
+          unit: ing.unit,
+        ),
       );
     }
     return input;
@@ -325,6 +334,7 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
                   name: ing.nameController.text.trim(),
                   amount: parseNumber(ing.amountController.text) ?? 0,
                   scaleType: s.type.scaleType,
+                  unit: ing.unit,
                 );
               })
               .toList();
@@ -371,10 +381,12 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
       _showError('Введите название');
       return;
     }
-    if (diameter <= 0 || height <= 0) {
-      _showError('Введите размеры формы');
+    if (diameter <= 0) {
+      _showError('Введите диаметр формы');
       return;
     }
+    // Высота теперь опциональна. Если 0 — скейлер сделает только по площади
+    // (объёмные секции масштабируются как area).
     if (_sections.isEmpty) {
       _showError('Добавьте хотя бы одну секцию');
       return;
@@ -397,10 +409,11 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
       final tierNumber = i + 2; // ярус 2, 3, ...
       final tierD = parseNumber(t.diameterController.text) ?? 0;
       final tierH = parseNumber(t.heightController.text) ?? 0;
-      if (tierD <= 0 || tierH <= 0) {
+      if (tierD <= 0) {
         droppedTierNumbers.add(tierNumber);
         continue;
       }
+      // Высота яруса опциональна.
       final tierSections = _buildCleanSections(t.sections);
       if (tierSections.isEmpty) {
         droppedTierNumbers.add(tierNumber);
@@ -848,10 +861,19 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
                                         child: TextField(
                                           controller: ing.amountController,
                                           keyboardType: TextInputType.number,
-                                          decoration: const InputDecoration(
+                                          decoration: InputDecoration(
                                             hintText: '0',
-                                            suffixText: 'г',
                                             isDense: true,
+                                            suffixIcon: _UnitToggle(
+                                              unit: ing.unit,
+                                              onChange: (u) =>
+                                                  setState(() => ing.unit = u),
+                                            ),
+                                            suffixIconConstraints:
+                                                const BoxConstraints(
+                                                  minWidth: 56,
+                                                  minHeight: 24,
+                                                ),
                                           ),
                                         ),
                                       ),
@@ -1035,9 +1057,10 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
                         controller: _heightController,
                         keyboardType: TextInputType.number,
                         decoration: const InputDecoration(
-                          hintText: '10',
+                          hintText: 'опц.',
                           suffixText: 'см',
                           labelText: 'Высота',
+                          helperText: 'необязательно',
                         ),
                       ),
                     ),
@@ -1439,7 +1462,8 @@ class _IngredientInput {
   // подменяет наш — так его текст автоматически попадает в save().
   TextEditingController nameController;
   final TextEditingController amountController;
-  _IngredientInput({String name = '', String amount = ''})
+  String unit; // 'г' или 'шт' — переключается тоглом в форме
+  _IngredientInput({String name = '', String amount = '', this.unit = 'г'})
     : nameController = TextEditingController(text: name),
       amountController = TextEditingController(text: amount);
 }
@@ -1455,4 +1479,35 @@ class _TierInput {
     : diameterController = TextEditingController(text: diameter),
       heightController = TextEditingController(text: height),
       labelController = TextEditingController(text: label);
+}
+
+/// Маленький свитчер «г / шт» в углу поля количества ингредиента.
+class _UnitToggle extends StatelessWidget {
+  final String unit;
+  final ValueChanged<String> onChange;
+  const _UnitToggle({required this.unit, required this.onChange});
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: () => onChange(unit == 'г' ? 'шт' : 'г'),
+      borderRadius: BorderRadius.circular(8),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        margin: const EdgeInsets.only(right: 4),
+        decoration: BoxDecoration(
+          color: const Color(0xFFFF6B8A).withValues(alpha: 0.12),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Text(
+          unit,
+          style: const TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+            color: Color(0xFFE85D75),
+          ),
+        ),
+      ),
+    );
+  }
 }

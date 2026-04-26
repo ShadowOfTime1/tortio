@@ -21,3 +21,11 @@ String formatGrams(double g) {
   }
   return '${g.round()} г';
 }
+
+/// Форматирует количество ингредиента с учётом единицы:
+/// - 'г' → formatGrams (граммы / килограммы с запятой)
+/// - 'шт' → целое число штук, штучный round (1.5 → 2, 0.4 → 0)
+String formatAmount(double amount, String unit) {
+  if (unit == 'шт') return '${amount.round()} шт';
+  return formatGrams(amount);
+}

@@ -130,6 +130,7 @@ class StorageService {
               'name': i.name,
               'amount': i.amount,
               'scaleType': i.scaleType.index,
+              if (i.unit != 'г') 'unit': i.unit,
             },
           )
           .toList(),
@@ -151,6 +152,7 @@ class StorageService {
           name: i['name'],
           amount: (i['amount'] as num).toDouble(),
           scaleType: ScaleType.values[i['scaleType'] as int],
+          unit: (i['unit'] as String?) ?? 'г',
         );
       }).toList(),
     );

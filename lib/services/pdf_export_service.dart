@@ -83,7 +83,9 @@ class PdfExportService {
         pw.Text(
           recipe.isMultiTier
               ? '${recipe.allTiers.length} ярус(ов) • итого ≈ ${formatGrams(totalWeight)}'
-              : '⌀ ${recipe.diameter.round()}×${recipe.height.round()} см • итого ≈ ${formatGrams(totalWeight)}',
+              : recipe.height > 0
+                  ? '⌀ ${recipe.diameter.round()}×${recipe.height.round()} см • итого ≈ ${formatGrams(totalWeight)}'
+                  : '⌀ ${recipe.diameter.round()} см • итого ≈ ${formatGrams(totalWeight)}',
           style: const pw.TextStyle(fontSize: 12, color: PdfColors.grey700),
         ),
         if (recipe.tags.isNotEmpty) ...[
@@ -164,7 +166,9 @@ class PdfExportService {
             borderRadius: const pw.BorderRadius.all(pw.Radius.circular(4)),
           ),
           child: pw.Text(
-            '$label  •  ⌀ ${tier.diameter.round()}×${tier.height.round()} см  •  ${formatGrams(tierWeight)}',
+            tier.height > 0
+                ? '$label  •  ⌀ ${tier.diameter.round()}×${tier.height.round()} см  •  ${formatGrams(tierWeight)}'
+                : '$label  •  ⌀ ${tier.diameter.round()} см  •  ${formatGrams(tierWeight)}',
             style: pw.TextStyle(
               fontSize: 12,
               fontWeight: pw.FontWeight.bold,
@@ -224,7 +228,7 @@ class PdfExportService {
                         vertical: 4,
                       ),
                       child: pw.Text(
-                        '${formatNumber(ing.amount)} г',
+                        formatAmount(ing.amount, ing.unit),
                         textAlign: pw.TextAlign.right,
                         style: pw.TextStyle(
                           fontSize: 11,

@@ -31,26 +31,33 @@ class ScalerScreen extends StatefulWidget {
 class _ScalerScreenState extends State<ScalerScreen> {
   final _scaler = RecipeScaler();
   late double _newDiameter;
+  late double _newHeight; // 0 если высота не указана у рецепта
   late double _newWeight;
   ScaleMode _mode = ScaleMode.size;
   List<int> _quickDiameters = AppSettings.defaultQuickDiameters;
-  // Для multi-tier: новые диаметры по каждому ярусу. В единственном index'е
-  // [0] для tier 1 — но мы там пользуемся `_newDiameter` через single-tier UI.
+  // Для multi-tier: новые диаметры/высоты по каждому ярусу.
   late List<double> _newTierDiameters;
+  late List<double> _newTierHeights;
 
   late final TextEditingController _diameterController;
+  late final TextEditingController _heightController;
   late final TextEditingController _weightController;
 
   @override
   void initState() {
     super.initState();
     _newDiameter = widget.recipe.diameter;
+    _newHeight = widget.recipe.height; // 0 если не задана
     _newWeight = widget.recipe.weight > 0 ? widget.recipe.weight : 1000;
     _diameterController = TextEditingController(
       text: '${_newDiameter.round()}',
     );
+    _heightController = TextEditingController(
+      text: _newHeight > 0 ? '${_newHeight.round()}' : '',
+    );
     _weightController = TextEditingController(text: '${_newWeight.round()}');
     _newTierDiameters = widget.recipe.allTiers.map((t) => t.diameter).toList();
+    _newTierHeights = widget.recipe.allTiers.map((t) => t.height).toList();
     _loadSettings();
   }
 
@@ -79,6 +86,20 @@ class _ScalerScreenState extends State<ScalerScreen> {
     final parsed = parseNumber(v);
     if (parsed != null && parsed >= 1 && parsed <= 50) {
       setState(() => _newDiameter = parsed);
+    }
+  }
+
+  void _onHeightSlider(double v) {
+    setState(() {
+      _newHeight = v;
+      _heightController.text = '${v.round()}';
+    });
+  }
+
+  void _onHeightInput(String v) {
+    final parsed = parseNumber(v);
+    if (parsed != null && parsed >= 1 && parsed <= 30) {
+      setState(() => _newHeight = parsed);
     }
   }
 
@@ -121,9 +142,12 @@ class _ScalerScreenState extends State<ScalerScreen> {
     } else {
       scaled = _scaler.scaleBySize(
         sections: recipe.sections,
+        // Если высота не указана (0) — используем 1 как обычный, тогда
+        // height-ratio будет 1 и volume-секции масштабируются как area.
         originalDiameter: recipe.diameter,
-        originalHeight: recipe.height,
+        originalHeight: recipe.height > 0 ? recipe.height : 1,
         newDiameter: _newDiameter,
+        newHeight: _newHeight > 0 ? _newHeight : null,
       );
       ratio = _newDiameter / recipe.diameter;
     }
@@ -436,7 +460,7 @@ class _ScalerScreenState extends State<ScalerScreen> {
                                 ),
                                 if (changed)
                                   Text(
-                                    '${formatNumber(orig.amount)}  →  ',
+                                    '${formatAmount(orig.amount, orig.unit)}  →  ',
                                     style: TextStyle(
                                       fontSize: 12,
                                       color: Colors.grey.shade400,
@@ -444,7 +468,7 @@ class _ScalerScreenState extends State<ScalerScreen> {
                                     ),
                                   ),
                                 Text(
-                                  '${formatNumber(curr.amount)} г',
+                                  formatAmount(curr.amount, curr.unit),
                                   style: TextStyle(
                                     fontSize: 16,
                                     fontWeight: FontWeight.w700,
@@ -574,17 +598,19 @@ class _ScalerScreenState extends State<ScalerScreen> {
     final recipe = widget.recipe;
     final tiers = recipe.allTiers;
 
-    // Скейлим каждый ярус по новому диаметру (height не меняется).
+    // Скейлим каждый ярус по новому диаметру и (если задана) высоте.
     final scaledByTier = <List<RecipeSection>>[];
     final ratiosByTier = <double>[];
     for (var i = 0; i < tiers.length; i++) {
       final tier = tiers[i];
       final newD = _newTierDiameters[i];
+      final newH = _newTierHeights[i];
       final scaled = _scaler.scaleBySize(
         sections: tier.sections,
         originalDiameter: tier.diameter,
-        originalHeight: tier.height,
+        originalHeight: tier.height > 0 ? tier.height : 1,
         newDiameter: newD,
+        newHeight: newH > 0 ? newH : null,
       );
       scaledByTier.add(scaled);
       ratiosByTier.add(newD / tier.diameter);
@@ -811,8 +837,9 @@ class _ScalerScreenState extends State<ScalerScreen> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Text(
-              'Оригинал: ⌀ ${tier.diameter.round()}×${tier.height.round()} см • '
-              '${_formatWeight(tierWeight)}',
+              tier.height > 0
+                  ? 'Оригинал: ⌀ ${tier.diameter.round()}×${tier.height.round()} см • ${_formatWeight(tierWeight)}'
+                  : 'Оригинал: ⌀ ${tier.diameter.round()} см • ${_formatWeight(tierWeight)}',
               style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
             ),
           ),
@@ -853,6 +880,44 @@ class _ScalerScreenState extends State<ScalerScreen> {
               ],
             ),
           ),
+          // Слайдер высоты (если у яруса задана)
+          if (tier.height > 0)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              child: Row(
+                children: [
+                  const SizedBox(width: 8),
+                  const Icon(
+                    Icons.height,
+                    size: 18,
+                    color: Color(0xFFE85D75),
+                  ),
+                  Expanded(
+                    child: Slider(
+                      value: _newTierHeights[idx].clamp(2, 30),
+                      min: 2,
+                      max: 30,
+                      divisions: 28,
+                      label: '${_newTierHeights[idx].round()} см',
+                      activeColor: const Color(0xFFFF6B8A),
+                      onChanged: (v) {
+                        setState(() => _newTierHeights[idx] = v);
+                      },
+                    ),
+                  ),
+                  SizedBox(
+                    width: 50,
+                    child: Text(
+                      '${_newTierHeights[idx].round()} см',
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w700,
+                        color: Color(0xFFE85D75),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
           const Divider(height: 1),
           // Секции яруса
           ...scaled.asMap().entries.map((e) {
@@ -898,7 +963,7 @@ class _ScalerScreenState extends State<ScalerScreen> {
                           ),
                           if (changed)
                             Text(
-                              '${formatNumber(orig.amount)} → ',
+                              '${formatAmount(orig.amount, orig.unit)} → ',
                               style: TextStyle(
                                 fontSize: 11,
                                 color: Colors.grey.shade400,
@@ -906,7 +971,7 @@ class _ScalerScreenState extends State<ScalerScreen> {
                               ),
                             ),
                           Text(
-                            '${formatNumber(curr.amount)} г',
+                            formatAmount(curr.amount, curr.unit),
                             style: TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.w700,
@@ -943,9 +1008,12 @@ class _ScalerScreenState extends State<ScalerScreen> {
   }
 
   void _showShoppingList(List<RecipeSection> scaled) {
-    final items = aggregateIngredients(scaled).entries.toList()
-      ..sort((a, b) => b.value.compareTo(a.value));
-    final total = items.fold<double>(0, (sum, e) => sum + e.value);
+    final items = aggregateIngredients(scaled)
+      ..sort((a, b) => b.amount.compareTo(a.amount));
+    // Считаем итог только по граммам (штуки нельзя сложить с граммами).
+    final totalG = items
+        .where((e) => e.unit == 'г')
+        .fold<double>(0, (sum, e) => sum + e.amount);
 
     showModalBottomSheet(
       context: context,
@@ -971,10 +1039,14 @@ class _ScalerScreenState extends State<ScalerScreen> {
                     style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                   ),
                   const Spacer(),
-                  Text(
-                    'итого ${_formatWeight(total)}',
-                    style: TextStyle(fontSize: 13, color: Colors.grey.shade600),
-                  ),
+                  if (totalG > 0)
+                    Text(
+                      'итого ${_formatWeight(totalG)}',
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: Colors.grey.shade600,
+                      ),
+                    ),
                 ],
               ),
               const SizedBox(height: 12),
@@ -1001,12 +1073,12 @@ class _ScalerScreenState extends State<ScalerScreen> {
                           children: [
                             Expanded(
                               child: Text(
-                                e.key,
+                                e.name,
                                 style: const TextStyle(fontSize: 15),
                               ),
                             ),
                             Text(
-                              _formatWeight(e.value),
+                              formatAmount(e.amount, e.unit),
                               style: const TextStyle(
                                 fontSize: 15,
                                 fontWeight: FontWeight.w700,
@@ -1032,7 +1104,7 @@ class _ScalerScreenState extends State<ScalerScreen> {
 
     final dimensions = <String>[
       '⌀ ${recipe.diameter.round()} см',
-      'высота ${recipe.height.round()} см',
+      if (recipe.height > 0) 'высота ${recipe.height.round()} см',
     ];
     final totalWeight = scaled
         .expand((s) => s.ingredients)
@@ -1048,7 +1120,7 @@ class _ScalerScreenState extends State<ScalerScreen> {
       if (ingredients.isEmpty) continue;
       buf.writeln('${section.type.icon} ${section.type.name}');
       for (final ing in ingredients) {
-        buf.writeln('  • ${ing.name} — ${_formatWeight(ing.amount)}');
+        buf.writeln('  • ${ing.name} — ${formatAmount(ing.amount, ing.unit)}');
       }
       buf.writeln();
     }
@@ -1161,7 +1233,9 @@ class _ScalerScreenState extends State<ScalerScreen> {
         ),
         const SizedBox(height: 10),
         Text(
-          'Оригинал: ⌀ ${recipe.diameter.round()} см',
+          recipe.height > 0
+              ? 'Оригинал: ⌀ ${recipe.diameter.round()}×${recipe.height.round()} см'
+              : 'Оригинал: ⌀ ${recipe.diameter.round()} см',
           style: TextStyle(
             color: Colors.white.withValues(alpha: 0.8),
             fontSize: 13,
@@ -1183,6 +1257,76 @@ class _ScalerScreenState extends State<ScalerScreen> {
             onChanged: _onDiameterSlider,
           ),
         ),
+        if (recipe.height > 0) ...[
+          const SizedBox(height: 4),
+          Row(
+            children: [
+              const Icon(Icons.height, size: 16, color: Colors.white70),
+              const SizedBox(width: 6),
+              Text(
+                'Высота',
+                style: TextStyle(
+                  color: Colors.white.withValues(alpha: 0.85),
+                  fontSize: 12,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Container(
+                width: 70,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 8,
+                  vertical: 2,
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.2),
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(
+                    color: Colors.white.withValues(alpha: 0.3),
+                  ),
+                ),
+                child: TextField(
+                  controller: _heightController,
+                  keyboardType: TextInputType.number,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFFFF6B8A),
+                  ),
+                  decoration: const InputDecoration(
+                    border: InputBorder.none,
+                    suffixText: 'см',
+                    suffixStyle: TextStyle(
+                      fontSize: 11,
+                      color: Colors.white70,
+                    ),
+                    isDense: true,
+                    contentPadding: EdgeInsets.zero,
+                  ),
+                  onChanged: _onHeightInput,
+                ),
+              ),
+              Expanded(
+                child: SliderTheme(
+                  data: SliderThemeData(
+                    activeTrackColor: Colors.white,
+                    inactiveTrackColor: Colors.white.withValues(alpha: 0.3),
+                    thumbColor: Colors.white,
+                    overlayColor: Colors.white.withValues(alpha: 0.2),
+                  ),
+                  child: Slider(
+                    value: _newHeight.clamp(2, 30),
+                    min: 2,
+                    max: 30,
+                    divisions: 28,
+                    label: '${_newHeight.round()} см',
+                    onChanged: _onHeightSlider,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
         const SizedBox(height: 4),
         // Быстрые кнопки для частых диаметров форм (настраиваются в Settings)
         Wrap(

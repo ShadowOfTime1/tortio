@@ -35,11 +35,14 @@ class Ingredient {
   final String name;
   final double amount;
   final ScaleType scaleType;
+  // 'г' (по умолчанию) или 'шт'. Для штук отображение и round'инг другие.
+  final String unit;
 
   Ingredient({
     required this.name,
     required this.amount,
     required this.scaleType,
+    this.unit = 'г',
   });
 
   Ingredient copyWith({double? amount}) {
@@ -47,6 +50,7 @@ class Ingredient {
       name: name,
       amount: amount ?? this.amount,
       scaleType: scaleType,
+      unit: unit,
     );
   }
 }
