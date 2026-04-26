@@ -858,23 +858,26 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
                                       const SizedBox(width: 8),
                                       Expanded(
                                         flex: 2,
-                                        child: TextField(
-                                          controller: ing.amountController,
-                                          keyboardType: TextInputType.number,
-                                          decoration: InputDecoration(
-                                            hintText: '0',
-                                            isDense: true,
-                                            suffixIcon: _UnitToggle(
+                                        child: Row(
+                                          children: [
+                                            Expanded(
+                                              child: TextField(
+                                                controller: ing.amountController,
+                                                keyboardType:
+                                                    TextInputType.number,
+                                                decoration: const InputDecoration(
+                                                  hintText: '0',
+                                                  isDense: true,
+                                                ),
+                                              ),
+                                            ),
+                                            const SizedBox(width: 4),
+                                            _UnitToggle(
                                               unit: ing.unit,
                                               onChange: (u) =>
                                                   setState(() => ing.unit = u),
                                             ),
-                                            suffixIconConstraints:
-                                                const BoxConstraints(
-                                                  minWidth: 56,
-                                                  minHeight: 24,
-                                                ),
-                                          ),
+                                          ],
                                         ),
                                       ),
                                       IconButton(
@@ -1494,7 +1497,6 @@ class _UnitToggle extends StatelessWidget {
       borderRadius: BorderRadius.circular(8),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-        margin: const EdgeInsets.only(right: 4),
         decoration: BoxDecoration(
           color: const Color(0xFFFF6B8A).withValues(alpha: 0.12),
           borderRadius: BorderRadius.circular(8),
