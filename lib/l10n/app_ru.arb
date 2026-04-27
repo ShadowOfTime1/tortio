@@ -190,9 +190,52 @@
   },
   "form_photo_pick": "Из галереи",
   "form_photo_camera": "Сделать фото",
-  "form_photo_remove": "Убрать",
-  "form_photo_error_camera": "Не удалось открыть камеру. Проверьте разрешения.",
-  "form_photo_error_gallery": "Не удалось открыть галерею.",
+  "form_photo_remove": "Убрать фото",
+  "form_photo_error_camera": "Не удалось открыть камеру: {err}",
+  "@form_photo_error_camera": {
+    "placeholders": { "err": { "type": "String" } }
+  },
+  "form_photo_error_gallery": "Не удалось выбрать фото: {err}",
+  "@form_photo_error_gallery": {
+    "placeholders": { "err": { "type": "String" } }
+  },
+  "form_photo_label": "Фото",
+  "form_field_title_hint": "Например: Шоколадный торт",
+  "form_field_diameter_short": "Диаметр",
+  "form_field_height_optional": "опц.",
+  "form_field_weight_optional_label": "Вес (необязательно)",
+  "form_field_notes_label": "Заметки / шаги (необязательно)",
+  "form_field_notes_hint": "Например: испечь при 170°C 35 мин. Бисквит — за день до сборки.",
+  "form_field_rating_label": "Оценка",
+  "form_field_tags_label_optional": "Теги (необязательно)",
+  "form_field_tags_input_hint": "шоколадный, без глютена",
+  "form_field_tags_helper": "Введи тег и нажми Enter (или через запятую)",
+  "form_section_extras_subtitle": "вес, заметки, оценка, теги",
+  "form_tier_composition": "Состав яруса",
+  "form_section_button": "Секция",
+  "form_section_empty_title": "Добавьте секцию",
+  "form_section_empty_hint": "Бисквит, крем, начинка...",
+  "form_section_note_hint": "Заметка к секции (опционально)",
+  "form_section_scale_label": "пересчёт: {label}",
+  "@form_section_scale_label": {
+    "placeholders": { "label": { "type": "String" } }
+  },
+  "form_ingredient_hint": "Ингредиент",
+  "form_add_tier_first": "Добавить ещё один ярус",
+  "form_add_tier_more": "Ещё один ярус",
+  "form_error_no_ingredients": "Заполните хотя бы один ингредиент с весом > 0",
+  "form_error_tiers_skipped_full": "Ярус(ы) {numbers} пропущены: нет ингредиентов с весом > 0 или не заполнены размеры",
+  "@form_error_tiers_skipped_full": {
+    "placeholders": { "numbers": { "type": "String" } }
+  },
+  "form_section_picker_title": "Выберите секцию",
+  "form_section_picker_create_custom": "Создать свой тип",
+  "form_section_picker_custom_group": "Свои типы",
+  "form_section_picker_cat_base": "Основа",
+  "form_section_picker_cat_creams": "Кремы и начинки",
+  "form_section_picker_cat_coatings": "Покрытия и пропитки",
+  "form_section_picker_cat_decor": "Декор",
+  "form_custom_type_actions_title": "Кастомный тип секции",
 
   "scaler_title_size": "По размеру",
   "scaler_title_weight": "По весу",
@@ -214,6 +257,94 @@
   "scaler_share_pdf": "Сохранить как PDF",
   "scaler_shopping_list": "Список покупок",
   "scaler_shopping_list_title": "Список покупок",
+  "scaler_shopping_list_total": "итого {grams}",
+  "@scaler_shopping_list_total": {
+    "placeholders": { "grams": { "type": "String" } }
+  },
+  "scaler_shopping_list_empty": "Ингредиентов нет",
+  "scaler_total_label": "пересчёт",
+  "scaler_export_tooltip": "Экспорт",
+  "scaler_export_share_text": "Поделиться текстом",
+  "scaler_export_save_pdf": "Сохранить как PDF",
+  "scaler_pdf_error": "Ошибка PDF: {err}",
+  "@scaler_pdf_error": {
+    "placeholders": { "err": { "type": "String" } }
+  },
+  "scaler_cooked_first": "Записал! Первый раз 🎂",
+  "scaler_original_size": "Оригинал: {sym} {d} {cm}",
+  "@scaler_original_size": {
+    "placeholders": {
+      "sym": { "type": "String" },
+      "d": { "type": "int" },
+      "cm": { "type": "String" }
+    }
+  },
+  "scaler_original_size_with_height": "Оригинал: {sym} {d}×{h} {cm}",
+  "@scaler_original_size_with_height": {
+    "placeholders": {
+      "sym": { "type": "String" },
+      "d": { "type": "int" },
+      "h": { "type": "int" },
+      "cm": { "type": "String" }
+    }
+  },
+  "scaler_original_size_with_height_weight": "Оригинал: {sym} {d}×{h} {cm} • {weight}",
+  "@scaler_original_size_with_height_weight": {
+    "placeholders": {
+      "sym": { "type": "String" },
+      "d": { "type": "int" },
+      "h": { "type": "int" },
+      "cm": { "type": "String" },
+      "weight": { "type": "String" }
+    }
+  },
+  "scaler_original_size_weight": "Оригинал: {sym} {d} {cm} • {weight}",
+  "@scaler_original_size_weight": {
+    "placeholders": {
+      "sym": { "type": "String" },
+      "d": { "type": "int" },
+      "cm": { "type": "String" },
+      "weight": { "type": "String" }
+    }
+  },
+  "scaler_original_weight": "Оригинал: {weight}",
+  "@scaler_original_weight": {
+    "placeholders": { "weight": { "type": "String" } }
+  },
+  "scaler_tier_label_named": "Ярус {n}: {label}",
+  "@scaler_tier_label_named": {
+    "placeholders": {
+      "n": { "type": "int" },
+      "label": { "type": "String" }
+    }
+  },
+  "scaler_tier_label": "Ярус {n}",
+  "@scaler_tier_label": {
+    "placeholders": { "n": { "type": "int" } }
+  },
+  "scaler_tiers_total": "{tiers} ярус(ов) • итого {weight}",
+  "@scaler_tiers_total": {
+    "placeholders": {
+      "tiers": { "type": "int" },
+      "weight": { "type": "String" }
+    }
+  },
+  "share_diameter": "{sym} {d} {cm}",
+  "@share_diameter": {
+    "placeholders": {
+      "sym": { "type": "String" },
+      "d": { "type": "int" },
+      "cm": { "type": "String" }
+    }
+  },
+  "share_height": "высота {h} {cm}",
+  "@share_height": {
+    "placeholders": {
+      "h": { "type": "int" },
+      "cm": { "type": "String" }
+    }
+  },
+  "share_notes_header": "📝 Заметки",
 
   "settings_title": "Настройки",
   "settings_group_appearance": "Внешний вид",
@@ -236,6 +367,84 @@
 
   "settings_quick_diameters": "Быстрые диаметры",
   "settings_quick_diameters_hint": "Через запятую, см",
+  "settings_quick_diameters_helper": "Эти числа показываются как кнопки-чипы под слайдером диаметра на экране пересчёта.",
+  "settings_quick_diameters_saved": "Быстрые диаметры сохранены",
+  "settings_default_mode_size_title": "По умолчанию: По размеру",
+  "settings_default_mode_weight_title": "По умолчанию: По весу",
+  "settings_default_mode_weight_subtitle": "Только если у рецепта указан вес",
+  "settings_auto_update_subtitle": "При запуске приложение спрашивает GitHub о новой версии",
+  "settings_export_done": "Экспортировано",
+  "settings_export_empty": "Нечего экспортировать — список пустой",
+  "settings_export_error": "Ошибка экспорта: {err}",
+  "@settings_export_error": {
+    "placeholders": { "err": { "type": "String" } }
+  },
+  "settings_import_nothing": "Ничего не импортировано",
+  "settings_import_count": "Импортировано: {count}",
+  "@settings_import_count": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "settings_import_error_with": "Ошибка импорта: {err}",
+  "@settings_import_error_with": {
+    "placeholders": { "err": { "type": "String" } }
+  },
+  "settings_open_link_failed": "Не удалось открыть ссылку",
+  "settings_no_custom_types": "Нет кастомных типов",
+  "settings_custom_type_scale_label": "масштаб: {name}",
+  "@settings_custom_type_scale_label": {
+    "placeholders": { "name": { "type": "String" } }
+  },
+  "settings_reset_dialog_title": "Сбросить настройки?",
+  "settings_reset_dialog_body": "Тема, сортировка, авто-проверка обновлений, default-режим пересчёта и быстрые диаметры вернутся к дефолтам. Рецепты и кастомные типы секций НЕ затронутся.",
+  "settings_reset_action": "Сбросить",
+  "settings_reset_subtitle": "Тема, сортировка, авто-обновление, default режим, быстрые диаметры. Рецепты не трогаются.",
+  "settings_delete_all_action": "Удалить всё",
+  "settings_delete_all_full_body": "Все рецепты, кастомные типы секций и snapshot импорта будут удалены безвозвратно. Резервная копия предыдущего сохранения тоже исчезнет. Уверен?",
+  "settings_check_update_done": "Установлена последняя версия",
+  "settings_check_update_available": "Доступна v{version}. Открой приложение заново — появится баннер с обновлением.",
+  "@settings_check_update_available": {
+    "placeholders": { "version": { "type": "String" } }
+  },
+  "settings_show_welcome_again_subtitle": "Краткий тур по приложению",
+  "settings_version_label": "Версия",
+  "settings_license_label": "Лицензия",
+  "settings_license_value": "MIT",
+  "settings_github_source": "Исходники на GitHub",
+  "settings_show_stats": "Показать статистику",
+  "settings_import_undo_action": "Откатить последний импорт",
+  "settings_save_action": "Сохранить",
+  "stats_title": "Статистика",
+  "stats_recipes": "Рецептов",
+  "stats_ingredients": "Ингредиентов всего",
+  "stats_total_recipe_weights": "Сумма весов рецептов",
+  "stats_top_ingredients_header": "ТОП ИНГРЕДИЕНТОВ",
+  "stats_top_tags_header": "ТОП ТЕГОВ",
+  "custom_type_dialog_new": "Новый тип секции",
+  "custom_type_dialog_edit": "Изменить тип секции",
+  "custom_type_field_name": "Название",
+  "custom_type_field_name_hint": "Например, Маршмеллоу",
+  "custom_type_field_icon": "Иконка (эмодзи)",
+  "custom_type_field_scale_label": "Как масштабировать",
+  "custom_type_scale_volume": "По объёму (d² × h)",
+  "custom_type_scale_area": "По площади (d²)",
+  "custom_type_scale_fixed": "Фикс (не меняется)",
+  "custom_type_create": "Создать",
+  "custom_type_used_dialog_title": "Удалить тип «{name}»?",
+  "@custom_type_used_dialog_title": {
+    "placeholders": { "name": { "type": "String" } }
+  },
+  "custom_type_used_dialog_body": "Этот тип используется в {count} рецепте(ах):\n\n{names}\n\nУже сохранённые секции продолжат работать как есть. Но добавить новые секции этого типа будет нельзя.",
+  "@custom_type_used_dialog_body": {
+    "placeholders": {
+      "count": { "type": "int" },
+      "names": { "type": "String" }
+    }
+  },
+  "custom_type_more": "... и ещё {n}",
+  "@custom_type_more": {
+    "placeholders": { "n": { "type": "int" } }
+  },
+  "custom_type_force_delete": "Всё равно удалить",
   "settings_default_scale_mode": "Режим пересчёта по умолчанию",
   "settings_default_scale_mode_size": "По размеру",
   "settings_default_scale_mode_weight": "По весу",

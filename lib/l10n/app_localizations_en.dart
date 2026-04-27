@@ -430,14 +430,116 @@ class AppLocalizationsEn extends AppLocalizations {
   String get form_photo_camera => 'Take photo';
 
   @override
-  String get form_photo_remove => 'Remove';
+  String get form_photo_remove => 'Remove photo';
 
   @override
-  String get form_photo_error_camera =>
-      'Couldn\'t open camera. Check permissions.';
+  String form_photo_error_camera(String err) {
+    return 'Couldn\'t open camera: $err';
+  }
 
   @override
-  String get form_photo_error_gallery => 'Couldn\'t open gallery.';
+  String form_photo_error_gallery(String err) {
+    return 'Couldn\'t pick photo: $err';
+  }
+
+  @override
+  String get form_photo_label => 'Photo';
+
+  @override
+  String get form_field_title_hint => 'e.g. Chocolate cake';
+
+  @override
+  String get form_field_diameter_short => 'Diameter';
+
+  @override
+  String get form_field_height_optional => 'opt.';
+
+  @override
+  String get form_field_weight_optional_label => 'Weight (optional)';
+
+  @override
+  String get form_field_notes_label => 'Notes / steps (optional)';
+
+  @override
+  String get form_field_notes_hint =>
+      'e.g. bake at 170°C for 35 min. Sponge — day before assembly.';
+
+  @override
+  String get form_field_rating_label => 'Rating';
+
+  @override
+  String get form_field_tags_label_optional => 'Tags (optional)';
+
+  @override
+  String get form_field_tags_input_hint => 'chocolate, gluten-free';
+
+  @override
+  String get form_field_tags_helper => 'Enter a tag and press Enter (or comma)';
+
+  @override
+  String get form_section_extras_subtitle => 'weight, notes, rating, tags';
+
+  @override
+  String get form_tier_composition => 'Tier composition';
+
+  @override
+  String get form_section_button => 'Section';
+
+  @override
+  String get form_section_empty_title => 'Add a section';
+
+  @override
+  String get form_section_empty_hint => 'Sponge, cream, filling...';
+
+  @override
+  String get form_section_note_hint => 'Section note (optional)';
+
+  @override
+  String form_section_scale_label(String label) {
+    return 'scale: $label';
+  }
+
+  @override
+  String get form_ingredient_hint => 'Ingredient';
+
+  @override
+  String get form_add_tier_first => 'Add another tier';
+
+  @override
+  String get form_add_tier_more => 'One more tier';
+
+  @override
+  String get form_error_no_ingredients =>
+      'Fill at least one ingredient with weight > 0';
+
+  @override
+  String form_error_tiers_skipped_full(String numbers) {
+    return 'Tier(s) $numbers skipped: no ingredients with weight > 0 or sizes not filled';
+  }
+
+  @override
+  String get form_section_picker_title => 'Choose section';
+
+  @override
+  String get form_section_picker_create_custom => 'Create custom type';
+
+  @override
+  String get form_section_picker_custom_group => 'Custom types';
+
+  @override
+  String get form_section_picker_cat_base => 'Base';
+
+  @override
+  String get form_section_picker_cat_creams => 'Creams & fillings';
+
+  @override
+  String get form_section_picker_cat_coatings => 'Coatings & syrups';
+
+  @override
+  String get form_section_picker_cat_decor => 'Decor';
+
+  @override
+  String get form_custom_type_actions_title => 'Custom section type';
 
   @override
   String get scaler_title_size => 'By size';
@@ -484,6 +586,98 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get scaler_shopping_list_title => 'Shopping list';
+
+  @override
+  String scaler_shopping_list_total(String grams) {
+    return 'total $grams';
+  }
+
+  @override
+  String get scaler_shopping_list_empty => 'No ingredients';
+
+  @override
+  String get scaler_total_label => 'rescaled';
+
+  @override
+  String get scaler_export_tooltip => 'Export';
+
+  @override
+  String get scaler_export_share_text => 'Share as text';
+
+  @override
+  String get scaler_export_save_pdf => 'Save as PDF';
+
+  @override
+  String scaler_pdf_error(String err) {
+    return 'PDF error: $err';
+  }
+
+  @override
+  String get scaler_cooked_first => 'Logged! First time 🎂';
+
+  @override
+  String scaler_original_size(String sym, int d, String cm) {
+    return 'Original: $sym $d $cm';
+  }
+
+  @override
+  String scaler_original_size_with_height(String sym, int d, int h, String cm) {
+    return 'Original: $sym $d×$h $cm';
+  }
+
+  @override
+  String scaler_original_size_with_height_weight(
+    String sym,
+    int d,
+    int h,
+    String cm,
+    String weight,
+  ) {
+    return 'Original: $sym $d×$h $cm • $weight';
+  }
+
+  @override
+  String scaler_original_size_weight(
+    String sym,
+    int d,
+    String cm,
+    String weight,
+  ) {
+    return 'Original: $sym $d $cm • $weight';
+  }
+
+  @override
+  String scaler_original_weight(String weight) {
+    return 'Original: $weight';
+  }
+
+  @override
+  String scaler_tier_label_named(int n, String label) {
+    return 'Tier $n: $label';
+  }
+
+  @override
+  String scaler_tier_label(int n) {
+    return 'Tier $n';
+  }
+
+  @override
+  String scaler_tiers_total(int tiers, String weight) {
+    return '$tiers tier(s) • total $weight';
+  }
+
+  @override
+  String share_diameter(String sym, int d, String cm) {
+    return '$sym $d $cm';
+  }
+
+  @override
+  String share_height(int h, String cm) {
+    return 'height $h $cm';
+  }
+
+  @override
+  String get share_notes_header => '📝 Notes';
 
   @override
   String get settings_title => 'Settings';
@@ -538,6 +732,181 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settings_quick_diameters_hint => 'Comma-separated, cm';
+
+  @override
+  String get settings_quick_diameters_helper =>
+      'These numbers appear as chip buttons under the diameter slider on the scaler screen.';
+
+  @override
+  String get settings_quick_diameters_saved => 'Quick diameters saved';
+
+  @override
+  String get settings_default_mode_size_title => 'Default: by size';
+
+  @override
+  String get settings_default_mode_weight_title => 'Default: by weight';
+
+  @override
+  String get settings_default_mode_weight_subtitle =>
+      'Only if the recipe has weight set';
+
+  @override
+  String get settings_auto_update_subtitle =>
+      'On launch, the app asks GitHub for a new version';
+
+  @override
+  String get settings_export_done => 'Exported';
+
+  @override
+  String get settings_export_empty => 'Nothing to export — list is empty';
+
+  @override
+  String settings_export_error(String err) {
+    return 'Export error: $err';
+  }
+
+  @override
+  String get settings_import_nothing => 'Nothing imported';
+
+  @override
+  String settings_import_count(int count) {
+    return 'Imported: $count';
+  }
+
+  @override
+  String settings_import_error_with(String err) {
+    return 'Import error: $err';
+  }
+
+  @override
+  String get settings_open_link_failed => 'Couldn\'t open link';
+
+  @override
+  String get settings_no_custom_types => 'No custom types';
+
+  @override
+  String settings_custom_type_scale_label(String name) {
+    return 'scale: $name';
+  }
+
+  @override
+  String get settings_reset_dialog_title => 'Reset settings?';
+
+  @override
+  String get settings_reset_dialog_body =>
+      'Theme, sort order, auto-update check, default scale mode and quick diameters will return to defaults. Recipes and custom section types will NOT be touched.';
+
+  @override
+  String get settings_reset_action => 'Reset';
+
+  @override
+  String get settings_reset_subtitle =>
+      'Theme, sort, auto-update, default mode, quick diameters. Recipes are kept.';
+
+  @override
+  String get settings_delete_all_action => 'Delete everything';
+
+  @override
+  String get settings_delete_all_full_body =>
+      'All recipes, custom section types and import snapshot will be deleted permanently. The previous backup will also disappear. Sure?';
+
+  @override
+  String get settings_check_update_done => 'You\'re on the latest version';
+
+  @override
+  String settings_check_update_available(String version) {
+    return 'v$version is available. Reopen the app — the update banner will show up.';
+  }
+
+  @override
+  String get settings_show_welcome_again_subtitle => 'Quick app tour';
+
+  @override
+  String get settings_version_label => 'Version';
+
+  @override
+  String get settings_license_label => 'License';
+
+  @override
+  String get settings_license_value => 'MIT';
+
+  @override
+  String get settings_github_source => 'Source on GitHub';
+
+  @override
+  String get settings_show_stats => 'Show stats';
+
+  @override
+  String get settings_import_undo_action => 'Undo last import';
+
+  @override
+  String get settings_save_action => 'Save';
+
+  @override
+  String get stats_title => 'Statistics';
+
+  @override
+  String get stats_recipes => 'Recipes';
+
+  @override
+  String get stats_ingredients => 'Total ingredients';
+
+  @override
+  String get stats_total_recipe_weights => 'Sum of recipe weights';
+
+  @override
+  String get stats_top_ingredients_header => 'TOP INGREDIENTS';
+
+  @override
+  String get stats_top_tags_header => 'TOP TAGS';
+
+  @override
+  String get custom_type_dialog_new => 'New section type';
+
+  @override
+  String get custom_type_dialog_edit => 'Edit section type';
+
+  @override
+  String get custom_type_field_name => 'Name';
+
+  @override
+  String get custom_type_field_name_hint => 'e.g. Marshmallow';
+
+  @override
+  String get custom_type_field_icon => 'Icon (emoji)';
+
+  @override
+  String get custom_type_field_scale_label => 'How to scale';
+
+  @override
+  String get custom_type_scale_volume => 'By volume (d² × h)';
+
+  @override
+  String get custom_type_scale_area => 'By area (d²)';
+
+  @override
+  String get custom_type_scale_fixed => 'Fixed (no change)';
+
+  @override
+  String get custom_type_create => 'Create';
+
+  @override
+  String custom_type_used_dialog_title(String name) {
+    return 'Delete type «$name»?';
+  }
+
+  @override
+  String custom_type_used_dialog_body(int count, String names) {
+    return 'This type is used in $count recipe(s):\n\n$names\n\nExisting sections will keep working as is. But you won\'t be able to add new sections of this type.';
+  }
+
+  @override
+  String custom_type_more(int n) {
+    return '... and $n more';
+  }
+
+  @override
+  String get custom_type_force_delete => 'Delete anyway';
 
   @override
   String get settings_default_scale_mode => 'Default scale mode';

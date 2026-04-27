@@ -254,11 +254,15 @@ class _ScalerScreenState extends State<ScalerScreen> {
                         child: Row(
                           children: [
                             _modeTab(
-                              'По размеру',
+                              AppLocalizations.of(context).scaler_title_size,
                               Icons.straighten,
                               ScaleMode.size,
                             ),
-                            _modeTab('По весу', Icons.scale, ScaleMode.weight),
+                            _modeTab(
+                              AppLocalizations.of(context).scaler_title_weight,
+                              Icons.scale,
+                              ScaleMode.weight,
+                            ),
                           ],
                         ),
                       ),
@@ -303,7 +307,7 @@ class _ScalerScreenState extends State<ScalerScreen> {
                     ),
                     const SizedBox(width: 8),
                     Text(
-                      'пересчёт',
+                      AppLocalizations.of(context).scaler_total_label,
                       style: TextStyle(
                         color: Colors.grey.shade500,
                         fontSize: 13,
@@ -321,7 +325,9 @@ class _ScalerScreenState extends State<ScalerScreen> {
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Text(
-                      'итого ≈ ${_formatWeight(totalWeight)}',
+                      AppLocalizations.of(
+                        context,
+                      ).scaler_total_weight(_formatWeight(totalWeight)),
                       style: const TextStyle(
                         color: Color(0xFFE85D75),
                         fontWeight: FontWeight.w600,
@@ -465,7 +471,7 @@ class _ScalerScreenState extends State<ScalerScreen> {
                                 ),
                                 if (changed)
                                   Text(
-                                    '${formatAmount(orig.amount, orig.unit)}  →  ',
+                                    '${_formatAmount(orig.amount, orig.unit)}  →  ',
                                     style: TextStyle(
                                       fontSize: 12,
                                       color: Colors.grey.shade400,
@@ -473,7 +479,7 @@ class _ScalerScreenState extends State<ScalerScreen> {
                                     ),
                                   ),
                                 Text(
-                                  formatAmount(curr.amount, curr.unit),
+                                  _formatAmount(curr.amount, curr.unit),
                                   style: TextStyle(
                                     fontSize: 16,
                                     fontWeight: FontWeight.w700,
@@ -516,16 +522,36 @@ class _ScalerScreenState extends State<ScalerScreen> {
     );
   }
 
-  // Делегируем форматирование в utils.formatGrams — там ещё запятая для RU.
-  String _formatWeight(double g) => formatGrams(g);
+  // Делегируем форматирование в utils.formatGrams, прокидывая локализованные
+  // единицы — иначе при English-локали всё равно покажутся 'г' / 'кг'.
+  String _formatWeight(double g) {
+    final l = AppLocalizations.of(context);
+    return formatGrams(
+      g,
+      gramsUnit: l.unit_grams_short,
+      kilogramsUnit: l.unit_kilograms_short,
+    );
+  }
+
+  String _formatAmount(double amount, String unit) {
+    final l = AppLocalizations.of(context);
+    return formatAmount(
+      amount,
+      unit,
+      gramsUnit: l.unit_grams_short,
+      kilogramsUnit: l.unit_kilograms_short,
+      piecesUnit: l.unit_pieces_short,
+    );
+  }
 
   Widget _buildExportMenu(
     Recipe recipe,
     List<List<RecipeSection>> scaledByTier,
     List<RecipeSection> flatScaled,
   ) {
+    final l = AppLocalizations.of(context);
     return PopupMenuButton<String>(
-      tooltip: 'Экспорт',
+      tooltip: l.scaler_export_tooltip,
       icon: const Icon(Icons.ios_share, color: Colors.white),
       onSelected: (action) {
         switch (action) {
@@ -535,12 +561,12 @@ class _ScalerScreenState extends State<ScalerScreen> {
             _exportPdf(recipe, scaledByTier);
         }
       },
-      itemBuilder: (_) => const [
+      itemBuilder: (_) => [
         PopupMenuItem(
           value: 'share',
           child: ListTile(
-            leading: Icon(Icons.share_outlined),
-            title: Text('Поделиться текстом'),
+            leading: const Icon(Icons.share_outlined),
+            title: Text(l.scaler_export_share_text),
             dense: true,
             contentPadding: EdgeInsets.zero,
           ),
@@ -548,8 +574,8 @@ class _ScalerScreenState extends State<ScalerScreen> {
         PopupMenuItem(
           value: 'pdf',
           child: ListTile(
-            leading: Icon(Icons.picture_as_pdf_outlined),
-            title: Text('Сохранить как PDF'),
+            leading: const Icon(Icons.picture_as_pdf_outlined),
+            title: Text(l.scaler_export_save_pdf),
             dense: true,
             contentPadding: EdgeInsets.zero,
           ),
@@ -562,14 +588,15 @@ class _ScalerScreenState extends State<ScalerScreen> {
     final updated = recipe.markCooked();
     widget.onRecipeUpdated?.call(updated);
     HapticFeedback.lightImpact();
+    final l = AppLocalizations.of(context);
     ScaffoldMessenger.of(context)
       ..clearSnackBars()
       ..showSnackBar(
         SnackBar(
           content: Text(
             updated.cookCount == 1
-                ? 'Записал! Первый раз 🎂'
-                : 'Записал! Готовите ${updated.cookCount}-й раз',
+                ? l.scaler_cooked_first
+                : l.scaler_cooked_today(updated.cookCount),
           ),
           behavior: SnackBarBehavior.floating,
           backgroundColor: const Color(0xFFE85D75),
@@ -589,9 +616,13 @@ class _ScalerScreenState extends State<ScalerScreen> {
       );
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Ошибка PDF: $e')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            AppLocalizations.of(context).scaler_pdf_error(e.toString()),
+          ),
+        ),
+      );
     }
   }
 
@@ -686,7 +717,9 @@ class _ScalerScreenState extends State<ScalerScreen> {
                           ),
                         ),
                         IconButton(
-                          tooltip: 'Список покупок',
+                          tooltip: AppLocalizations.of(
+                            context,
+                          ).scaler_shopping_list,
                           onPressed: () => _showShoppingList(flatScaled),
                           icon: const Icon(
                             Icons.shopping_basket_outlined,
@@ -694,7 +727,9 @@ class _ScalerScreenState extends State<ScalerScreen> {
                           ),
                         ),
                         IconButton(
-                          tooltip: 'Я приготовил',
+                          tooltip: AppLocalizations.of(
+                            context,
+                          ).scaler_cooked_button,
                           onPressed: () => _markCooked(recipe),
                           icon: const Icon(
                             Icons.check_circle_outline,
@@ -707,7 +742,10 @@ class _ScalerScreenState extends State<ScalerScreen> {
                     Padding(
                       padding: const EdgeInsets.fromLTRB(20, 4, 20, 0),
                       child: Text(
-                        '${tiers.length} ярус(ов) • итого ≈ ${_formatWeight(totalWeight)}',
+                        AppLocalizations.of(context).scaler_tiers_total(
+                          tiers.length,
+                          _formatWeight(totalWeight),
+                        ),
                         style: const TextStyle(
                           color: Colors.white,
                           fontSize: 13,
@@ -785,9 +823,10 @@ class _ScalerScreenState extends State<ScalerScreen> {
     final tierWeight = scaled
         .expand((s) => s.ingredients)
         .fold<double>(0, (sum, i) => sum + i.amount);
+    final l = AppLocalizations.of(context);
     final label = tier.label.isNotEmpty
-        ? 'Ярус ${idx + 1}: ${tier.label}'
-        : 'Ярус ${idx + 1}';
+        ? l.scaler_tier_label_named(idx + 1, tier.label)
+        : l.scaler_tier_label(idx + 1);
 
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
@@ -843,8 +882,19 @@ class _ScalerScreenState extends State<ScalerScreen> {
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Text(
               tier.height > 0
-                  ? 'Оригинал: ⌀ ${tier.diameter.round()}×${tier.height.round()} см • ${_formatWeight(tierWeight)}'
-                  : 'Оригинал: ⌀ ${tier.diameter.round()} см • ${_formatWeight(tierWeight)}',
+                  ? l.scaler_original_size_with_height_weight(
+                      l.unit_diameter_symbol,
+                      tier.diameter.round(),
+                      tier.height.round(),
+                      l.unit_centimeters_short,
+                      _formatWeight(tierWeight),
+                    )
+                  : l.scaler_original_size_weight(
+                      l.unit_diameter_symbol,
+                      tier.diameter.round(),
+                      l.unit_centimeters_short,
+                      _formatWeight(tierWeight),
+                    ),
               style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
             ),
           ),
@@ -865,7 +915,7 @@ class _ScalerScreenState extends State<ScalerScreen> {
                     min: 10,
                     max: 50,
                     divisions: 40,
-                    label: '${_newTierDiameters[idx].round()} см',
+                    label: '${_newTierDiameters[idx].round()} ${l.unit_centimeters_short}',
                     activeColor: const Color(0xFFFF6B8A),
                     onChanged: (v) {
                       setState(() => _newTierDiameters[idx] = v);
@@ -875,7 +925,7 @@ class _ScalerScreenState extends State<ScalerScreen> {
                 SizedBox(
                   width: 50,
                   child: Text(
-                    '${_newTierDiameters[idx].round()} см',
+                    '${_newTierDiameters[idx].round()} ${l.unit_centimeters_short}',
                     style: const TextStyle(
                       fontWeight: FontWeight.w700,
                       color: Color(0xFFE85D75),
@@ -892,12 +942,12 @@ class _ScalerScreenState extends State<ScalerScreen> {
               child: Row(
                 children: [
                   const SizedBox(width: 8),
-                  const SizedBox(
+                  SizedBox(
                     width: 22,
                     child: Text(
-                      'В',
+                      l.scaler_height_label_short,
                       textAlign: TextAlign.center,
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.w700,
                         color: Color(0xFFE85D75),
@@ -910,7 +960,7 @@ class _ScalerScreenState extends State<ScalerScreen> {
                       min: 2,
                       max: 30,
                       divisions: 28,
-                      label: '${_newTierHeights[idx].round()} см',
+                      label: '${_newTierHeights[idx].round()} ${l.unit_centimeters_short}',
                       activeColor: const Color(0xFFFF6B8A),
                       onChanged: (v) {
                         setState(() => _newTierHeights[idx] = v);
@@ -920,7 +970,7 @@ class _ScalerScreenState extends State<ScalerScreen> {
                   SizedBox(
                     width: 50,
                     child: Text(
-                      '${_newTierHeights[idx].round()} см',
+                      '${_newTierHeights[idx].round()} ${l.unit_centimeters_short}',
                       style: const TextStyle(
                         fontWeight: FontWeight.w700,
                         color: Color(0xFFE85D75),
@@ -975,7 +1025,7 @@ class _ScalerScreenState extends State<ScalerScreen> {
                           ),
                           if (changed)
                             Text(
-                              '${formatAmount(orig.amount, orig.unit)} → ',
+                              '${_formatAmount(orig.amount, orig.unit)} → ',
                               style: TextStyle(
                                 fontSize: 11,
                                 color: Colors.grey.shade400,
@@ -983,7 +1033,7 @@ class _ScalerScreenState extends State<ScalerScreen> {
                               ),
                             ),
                           Text(
-                            formatAmount(curr.amount, curr.unit),
+                            _formatAmount(curr.amount, curr.unit),
                             style: TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.w700,
@@ -1020,6 +1070,7 @@ class _ScalerScreenState extends State<ScalerScreen> {
   }
 
   void _showShoppingList(List<RecipeSection> scaled) {
+    final l = AppLocalizations.of(context);
     final items = aggregateIngredients(scaled)
       ..sort((a, b) => b.amount.compareTo(a.amount));
     // Считаем итог только по граммам (штуки нельзя сложить с граммами).
@@ -1046,14 +1097,17 @@ class _ScalerScreenState extends State<ScalerScreen> {
                     color: Color(0xFFE85D75),
                   ),
                   const SizedBox(width: 8),
-                  const Text(
-                    'Список покупок',
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  Text(
+                    l.scaler_shopping_list_title,
+                    style: const TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   const Spacer(),
                   if (totalG > 0)
                     Text(
-                      'итого ${_formatWeight(totalG)}',
+                      l.scaler_shopping_list_total(_formatWeight(totalG)),
                       style: TextStyle(
                         fontSize: 13,
                         color: Colors.grey.shade600,
@@ -1063,11 +1117,11 @@ class _ScalerScreenState extends State<ScalerScreen> {
               ),
               const SizedBox(height: 12),
               if (items.isEmpty)
-                const Padding(
-                  padding: EdgeInsets.symmetric(vertical: 24),
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 24),
                   child: Text(
-                    'Ингредиентов нет',
-                    style: TextStyle(color: Colors.grey),
+                    l.scaler_shopping_list_empty,
+                    style: const TextStyle(color: Colors.grey),
                   ),
                 )
               else
@@ -1090,7 +1144,7 @@ class _ScalerScreenState extends State<ScalerScreen> {
                               ),
                             ),
                             Text(
-                              formatAmount(e.amount, e.unit),
+                              _formatAmount(e.amount, e.unit),
                               style: const TextStyle(
                                 fontSize: 15,
                                 fontWeight: FontWeight.w700,
@@ -1231,10 +1285,15 @@ class _ScalerScreenState extends State<ScalerScreen> {
                   fontWeight: FontWeight.bold,
                   color: Color(0xFFFF6B8A),
                 ),
-                decoration: const InputDecoration(
+                decoration: InputDecoration(
                   border: InputBorder.none,
-                  suffixText: 'см',
-                  suffixStyle: TextStyle(fontSize: 14, color: Colors.white70),
+                  suffixText: AppLocalizations.of(
+                    context,
+                  ).unit_centimeters_short,
+                  suffixStyle: const TextStyle(
+                    fontSize: 14,
+                    color: Colors.white70,
+                  ),
                   isDense: true,
                   contentPadding: EdgeInsets.zero,
                 ),
@@ -1244,14 +1303,28 @@ class _ScalerScreenState extends State<ScalerScreen> {
           ],
         ),
         const SizedBox(height: 10),
-        Text(
-          recipe.height > 0
-              ? 'Оригинал: ⌀ ${recipe.diameter.round()}×${recipe.height.round()} см'
-              : 'Оригинал: ⌀ ${recipe.diameter.round()} см',
-          style: TextStyle(
-            color: Colors.white.withValues(alpha: 0.8),
-            fontSize: 13,
-          ),
+        Builder(
+          builder: (context) {
+            final l = AppLocalizations.of(context);
+            return Text(
+              recipe.height > 0
+                  ? l.scaler_original_size_with_height(
+                      l.unit_diameter_symbol,
+                      recipe.diameter.round(),
+                      recipe.height.round(),
+                      l.unit_centimeters_short,
+                    )
+                  : l.scaler_original_size(
+                      l.unit_diameter_symbol,
+                      recipe.diameter.round(),
+                      l.unit_centimeters_short,
+                    ),
+              style: TextStyle(
+                color: Colors.white.withValues(alpha: 0.8),
+                fontSize: 13,
+              ),
+            );
+          },
         ),
         SliderTheme(
           data: SliderThemeData(
@@ -1265,7 +1338,7 @@ class _ScalerScreenState extends State<ScalerScreen> {
             min: 10,
             max: 50,
             divisions: 40,
-            label: '${_newDiameter.round()} см',
+            label: '${_newDiameter.round()} ${AppLocalizations.of(context).unit_centimeters_short}',
             onChanged: _onDiameterSlider,
           ),
         ),
@@ -1274,7 +1347,7 @@ class _ScalerScreenState extends State<ScalerScreen> {
           Row(
             children: [
               Text(
-                'Высота',
+                AppLocalizations.of(context).scaler_height_label_full,
                 style: TextStyle(
                   color: Colors.white.withValues(alpha: 0.85),
                   fontSize: 12,
@@ -1303,10 +1376,12 @@ class _ScalerScreenState extends State<ScalerScreen> {
                     fontWeight: FontWeight.bold,
                     color: Color(0xFFFF6B8A),
                   ),
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
                     border: InputBorder.none,
-                    suffixText: 'см',
-                    suffixStyle: TextStyle(
+                    suffixText: AppLocalizations.of(
+                      context,
+                    ).unit_centimeters_short,
+                    suffixStyle: const TextStyle(
                       fontSize: 11,
                       color: Colors.white70,
                     ),
@@ -1329,7 +1404,7 @@ class _ScalerScreenState extends State<ScalerScreen> {
                     min: 2,
                     max: 30,
                     divisions: 28,
-                    label: '${_newHeight.round()} см',
+                    label: '${_newHeight.round()} ${AppLocalizations.of(context).unit_centimeters_short}',
                     onChanged: _onHeightSlider,
                   ),
                 ),
@@ -1417,10 +1492,13 @@ class _ScalerScreenState extends State<ScalerScreen> {
                   fontWeight: FontWeight.bold,
                   color: Color(0xFFFF6B8A),
                 ),
-                decoration: const InputDecoration(
+                decoration: InputDecoration(
                   border: InputBorder.none,
-                  suffixText: 'г',
-                  suffixStyle: TextStyle(fontSize: 14, color: Colors.white70),
+                  suffixText: AppLocalizations.of(context).unit_grams_short,
+                  suffixStyle: const TextStyle(
+                    fontSize: 14,
+                    color: Colors.white70,
+                  ),
                   isDense: true,
                   contentPadding: EdgeInsets.zero,
                 ),
@@ -1431,7 +1509,9 @@ class _ScalerScreenState extends State<ScalerScreen> {
         ),
         const SizedBox(height: 10),
         Text(
-          'Оригинал: ${formatGrams(recipe.weight)}',
+          AppLocalizations.of(
+            context,
+          ).scaler_original_weight(_formatWeight(recipe.weight)),
           style: TextStyle(
             color: Colors.white.withValues(alpha: 0.8),
             fontSize: 13,
@@ -1449,7 +1529,7 @@ class _ScalerScreenState extends State<ScalerScreen> {
             min: 100,
             max: 20000,
             divisions: 199,
-            label: formatGrams(_newWeight),
+            label: _formatWeight(_newWeight),
             onChanged: _onWeightSlider,
           ),
         ),

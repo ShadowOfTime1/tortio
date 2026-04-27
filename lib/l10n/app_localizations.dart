@@ -785,20 +785,206 @@ abstract class AppLocalizations {
   /// No description provided for @form_photo_remove.
   ///
   /// In ru, this message translates to:
-  /// **'Убрать'**
+  /// **'Убрать фото'**
   String get form_photo_remove;
 
   /// No description provided for @form_photo_error_camera.
   ///
   /// In ru, this message translates to:
-  /// **'Не удалось открыть камеру. Проверьте разрешения.'**
-  String get form_photo_error_camera;
+  /// **'Не удалось открыть камеру: {err}'**
+  String form_photo_error_camera(String err);
 
   /// No description provided for @form_photo_error_gallery.
   ///
   /// In ru, this message translates to:
-  /// **'Не удалось открыть галерею.'**
-  String get form_photo_error_gallery;
+  /// **'Не удалось выбрать фото: {err}'**
+  String form_photo_error_gallery(String err);
+
+  /// No description provided for @form_photo_label.
+  ///
+  /// In ru, this message translates to:
+  /// **'Фото'**
+  String get form_photo_label;
+
+  /// No description provided for @form_field_title_hint.
+  ///
+  /// In ru, this message translates to:
+  /// **'Например: Шоколадный торт'**
+  String get form_field_title_hint;
+
+  /// No description provided for @form_field_diameter_short.
+  ///
+  /// In ru, this message translates to:
+  /// **'Диаметр'**
+  String get form_field_diameter_short;
+
+  /// No description provided for @form_field_height_optional.
+  ///
+  /// In ru, this message translates to:
+  /// **'опц.'**
+  String get form_field_height_optional;
+
+  /// No description provided for @form_field_weight_optional_label.
+  ///
+  /// In ru, this message translates to:
+  /// **'Вес (необязательно)'**
+  String get form_field_weight_optional_label;
+
+  /// No description provided for @form_field_notes_label.
+  ///
+  /// In ru, this message translates to:
+  /// **'Заметки / шаги (необязательно)'**
+  String get form_field_notes_label;
+
+  /// No description provided for @form_field_notes_hint.
+  ///
+  /// In ru, this message translates to:
+  /// **'Например: испечь при 170°C 35 мин. Бисквит — за день до сборки.'**
+  String get form_field_notes_hint;
+
+  /// No description provided for @form_field_rating_label.
+  ///
+  /// In ru, this message translates to:
+  /// **'Оценка'**
+  String get form_field_rating_label;
+
+  /// No description provided for @form_field_tags_label_optional.
+  ///
+  /// In ru, this message translates to:
+  /// **'Теги (необязательно)'**
+  String get form_field_tags_label_optional;
+
+  /// No description provided for @form_field_tags_input_hint.
+  ///
+  /// In ru, this message translates to:
+  /// **'шоколадный, без глютена'**
+  String get form_field_tags_input_hint;
+
+  /// No description provided for @form_field_tags_helper.
+  ///
+  /// In ru, this message translates to:
+  /// **'Введи тег и нажми Enter (или через запятую)'**
+  String get form_field_tags_helper;
+
+  /// No description provided for @form_section_extras_subtitle.
+  ///
+  /// In ru, this message translates to:
+  /// **'вес, заметки, оценка, теги'**
+  String get form_section_extras_subtitle;
+
+  /// No description provided for @form_tier_composition.
+  ///
+  /// In ru, this message translates to:
+  /// **'Состав яруса'**
+  String get form_tier_composition;
+
+  /// No description provided for @form_section_button.
+  ///
+  /// In ru, this message translates to:
+  /// **'Секция'**
+  String get form_section_button;
+
+  /// No description provided for @form_section_empty_title.
+  ///
+  /// In ru, this message translates to:
+  /// **'Добавьте секцию'**
+  String get form_section_empty_title;
+
+  /// No description provided for @form_section_empty_hint.
+  ///
+  /// In ru, this message translates to:
+  /// **'Бисквит, крем, начинка...'**
+  String get form_section_empty_hint;
+
+  /// No description provided for @form_section_note_hint.
+  ///
+  /// In ru, this message translates to:
+  /// **'Заметка к секции (опционально)'**
+  String get form_section_note_hint;
+
+  /// No description provided for @form_section_scale_label.
+  ///
+  /// In ru, this message translates to:
+  /// **'пересчёт: {label}'**
+  String form_section_scale_label(String label);
+
+  /// No description provided for @form_ingredient_hint.
+  ///
+  /// In ru, this message translates to:
+  /// **'Ингредиент'**
+  String get form_ingredient_hint;
+
+  /// No description provided for @form_add_tier_first.
+  ///
+  /// In ru, this message translates to:
+  /// **'Добавить ещё один ярус'**
+  String get form_add_tier_first;
+
+  /// No description provided for @form_add_tier_more.
+  ///
+  /// In ru, this message translates to:
+  /// **'Ещё один ярус'**
+  String get form_add_tier_more;
+
+  /// No description provided for @form_error_no_ingredients.
+  ///
+  /// In ru, this message translates to:
+  /// **'Заполните хотя бы один ингредиент с весом > 0'**
+  String get form_error_no_ingredients;
+
+  /// No description provided for @form_error_tiers_skipped_full.
+  ///
+  /// In ru, this message translates to:
+  /// **'Ярус(ы) {numbers} пропущены: нет ингредиентов с весом > 0 или не заполнены размеры'**
+  String form_error_tiers_skipped_full(String numbers);
+
+  /// No description provided for @form_section_picker_title.
+  ///
+  /// In ru, this message translates to:
+  /// **'Выберите секцию'**
+  String get form_section_picker_title;
+
+  /// No description provided for @form_section_picker_create_custom.
+  ///
+  /// In ru, this message translates to:
+  /// **'Создать свой тип'**
+  String get form_section_picker_create_custom;
+
+  /// No description provided for @form_section_picker_custom_group.
+  ///
+  /// In ru, this message translates to:
+  /// **'Свои типы'**
+  String get form_section_picker_custom_group;
+
+  /// No description provided for @form_section_picker_cat_base.
+  ///
+  /// In ru, this message translates to:
+  /// **'Основа'**
+  String get form_section_picker_cat_base;
+
+  /// No description provided for @form_section_picker_cat_creams.
+  ///
+  /// In ru, this message translates to:
+  /// **'Кремы и начинки'**
+  String get form_section_picker_cat_creams;
+
+  /// No description provided for @form_section_picker_cat_coatings.
+  ///
+  /// In ru, this message translates to:
+  /// **'Покрытия и пропитки'**
+  String get form_section_picker_cat_coatings;
+
+  /// No description provided for @form_section_picker_cat_decor.
+  ///
+  /// In ru, this message translates to:
+  /// **'Декор'**
+  String get form_section_picker_cat_decor;
+
+  /// No description provided for @form_custom_type_actions_title.
+  ///
+  /// In ru, this message translates to:
+  /// **'Кастомный тип секции'**
+  String get form_custom_type_actions_title;
 
   /// No description provided for @scaler_title_size.
   ///
@@ -883,6 +1069,131 @@ abstract class AppLocalizations {
   /// In ru, this message translates to:
   /// **'Список покупок'**
   String get scaler_shopping_list_title;
+
+  /// No description provided for @scaler_shopping_list_total.
+  ///
+  /// In ru, this message translates to:
+  /// **'итого {grams}'**
+  String scaler_shopping_list_total(String grams);
+
+  /// No description provided for @scaler_shopping_list_empty.
+  ///
+  /// In ru, this message translates to:
+  /// **'Ингредиентов нет'**
+  String get scaler_shopping_list_empty;
+
+  /// No description provided for @scaler_total_label.
+  ///
+  /// In ru, this message translates to:
+  /// **'пересчёт'**
+  String get scaler_total_label;
+
+  /// No description provided for @scaler_export_tooltip.
+  ///
+  /// In ru, this message translates to:
+  /// **'Экспорт'**
+  String get scaler_export_tooltip;
+
+  /// No description provided for @scaler_export_share_text.
+  ///
+  /// In ru, this message translates to:
+  /// **'Поделиться текстом'**
+  String get scaler_export_share_text;
+
+  /// No description provided for @scaler_export_save_pdf.
+  ///
+  /// In ru, this message translates to:
+  /// **'Сохранить как PDF'**
+  String get scaler_export_save_pdf;
+
+  /// No description provided for @scaler_pdf_error.
+  ///
+  /// In ru, this message translates to:
+  /// **'Ошибка PDF: {err}'**
+  String scaler_pdf_error(String err);
+
+  /// No description provided for @scaler_cooked_first.
+  ///
+  /// In ru, this message translates to:
+  /// **'Записал! Первый раз 🎂'**
+  String get scaler_cooked_first;
+
+  /// No description provided for @scaler_original_size.
+  ///
+  /// In ru, this message translates to:
+  /// **'Оригинал: {sym} {d} {cm}'**
+  String scaler_original_size(String sym, int d, String cm);
+
+  /// No description provided for @scaler_original_size_with_height.
+  ///
+  /// In ru, this message translates to:
+  /// **'Оригинал: {sym} {d}×{h} {cm}'**
+  String scaler_original_size_with_height(String sym, int d, int h, String cm);
+
+  /// No description provided for @scaler_original_size_with_height_weight.
+  ///
+  /// In ru, this message translates to:
+  /// **'Оригинал: {sym} {d}×{h} {cm} • {weight}'**
+  String scaler_original_size_with_height_weight(
+    String sym,
+    int d,
+    int h,
+    String cm,
+    String weight,
+  );
+
+  /// No description provided for @scaler_original_size_weight.
+  ///
+  /// In ru, this message translates to:
+  /// **'Оригинал: {sym} {d} {cm} • {weight}'**
+  String scaler_original_size_weight(
+    String sym,
+    int d,
+    String cm,
+    String weight,
+  );
+
+  /// No description provided for @scaler_original_weight.
+  ///
+  /// In ru, this message translates to:
+  /// **'Оригинал: {weight}'**
+  String scaler_original_weight(String weight);
+
+  /// No description provided for @scaler_tier_label_named.
+  ///
+  /// In ru, this message translates to:
+  /// **'Ярус {n}: {label}'**
+  String scaler_tier_label_named(int n, String label);
+
+  /// No description provided for @scaler_tier_label.
+  ///
+  /// In ru, this message translates to:
+  /// **'Ярус {n}'**
+  String scaler_tier_label(int n);
+
+  /// No description provided for @scaler_tiers_total.
+  ///
+  /// In ru, this message translates to:
+  /// **'{tiers} ярус(ов) • итого {weight}'**
+  String scaler_tiers_total(int tiers, String weight);
+
+  /// No description provided for @share_diameter.
+  ///
+  /// In ru, this message translates to:
+  /// **'{sym} {d} {cm}'**
+  String share_diameter(String sym, int d, String cm);
+
+  /// No description provided for @share_height.
+  ///
+  /// In ru, this message translates to:
+  /// **'высота {h} {cm}'**
+  String share_height(int h, String cm);
+
+  /// No description provided for @share_notes_header.
+  ///
+  /// In ru, this message translates to:
+  /// **'📝 Заметки'**
+  String get share_notes_header;
 
   /// No description provided for @settings_title.
   ///
@@ -991,6 +1302,312 @@ abstract class AppLocalizations {
   /// In ru, this message translates to:
   /// **'Через запятую, см'**
   String get settings_quick_diameters_hint;
+
+  /// No description provided for @settings_quick_diameters_helper.
+  ///
+  /// In ru, this message translates to:
+  /// **'Эти числа показываются как кнопки-чипы под слайдером диаметра на экране пересчёта.'**
+  String get settings_quick_diameters_helper;
+
+  /// No description provided for @settings_quick_diameters_saved.
+  ///
+  /// In ru, this message translates to:
+  /// **'Быстрые диаметры сохранены'**
+  String get settings_quick_diameters_saved;
+
+  /// No description provided for @settings_default_mode_size_title.
+  ///
+  /// In ru, this message translates to:
+  /// **'По умолчанию: По размеру'**
+  String get settings_default_mode_size_title;
+
+  /// No description provided for @settings_default_mode_weight_title.
+  ///
+  /// In ru, this message translates to:
+  /// **'По умолчанию: По весу'**
+  String get settings_default_mode_weight_title;
+
+  /// No description provided for @settings_default_mode_weight_subtitle.
+  ///
+  /// In ru, this message translates to:
+  /// **'Только если у рецепта указан вес'**
+  String get settings_default_mode_weight_subtitle;
+
+  /// No description provided for @settings_auto_update_subtitle.
+  ///
+  /// In ru, this message translates to:
+  /// **'При запуске приложение спрашивает GitHub о новой версии'**
+  String get settings_auto_update_subtitle;
+
+  /// No description provided for @settings_export_done.
+  ///
+  /// In ru, this message translates to:
+  /// **'Экспортировано'**
+  String get settings_export_done;
+
+  /// No description provided for @settings_export_empty.
+  ///
+  /// In ru, this message translates to:
+  /// **'Нечего экспортировать — список пустой'**
+  String get settings_export_empty;
+
+  /// No description provided for @settings_export_error.
+  ///
+  /// In ru, this message translates to:
+  /// **'Ошибка экспорта: {err}'**
+  String settings_export_error(String err);
+
+  /// No description provided for @settings_import_nothing.
+  ///
+  /// In ru, this message translates to:
+  /// **'Ничего не импортировано'**
+  String get settings_import_nothing;
+
+  /// No description provided for @settings_import_count.
+  ///
+  /// In ru, this message translates to:
+  /// **'Импортировано: {count}'**
+  String settings_import_count(int count);
+
+  /// No description provided for @settings_import_error_with.
+  ///
+  /// In ru, this message translates to:
+  /// **'Ошибка импорта: {err}'**
+  String settings_import_error_with(String err);
+
+  /// No description provided for @settings_open_link_failed.
+  ///
+  /// In ru, this message translates to:
+  /// **'Не удалось открыть ссылку'**
+  String get settings_open_link_failed;
+
+  /// No description provided for @settings_no_custom_types.
+  ///
+  /// In ru, this message translates to:
+  /// **'Нет кастомных типов'**
+  String get settings_no_custom_types;
+
+  /// No description provided for @settings_custom_type_scale_label.
+  ///
+  /// In ru, this message translates to:
+  /// **'масштаб: {name}'**
+  String settings_custom_type_scale_label(String name);
+
+  /// No description provided for @settings_reset_dialog_title.
+  ///
+  /// In ru, this message translates to:
+  /// **'Сбросить настройки?'**
+  String get settings_reset_dialog_title;
+
+  /// No description provided for @settings_reset_dialog_body.
+  ///
+  /// In ru, this message translates to:
+  /// **'Тема, сортировка, авто-проверка обновлений, default-режим пересчёта и быстрые диаметры вернутся к дефолтам. Рецепты и кастомные типы секций НЕ затронутся.'**
+  String get settings_reset_dialog_body;
+
+  /// No description provided for @settings_reset_action.
+  ///
+  /// In ru, this message translates to:
+  /// **'Сбросить'**
+  String get settings_reset_action;
+
+  /// No description provided for @settings_reset_subtitle.
+  ///
+  /// In ru, this message translates to:
+  /// **'Тема, сортировка, авто-обновление, default режим, быстрые диаметры. Рецепты не трогаются.'**
+  String get settings_reset_subtitle;
+
+  /// No description provided for @settings_delete_all_action.
+  ///
+  /// In ru, this message translates to:
+  /// **'Удалить всё'**
+  String get settings_delete_all_action;
+
+  /// No description provided for @settings_delete_all_full_body.
+  ///
+  /// In ru, this message translates to:
+  /// **'Все рецепты, кастомные типы секций и snapshot импорта будут удалены безвозвратно. Резервная копия предыдущего сохранения тоже исчезнет. Уверен?'**
+  String get settings_delete_all_full_body;
+
+  /// No description provided for @settings_check_update_done.
+  ///
+  /// In ru, this message translates to:
+  /// **'Установлена последняя версия'**
+  String get settings_check_update_done;
+
+  /// No description provided for @settings_check_update_available.
+  ///
+  /// In ru, this message translates to:
+  /// **'Доступна v{version}. Открой приложение заново — появится баннер с обновлением.'**
+  String settings_check_update_available(String version);
+
+  /// No description provided for @settings_show_welcome_again_subtitle.
+  ///
+  /// In ru, this message translates to:
+  /// **'Краткий тур по приложению'**
+  String get settings_show_welcome_again_subtitle;
+
+  /// No description provided for @settings_version_label.
+  ///
+  /// In ru, this message translates to:
+  /// **'Версия'**
+  String get settings_version_label;
+
+  /// No description provided for @settings_license_label.
+  ///
+  /// In ru, this message translates to:
+  /// **'Лицензия'**
+  String get settings_license_label;
+
+  /// No description provided for @settings_license_value.
+  ///
+  /// In ru, this message translates to:
+  /// **'MIT'**
+  String get settings_license_value;
+
+  /// No description provided for @settings_github_source.
+  ///
+  /// In ru, this message translates to:
+  /// **'Исходники на GitHub'**
+  String get settings_github_source;
+
+  /// No description provided for @settings_show_stats.
+  ///
+  /// In ru, this message translates to:
+  /// **'Показать статистику'**
+  String get settings_show_stats;
+
+  /// No description provided for @settings_import_undo_action.
+  ///
+  /// In ru, this message translates to:
+  /// **'Откатить последний импорт'**
+  String get settings_import_undo_action;
+
+  /// No description provided for @settings_save_action.
+  ///
+  /// In ru, this message translates to:
+  /// **'Сохранить'**
+  String get settings_save_action;
+
+  /// No description provided for @stats_title.
+  ///
+  /// In ru, this message translates to:
+  /// **'Статистика'**
+  String get stats_title;
+
+  /// No description provided for @stats_recipes.
+  ///
+  /// In ru, this message translates to:
+  /// **'Рецептов'**
+  String get stats_recipes;
+
+  /// No description provided for @stats_ingredients.
+  ///
+  /// In ru, this message translates to:
+  /// **'Ингредиентов всего'**
+  String get stats_ingredients;
+
+  /// No description provided for @stats_total_recipe_weights.
+  ///
+  /// In ru, this message translates to:
+  /// **'Сумма весов рецептов'**
+  String get stats_total_recipe_weights;
+
+  /// No description provided for @stats_top_ingredients_header.
+  ///
+  /// In ru, this message translates to:
+  /// **'ТОП ИНГРЕДИЕНТОВ'**
+  String get stats_top_ingredients_header;
+
+  /// No description provided for @stats_top_tags_header.
+  ///
+  /// In ru, this message translates to:
+  /// **'ТОП ТЕГОВ'**
+  String get stats_top_tags_header;
+
+  /// No description provided for @custom_type_dialog_new.
+  ///
+  /// In ru, this message translates to:
+  /// **'Новый тип секции'**
+  String get custom_type_dialog_new;
+
+  /// No description provided for @custom_type_dialog_edit.
+  ///
+  /// In ru, this message translates to:
+  /// **'Изменить тип секции'**
+  String get custom_type_dialog_edit;
+
+  /// No description provided for @custom_type_field_name.
+  ///
+  /// In ru, this message translates to:
+  /// **'Название'**
+  String get custom_type_field_name;
+
+  /// No description provided for @custom_type_field_name_hint.
+  ///
+  /// In ru, this message translates to:
+  /// **'Например, Маршмеллоу'**
+  String get custom_type_field_name_hint;
+
+  /// No description provided for @custom_type_field_icon.
+  ///
+  /// In ru, this message translates to:
+  /// **'Иконка (эмодзи)'**
+  String get custom_type_field_icon;
+
+  /// No description provided for @custom_type_field_scale_label.
+  ///
+  /// In ru, this message translates to:
+  /// **'Как масштабировать'**
+  String get custom_type_field_scale_label;
+
+  /// No description provided for @custom_type_scale_volume.
+  ///
+  /// In ru, this message translates to:
+  /// **'По объёму (d² × h)'**
+  String get custom_type_scale_volume;
+
+  /// No description provided for @custom_type_scale_area.
+  ///
+  /// In ru, this message translates to:
+  /// **'По площади (d²)'**
+  String get custom_type_scale_area;
+
+  /// No description provided for @custom_type_scale_fixed.
+  ///
+  /// In ru, this message translates to:
+  /// **'Фикс (не меняется)'**
+  String get custom_type_scale_fixed;
+
+  /// No description provided for @custom_type_create.
+  ///
+  /// In ru, this message translates to:
+  /// **'Создать'**
+  String get custom_type_create;
+
+  /// No description provided for @custom_type_used_dialog_title.
+  ///
+  /// In ru, this message translates to:
+  /// **'Удалить тип «{name}»?'**
+  String custom_type_used_dialog_title(String name);
+
+  /// No description provided for @custom_type_used_dialog_body.
+  ///
+  /// In ru, this message translates to:
+  /// **'Этот тип используется в {count} рецепте(ах):\n\n{names}\n\nУже сохранённые секции продолжат работать как есть. Но добавить новые секции этого типа будет нельзя.'**
+  String custom_type_used_dialog_body(int count, String names);
+
+  /// No description provided for @custom_type_more.
+  ///
+  /// In ru, this message translates to:
+  /// **'... и ещё {n}'**
+  String custom_type_more(int n);
+
+  /// No description provided for @custom_type_force_delete.
+  ///
+  /// In ru, this message translates to:
+  /// **'Всё равно удалить'**
+  String get custom_type_force_delete;
 
   /// No description provided for @settings_default_scale_mode.
   ///

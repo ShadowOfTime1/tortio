@@ -73,7 +73,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     await AppSettings.saveQuickDiameters(list);
     if (!mounted) return;
     setState(() => _diametersController.text = list.join(', '));
-    _toast('Quick-диаметры сохранены');
+    _toast(AppLocalizations.of(context).settings_quick_diameters_saved);
   }
 
   Future<void> _setDefaultScaleMode(String mode) async {
@@ -91,13 +91,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
     try {
       final update = await UpdateService.checkForUpdate();
       if (!mounted) return;
+      final l = AppLocalizations.of(context);
       if (update == null) {
-        _toast('Установлена последняя версия');
+        _toast(l.settings_check_update_done);
       } else {
-        _toast(
-          'Доступна v${update.version}. Открой приложение заново — '
-          'появится баннер с обновлением.',
-        );
+        _toast(l.settings_check_update_available(update.version));
       }
     } finally {
       // Возвращаем как было.
@@ -111,27 +109,24 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   Future<void> _resetSettings() async {
+    final l = AppLocalizations.of(context);
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: const Text('Сбросить настройки?'),
-        content: const Text(
-          'Тема, сортировка, авто-проверка обновлений, default-режим '
-          'пересчёта и quick-диаметры вернутся к дефолтам. Рецепты и '
-          'кастомные типы секций НЕ затронутся.',
-        ),
+        title: Text(l.settings_reset_dialog_title),
+        content: Text(l.settings_reset_dialog_body),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Отмена'),
+            child: Text(l.common_cancel),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(ctx, true),
             style: FilledButton.styleFrom(
               backgroundColor: const Color(0xFFFF6B8A),
             ),
-            child: const Text('Сбросить'),
+            child: Text(l.settings_reset_action),
           ),
         ],
       ),
@@ -143,68 +138,69 @@ class _SettingsScreenState extends State<SettingsScreen> {
     await ThemeService.instance.load();
     if (!mounted) return;
     await _load();
-    _toast('Настройки сброшены');
+    if (!mounted) return;
+    _toast(AppLocalizations.of(context).settings_reset_settings_done);
   }
 
   Future<void> _exportRecipes() async {
+    final l = AppLocalizations.of(context);
     final recipes = await StorageService.loadRecipes();
     if (recipes.isEmpty) {
-      _toast('Нечего экспортировать — список пустой');
+      _toast(l.settings_export_empty);
       return;
     }
     try {
       await ImportExportService.exportRecipes(recipes);
     } catch (e) {
-      _toast('Ошибка экспорта: $e');
+      _toast(l.settings_export_error(e.toString()));
     }
   }
 
   Future<void> _importRecipes() async {
+    final l = AppLocalizations.of(context);
     try {
       final count = await ImportExportService.importRecipes();
       if (count == 0) {
-        _toast('Ничего не импортировано');
+        _toast(l.settings_import_nothing);
       } else {
-        _toast('Импортировано: $count');
+        _toast(l.settings_import_count(count));
         await _load();
       }
     } catch (e) {
-      _toast('Ошибка импорта: $e');
+      _toast(l.settings_import_error_with(e.toString()));
     }
   }
 
   Future<void> _restoreImport() async {
     await StorageService.restoreImportSnapshot();
     await _load();
-    _toast('Импорт откачен');
+    if (!mounted) return;
+    _toast(AppLocalizations.of(context).settings_import_undone);
   }
 
   /// Колбэк после успешного восстановления из Google Drive — родительский
   /// MainWrapper перечитает рецепты с диска при следующем resume.
   void _onCloudRestored(int count) {
-    _toast('Восстановлено рецептов: $count');
+    _toast(AppLocalizations.of(context).settings_cloud_restore_done(count));
   }
 
   Future<void> _clearAll() async {
+    final l = AppLocalizations.of(context);
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: const Text('Удалить все рецепты?'),
-        content: const Text(
-          'Все рецепты, кастомные типы секций и snapshot'
-          ' импорта будут удалены безвозвратно. Резервная копия'
-          ' предыдущего сохранения тоже исчезнет. Уверен?',
-        ),
+        title: Text(l.settings_delete_all_confirm_title),
+        content: Text(l.settings_delete_all_full_body),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Отмена'),
+            child: Text(l.common_cancel),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(ctx, true),
             style: FilledButton.styleFrom(backgroundColor: Colors.red.shade400),
-            child: const Text('Удалить всё'),
+            child: Text(l.settings_delete_all_action),
           ),
         ],
       ),
@@ -218,7 +214,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
     await prefs.remove('custom_section_types');
     if (!mounted) return;
     await _load();
-    _toast('Всё удалено');
+    if (!mounted) return;
+    _toast(AppLocalizations.of(context).settings_delete_all_done);
   }
 
   Future<void> _editCustomType(SectionType type) async {
@@ -241,32 +238,32 @@ class _SettingsScreenState extends State<SettingsScreen> {
     if (!mounted) return;
 
     if (usedIn.isNotEmpty) {
+      final l = AppLocalizations.of(context);
       final preview = usedIn.take(5).map((r) => '• ${r.title}').join('\n');
-      final more = usedIn.length > 5 ? '\n... и ещё ${usedIn.length - 5}' : '';
+      final more = usedIn.length > 5
+          ? '\n${l.custom_type_more(usedIn.length - 5)}'
+          : '';
       final confirmed = await showDialog<bool>(
         context: context,
         builder: (ctx) => AlertDialog(
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(20),
           ),
-          title: Text('Удалить тип «${type.name}»?'),
+          title: Text(l.custom_type_used_dialog_title(type.name)),
           content: Text(
-            'Этот тип используется в ${usedIn.length} рецепте(ах):\n\n'
-            '$preview$more\n\n'
-            'Уже сохранённые секции продолжат работать как есть. '
-            'Но добавить новые секции этого типа будет нельзя.',
+            l.custom_type_used_dialog_body(usedIn.length, '$preview$more'),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(ctx, false),
-              child: const Text('Отмена'),
+              child: Text(l.common_cancel),
             ),
             FilledButton(
               onPressed: () => Navigator.pop(ctx, true),
               style: FilledButton.styleFrom(
                 backgroundColor: Colors.red.shade400,
               ),
-              child: const Text('Всё равно удалить'),
+              child: Text(l.custom_type_force_delete),
             ),
           ],
         ),
@@ -301,7 +298,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
             borderRadius: BorderRadius.circular(20),
           ),
           title: Text(
-            initial == null ? 'Новый тип секции' : 'Изменить тип секции',
+            initial == null
+                ? AppLocalizations.of(ctx).custom_type_dialog_new
+                : AppLocalizations.of(ctx).custom_type_dialog_edit,
           ),
           content: Column(
             mainAxisSize: MainAxisSize.min,
@@ -310,46 +309,57 @@ class _SettingsScreenState extends State<SettingsScreen> {
               TextField(
                 controller: nameController,
                 autofocus: true,
-                decoration: const InputDecoration(
-                  labelText: 'Название',
-                  hintText: 'Например, Маршмеллоу',
+                decoration: InputDecoration(
+                  labelText: AppLocalizations.of(ctx).custom_type_field_name,
+                  hintText: AppLocalizations.of(
+                    ctx,
+                  ).custom_type_field_name_hint,
                 ),
               ),
               const SizedBox(height: 12),
               TextField(
                 controller: iconController,
-                decoration: const InputDecoration(
-                  labelText: 'Иконка (эмодзи)',
+                decoration: InputDecoration(
+                  labelText: AppLocalizations.of(ctx).custom_type_field_icon,
                   hintText: '🍡',
                 ),
               ),
               const SizedBox(height: 16),
-              const Text(
-                'Как масштабировать',
-                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+              Text(
+                AppLocalizations.of(ctx).custom_type_field_scale_label,
+                style: const TextStyle(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 13,
+                ),
               ),
               RadioGroup<ScaleType>(
                 groupValue: selectedScale,
                 onChanged: (v) => setDialogState(() => selectedScale = v!),
-                child: const Column(
+                child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     RadioListTile<ScaleType>(
                       dense: true,
                       contentPadding: EdgeInsets.zero,
-                      title: Text('По объёму (d² × h)'),
+                      title: Text(
+                        AppLocalizations.of(ctx).custom_type_scale_volume,
+                      ),
                       value: ScaleType.volume,
                     ),
                     RadioListTile<ScaleType>(
                       dense: true,
                       contentPadding: EdgeInsets.zero,
-                      title: Text('По площади (d²)'),
+                      title: Text(
+                        AppLocalizations.of(ctx).custom_type_scale_area,
+                      ),
                       value: ScaleType.area,
                     ),
                     RadioListTile<ScaleType>(
                       dense: true,
                       contentPadding: EdgeInsets.zero,
-                      title: Text('Фикс (не меняется)'),
+                      title: Text(
+                        AppLocalizations.of(ctx).custom_type_scale_fixed,
+                      ),
                       value: ScaleType.fixed,
                     ),
                   ],
@@ -360,7 +370,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(ctx),
-              child: const Text('Отмена'),
+              child: Text(AppLocalizations.of(ctx).common_cancel),
             ),
             FilledButton(
               onPressed: () {
@@ -375,7 +385,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
               style: FilledButton.styleFrom(
                 backgroundColor: const Color(0xFFFF6B8A),
               ),
-              child: Text(initial == null ? 'Создать' : 'Сохранить'),
+              child: Text(
+                initial == null
+                    ? AppLocalizations.of(ctx).custom_type_create
+                    : AppLocalizations.of(ctx).common_save,
+              ),
             ),
           ],
         ),
@@ -387,6 +401,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     final recipes = await StorageService.loadRecipes();
     if (!mounted) return;
     final stats = computeStats(recipes);
+    final l = AppLocalizations.of(context);
     showModalBottomSheet(
       context: context,
       shape: const RoundedRectangleBorder(
@@ -400,33 +415,39 @@ class _SettingsScreenState extends State<SettingsScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
-                children: const [
-                  Icon(Icons.bar_chart_outlined, color: Color(0xFFE85D75)),
-                  SizedBox(width: 8),
+                children: [
+                  const Icon(
+                    Icons.bar_chart_outlined,
+                    color: Color(0xFFE85D75),
+                  ),
+                  const SizedBox(width: 8),
                   Text(
-                    'Статистика',
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                    l.stats_title,
+                    style: const TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ],
               ),
               const SizedBox(height: 16),
-              _statRow('Рецептов', '${stats.recipeCount}'),
-              _statRow('Ингредиентов всего', '${stats.totalIngredientCount}'),
+              _statRow(l.stats_recipes, '${stats.recipeCount}'),
+              _statRow(l.stats_ingredients, '${stats.totalIngredientCount}'),
               if (stats.totalWeight > 0)
                 _statRow(
-                  'Сумма весов рецептов',
+                  l.stats_total_recipe_weights,
                   formatGrams(stats.totalWeight),
                 ),
               const SizedBox(height: 16),
               if (stats.topIngredients.isNotEmpty) ...[
-                _sectionLabel('ТОП ИНГРЕДИЕНТОВ'),
+                _sectionLabel(l.stats_top_ingredients_header),
                 ...stats.topIngredients.map(
                   (e) => _statRow(e.key, '×${e.value}'),
                 ),
                 const SizedBox(height: 12),
               ],
               if (stats.topTags.isNotEmpty) ...[
-                _sectionLabel('ТОП ТЕГОВ'),
+                _sectionLabel(l.stats_top_tags_header),
                 ...stats.topTags.map((e) => _statRow(e.key, '×${e.value}')),
               ],
             ],
@@ -484,7 +505,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Future<void> _openGitHub() async {
     final url = Uri.parse('https://github.com/ShadowOfTime1/tortio');
     if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
-      _toast('Не удалось открыть ссылку');
+      if (!mounted) return;
+      _toast(AppLocalizations.of(context).settings_open_link_failed);
     }
   }
 
@@ -550,11 +572,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
           // === Кастомные типы секций ===
           _groupHeader(l.settings_custom_types),
           if (_customTypes.isEmpty)
-            const ListTile(
+            ListTile(
               dense: true,
               title: Text(
-                'Нет кастомных типов',
-                style: TextStyle(color: Colors.grey),
+                l.settings_no_custom_types,
+                style: const TextStyle(color: Colors.grey),
               ),
             )
           else
@@ -563,7 +585,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 dense: true,
                 leading: Text(t.icon, style: const TextStyle(fontSize: 22)),
                 title: Text(t.name),
-                subtitle: Text('масштаб: ${t.scaleType.name}'),
+                subtitle: Text(
+                  l.settings_custom_type_scale_label(t.scaleType.name),
+                ),
                 trailing: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
@@ -585,9 +609,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
           ListTile(
             leading: const Icon(Icons.add, color: Color(0xFFE85D75)),
-            title: const Text(
-              'Добавить тип',
-              style: TextStyle(color: Color(0xFFE85D75)),
+            title: Text(
+              l.settings_custom_types_add,
+              style: const TextStyle(color: Color(0xFFE85D75)),
             ),
             onTap: _addCustomType,
           ),
@@ -596,7 +620,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           _groupHeader(l.settings_default_scale_mode),
           ListTile(
             dense: true,
-            title: const Text('Quick-диаметры'),
+            title: Text(l.settings_quick_diameters),
             subtitle: TextField(
               controller: _diametersController,
               keyboardType: TextInputType.number,
@@ -608,33 +632,30 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
             trailing: IconButton(
               icon: const Icon(Icons.check, color: Color(0xFFE85D75)),
-              tooltip: 'Сохранить',
+              tooltip: l.common_save,
               onPressed: _saveDiameters,
             ),
           ),
-          _groupSubLabel(
-            'Эти числа показываются как кнопки-чипы под слайдером диаметра '
-            'на экране пересчёта.',
-          ),
+          _groupSubLabel(l.settings_quick_diameters_helper),
           const SizedBox(height: 8),
           RadioGroup<String>(
             groupValue: _defaultScaleMode,
             onChanged: (v) {
               if (v != null) _setDefaultScaleMode(v);
             },
-            child: const Column(
+            child: Column(
               children: [
                 RadioListTile<String>(
                   dense: true,
-                  title: Text('По умолчанию: По размеру'),
+                  title: Text(l.settings_default_mode_size_title),
                   value: 'size',
                 ),
                 RadioListTile<String>(
                   dense: true,
-                  title: Text('По умолчанию: По весу'),
+                  title: Text(l.settings_default_mode_weight_title),
                   subtitle: Text(
-                    'Только если у рецепта указан вес',
-                    style: TextStyle(fontSize: 11),
+                    l.settings_default_mode_weight_subtitle,
+                    style: const TextStyle(fontSize: 11),
                   ),
                   value: 'weight',
                 ),
@@ -645,10 +666,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
           // === Обновления ===
           _groupHeader(l.settings_auto_update),
           SwitchListTile(
-            title: const Text('Автоматически проверять обновления'),
-            subtitle: const Text(
-              'При запуске приложение спрашивает GitHub о новой версии',
-            ),
+            title: Text(l.settings_auto_update),
+            subtitle: Text(l.settings_auto_update_subtitle),
             value: _autoUpdateCheck,
             onChanged: _setAutoUpdate,
           ),
@@ -660,7 +679,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     child: CircularProgressIndicator(strokeWidth: 2),
                   )
                 : const Icon(Icons.refresh),
-            title: const Text('Проверить обновление сейчас'),
+            title: Text(l.settings_check_update_now),
             onTap: _checkingUpdate ? null : _checkUpdateNow,
           ),
 
@@ -672,20 +691,20 @@ class _SettingsScreenState extends State<SettingsScreen> {
           _groupHeader(l.settings_group_backup),
           ListTile(
             leading: const Icon(Icons.upload_file_outlined),
-            title: const Text('Экспортировать в JSON'),
+            title: Text(l.settings_export),
             onTap: _exportRecipes,
           ),
           ListTile(
             leading: const Icon(Icons.download_outlined),
-            title: const Text('Импортировать из JSON'),
+            title: Text(l.settings_import),
             onTap: _importRecipes,
           ),
           if (_canRestoreImport)
             ListTile(
               leading: const Icon(Icons.undo, color: Colors.orange),
-              title: const Text(
-                'Откатить последний импорт',
-                style: TextStyle(color: Colors.orange),
+              title: Text(
+                l.settings_import_undo_action,
+                style: const TextStyle(color: Colors.orange),
               ),
               onTap: _restoreImport,
             ),
@@ -694,7 +713,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           _groupHeader(l.settings_stats),
           ListTile(
             leading: const Icon(Icons.bar_chart_outlined),
-            title: const Text('Показать статистику'),
+            title: Text(l.settings_show_stats),
             onTap: _showStats,
           ),
 
@@ -702,14 +721,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
           _groupHeader(l.settings_group_danger, color: Colors.red),
           ListTile(
             leading: const Icon(Icons.refresh, color: Color(0xFFFF6B8A)),
-            title: const Text(
-              'Сбросить настройки до дефолтов',
-              style: TextStyle(color: Color(0xFFE85D75)),
+            title: Text(
+              l.settings_reset_settings,
+              style: const TextStyle(color: Color(0xFFE85D75)),
             ),
-            subtitle: const Text(
-              'Тема, сортировка, авто-обновление, default режим, '
-              'quick-диаметры. Рецепты не трогаются.',
-            ),
+            subtitle: Text(l.settings_reset_subtitle),
             onTap: _resetSettings,
           ),
           ListTile(
@@ -717,9 +733,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
               Icons.delete_forever_outlined,
               color: Colors.red,
             ),
-            title: const Text(
-              'Удалить все рецепты и кастомные типы',
-              style: TextStyle(color: Colors.red),
+            title: Text(
+              l.settings_delete_all,
+              style: const TextStyle(color: Colors.red),
             ),
             onTap: _clearAll,
           ),
@@ -731,26 +747,29 @@ class _SettingsScreenState extends State<SettingsScreen> {
           _groupHeader(l.settings_group_about),
           ListTile(
             leading: const Icon(Icons.info_outline),
-            title: const Text('Версия'),
+            title: Text(l.settings_version_label),
             trailing: Text('v$_version', style: const TextStyle(fontSize: 14)),
           ),
           ListTile(
             leading: const Icon(Icons.waving_hand_outlined),
-            title: const Text('Показать приветствие снова'),
-            subtitle: const Text('Краткий тур по приложению'),
+            title: Text(l.settings_show_welcome_again),
+            subtitle: Text(l.settings_show_welcome_again_subtitle),
             onTap: _showWelcomeAgain,
           ),
           ListTile(
             leading: const Icon(Icons.code),
-            title: const Text('Исходники на GitHub'),
+            title: Text(l.settings_github_source),
             subtitle: const Text('ShadowOfTime1/tortio'),
             trailing: const Icon(Icons.open_in_new, size: 18),
             onTap: _openGitHub,
           ),
-          const ListTile(
-            leading: Icon(Icons.gavel_outlined),
-            title: Text('Лицензия'),
-            trailing: Text('MIT', style: TextStyle(fontSize: 14)),
+          ListTile(
+            leading: const Icon(Icons.gavel_outlined),
+            title: Text(l.settings_license_label),
+            trailing: Text(
+              l.settings_license_value,
+              style: const TextStyle(fontSize: 14),
+            ),
           ),
           const SizedBox(height: 32),
         ],

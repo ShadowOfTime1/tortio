@@ -240,7 +240,9 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
             borderRadius: BorderRadius.circular(20),
           ),
           title: Text(
-            initial == null ? 'Свой тип секции' : 'Изменить тип секции',
+            initial == null
+                ? AppLocalizations.of(ctx).custom_type_dialog_new
+                : AppLocalizations.of(ctx).custom_type_dialog_edit,
           ),
           content: Column(
             mainAxisSize: MainAxisSize.min,
@@ -249,46 +251,57 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
               TextField(
                 controller: nameController,
                 autofocus: true,
-                decoration: const InputDecoration(
-                  labelText: 'Название',
-                  hintText: 'Например, Маршмеллоу',
+                decoration: InputDecoration(
+                  labelText: AppLocalizations.of(ctx).custom_type_field_name,
+                  hintText: AppLocalizations.of(
+                    ctx,
+                  ).custom_type_field_name_hint,
                 ),
               ),
               const SizedBox(height: 12),
               TextField(
                 controller: iconController,
-                decoration: const InputDecoration(
-                  labelText: 'Иконка (эмодзи)',
+                decoration: InputDecoration(
+                  labelText: AppLocalizations.of(ctx).custom_type_field_icon,
                   hintText: '🍡',
                 ),
               ),
               const SizedBox(height: 16),
-              const Text(
-                'Как масштабировать',
-                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+              Text(
+                AppLocalizations.of(ctx).custom_type_field_scale_label,
+                style: const TextStyle(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 13,
+                ),
               ),
               RadioGroup<ScaleType>(
                 groupValue: selectedScale,
                 onChanged: (v) => setDialogState(() => selectedScale = v!),
-                child: const Column(
+                child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     RadioListTile<ScaleType>(
                       dense: true,
                       contentPadding: EdgeInsets.zero,
-                      title: Text('По объёму (d² × h)'),
+                      title: Text(
+                        AppLocalizations.of(ctx).custom_type_scale_volume,
+                      ),
                       value: ScaleType.volume,
                     ),
                     RadioListTile<ScaleType>(
                       dense: true,
                       contentPadding: EdgeInsets.zero,
-                      title: Text('По площади (d²)'),
+                      title: Text(
+                        AppLocalizations.of(ctx).custom_type_scale_area,
+                      ),
                       value: ScaleType.area,
                     ),
                     RadioListTile<ScaleType>(
                       dense: true,
                       contentPadding: EdgeInsets.zero,
-                      title: Text('Фикс (не меняется)'),
+                      title: Text(
+                        AppLocalizations.of(ctx).custom_type_scale_fixed,
+                      ),
                       value: ScaleType.fixed,
                     ),
                   ],
@@ -299,7 +312,7 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(ctx),
-              child: const Text('Отмена'),
+              child: Text(AppLocalizations.of(ctx).common_cancel),
             ),
             FilledButton(
               onPressed: () {
@@ -314,7 +327,11 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
               style: FilledButton.styleFrom(
                 backgroundColor: const Color(0xFFFF6B8A),
               ),
-              child: Text(initial == null ? 'Создать' : 'Сохранить'),
+              child: Text(
+                initial == null
+                    ? AppLocalizations.of(ctx).custom_type_create
+                    : AppLocalizations.of(ctx).common_save,
+              ),
             ),
           ],
         ),
@@ -440,19 +457,20 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
     final diameter = parseNumber(_diameterController.text) ?? 0;
     final height = parseNumber(_heightController.text) ?? 0;
     final weight = parseNumber(_weightController.text) ?? 0;
+    final l = AppLocalizations.of(context);
 
     if (title.isEmpty) {
-      _showError('Введите название');
+      _showError(l.form_error_title_required);
       return;
     }
     if (diameter <= 0) {
-      _showError('Введите диаметр формы');
+      _showError(l.form_error_diameter_required);
       return;
     }
     // Высота теперь опциональна. Если 0 — скейлер сделает только по площади
     // (объёмные секции масштабируются как area).
     if (_sections.isEmpty) {
-      _showError('Добавьте хотя бы одну секцию');
+      _showError(l.form_error_no_sections);
       return;
     }
 
@@ -462,7 +480,7 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
     final cleanSections = _buildCleanSections(_sections);
 
     if (cleanSections.isEmpty) {
-      _showError('Заполните хотя бы один ингредиент с весом > 0');
+      _showError(l.form_error_no_ingredients);
       return;
     }
 
@@ -495,8 +513,7 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
 
     if (droppedTierNumbers.isNotEmpty) {
       _showError(
-        'Ярус(ы) ${droppedTierNumbers.join(", ")} пропущены: '
-        'нет ингредиентов с весом > 0 или не заполнены размеры',
+        l.form_error_tiers_skipped_full(droppedTierNumbers.join(', ')),
       );
       return;
     }
@@ -533,12 +550,13 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
       }
     } catch (e) {
       if (!mounted) return;
+      final l = AppLocalizations.of(context);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
             source == ImageSource.camera
-                ? 'Не удалось открыть камеру: $e'
-                : 'Не удалось выбрать фото: $e',
+                ? l.form_photo_error_camera(e.toString())
+                : l.form_photo_error_gallery(e.toString()),
           ),
         ),
       );
@@ -557,7 +575,7 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
           children: [
             ListTile(
               leading: const Icon(Icons.photo_library_outlined),
-              title: const Text('Из галереи'),
+              title: Text(AppLocalizations.of(ctx).form_photo_pick),
               onTap: () {
                 Navigator.pop(ctx);
                 _pickImage(ImageSource.gallery);
@@ -565,7 +583,7 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
             ),
             ListTile(
               leading: const Icon(Icons.photo_camera_outlined),
-              title: const Text('Сделать фото'),
+              title: Text(AppLocalizations.of(ctx).form_photo_camera),
               onTap: () {
                 Navigator.pop(ctx);
                 _pickImage(ImageSource.camera);
@@ -574,9 +592,9 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
             if (_imagePath.isNotEmpty)
               ListTile(
                 leading: const Icon(Icons.delete_outline, color: Colors.red),
-                title: const Text(
-                  'Убрать фото',
-                  style: TextStyle(color: Colors.red),
+                title: Text(
+                  AppLocalizations.of(ctx).form_photo_remove,
+                  style: const TextStyle(color: Colors.red),
                 ),
                 onTap: () {
                   Navigator.pop(ctx);
@@ -594,6 +612,7 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
   /// Tier 1 живёт в основной форме, эти — отдельные складные блоки.
   Widget _buildAdditionalTier(int idx, _TierInput tier) {
     final tierNumber = idx + 2; // 0 → "Ярус 2", 1 → "Ярус 3"
+    final l = AppLocalizations.of(context);
     return Container(
       margin: const EdgeInsets.only(top: 12, bottom: 4),
       padding: const EdgeInsets.fromLTRB(16, 12, 12, 16),
@@ -624,7 +643,7 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
-                  'Ярус $tierNumber',
+                  l.form_tier_label(tierNumber),
                   style: const TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.w700,
@@ -634,7 +653,7 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
               ),
               const Spacer(),
               IconButton(
-                tooltip: 'Удалить ярус',
+                tooltip: l.form_remove_tier,
                 icon: const Icon(Icons.close, color: Colors.red),
                 onPressed: () => _removeTier(tier),
               ),
@@ -643,8 +662,8 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
           const SizedBox(height: 8),
           TextField(
             controller: tier.labelController,
-            decoration: const InputDecoration(
-              hintText: 'Название (опц): низ, середина, верх...',
+            decoration: InputDecoration(
+              hintText: l.form_tier_name_optional,
               isDense: true,
             ),
           ),
@@ -656,9 +675,9 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
                 child: TextField(
                   controller: tier.diameterController,
                   keyboardType: TextInputType.number,
-                  decoration: const InputDecoration(
-                    labelText: 'Диаметр',
-                    suffixText: 'см',
+                  decoration: InputDecoration(
+                    labelText: l.form_field_diameter,
+                    suffixText: l.unit_centimeters_short,
                     isDense: true,
                     floatingLabelBehavior: FloatingLabelBehavior.always,
                   ),
@@ -669,9 +688,9 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
                 child: TextField(
                   controller: tier.heightController,
                   keyboardType: TextInputType.number,
-                  decoration: const InputDecoration(
-                    labelText: 'Высота (опц.)',
-                    suffixText: 'см',
+                  decoration: InputDecoration(
+                    labelText: '${l.form_field_height} (${l.common_optional})',
+                    suffixText: l.unit_centimeters_short,
                     isDense: true,
                     floatingLabelBehavior: FloatingLabelBehavior.always,
                   ),
@@ -683,15 +702,18 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
           // Состав яруса
           Row(
             children: [
-              const Text(
-                'Состав яруса',
-                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+              Text(
+                l.form_tier_composition,
+                style: const TextStyle(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 14,
+                ),
               ),
               const Spacer(),
               FilledButton.icon(
                 onPressed: () => _addSection(toList: tier.sections),
                 icon: const Icon(Icons.add, size: 16),
-                label: const Text('Секция'),
+                label: Text(l.form_section_button),
                 style: FilledButton.styleFrom(
                   backgroundColor: const Color(0xFFFF6B8A),
                   padding: const EdgeInsets.symmetric(
@@ -714,6 +736,7 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
   /// Включает drag-drop секций, drag-drop ингредиентов, Autocomplete
   /// названий, заметки, empty-state.
   Widget _buildSectionsList(List<_SectionInput> list) {
+    final l = AppLocalizations.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       mainAxisSize: MainAxisSize.min,
@@ -734,14 +757,17 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
                 color: const Color(0xFFFF6B8A).withValues(alpha: 0.2),
               ),
             ),
-            child: const Column(
+            child: Column(
               children: [
-                Text('🧁', style: TextStyle(fontSize: 40)),
-                SizedBox(height: 12),
-                Text('Добавьте секцию', style: TextStyle(color: Colors.grey)),
+                const Text('🧁', style: TextStyle(fontSize: 40)),
+                const SizedBox(height: 12),
                 Text(
-                  'Бисквит, крем, начинка...',
-                  style: TextStyle(color: Colors.grey, fontSize: 12),
+                  l.form_section_empty_title,
+                  style: const TextStyle(color: Colors.grey),
+                ),
+                Text(
+                  l.form_section_empty_hint,
+                  style: const TextStyle(color: Colors.grey, fontSize: 12),
                 ),
               ],
             ),
@@ -816,7 +842,9 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
                                     ),
                                   ),
                                   Text(
-                                    'пересчёт: ${section.type.scaleLabel}',
+                                    l.form_section_scale_label(
+                                      section.type.scaleLabel,
+                                    ),
                                     style: TextStyle(
                                       fontSize: 11,
                                       color: Colors.grey.shade500,
@@ -917,11 +945,10 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
                                                 return TextField(
                                                   controller: ctrl,
                                                   focusNode: fn,
-                                                  decoration:
-                                                      const InputDecoration(
-                                                        hintText: 'Ингредиент',
-                                                        isDense: true,
-                                                      ),
+                                                  decoration: InputDecoration(
+                                                    hintText: l.form_ingredient_hint,
+                                                    isDense: true,
+                                                  ),
                                                 );
                                               },
                                         ),
@@ -975,7 +1002,7 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
                               onPressed: () => _addIngredient(section),
                               icon: Icon(Icons.add, size: 16, color: colors[0]),
                               label: Text(
-                                'Ингредиент',
+                                l.form_ingredient_hint,
                                 style: TextStyle(color: colors[0]),
                               ),
                             ),
@@ -991,7 +1018,7 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
                                 minLines: 1,
                                 style: const TextStyle(fontSize: 13),
                                 decoration: InputDecoration(
-                                  hintText: 'Заметка к секции (опционально)',
+                                  hintText: l.form_section_note_hint,
                                   hintStyle: TextStyle(
                                     fontSize: 13,
                                     color: Colors.grey.shade400,
@@ -1112,19 +1139,21 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
                             : null,
                       ),
                       child: _imagePath.isEmpty
-                          ? const Center(
+                          ? Center(
                               child: Column(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  Icon(
+                                  const Icon(
                                     Icons.add_a_photo_outlined,
                                     color: Color(0xFFE85D75),
                                     size: 28,
                                   ),
-                                  SizedBox(height: 4),
+                                  const SizedBox(height: 4),
                                   Text(
-                                    'Фото',
-                                    style: TextStyle(
+                                    AppLocalizations.of(
+                                      context,
+                                    ).form_photo_label,
+                                    style: const TextStyle(
                                       color: Color(0xFFE85D75),
                                       fontSize: 12,
                                     ),
@@ -1138,15 +1167,17 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
                 ),
                 const SizedBox(height: 20),
 
-                const Text(
-                  'Название',
-                  style: TextStyle(fontWeight: FontWeight.w600),
+                Text(
+                  AppLocalizations.of(context).form_field_title,
+                  style: const TextStyle(fontWeight: FontWeight.w600),
                 ),
                 const SizedBox(height: 8),
                 TextField(
                   controller: _titleController,
-                  decoration: const InputDecoration(
-                    hintText: 'Например: Шоколадный торт',
+                  decoration: InputDecoration(
+                    hintText: AppLocalizations.of(
+                      context,
+                    ).form_field_title_hint,
                   ),
                 ),
                 const SizedBox(height: 20),
@@ -1155,13 +1186,13 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
                   crossAxisAlignment: CrossAxisAlignment.baseline,
                   textBaseline: TextBaseline.alphabetic,
                   children: [
-                    const Text(
-                      'Размеры формы',
-                      style: TextStyle(fontWeight: FontWeight.w600),
+                    Text(
+                      AppLocalizations.of(context).form_section_size_header,
+                      style: const TextStyle(fontWeight: FontWeight.w600),
                     ),
                     const SizedBox(width: 6),
                     Text(
-                      '(высота — опционально)',
+                      AppLocalizations.of(context).form_section_size_subtitle,
                       style: TextStyle(
                         fontSize: 12,
                         color: Colors.grey.shade500,
@@ -1177,13 +1208,14 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
                       child: TextField(
                         controller: _diameterController,
                         keyboardType: TextInputType.number,
-                        decoration: const InputDecoration(
+                        decoration: InputDecoration(
                           hintText: '20',
-                          suffixText: 'см',
-                          labelText: 'Диаметр',
-                          // always — иначе у пустого поля suffix «см»
-                          // схлопывается, поля Диаметр/Высота выглядят
-                          // непоследовательно.
+                          suffixText: AppLocalizations.of(
+                            context,
+                          ).unit_centimeters_short,
+                          labelText: AppLocalizations.of(
+                            context,
+                          ).form_field_diameter,
                           floatingLabelBehavior: FloatingLabelBehavior.always,
                         ),
                       ),
@@ -1193,10 +1225,16 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
                       child: TextField(
                         controller: _heightController,
                         keyboardType: TextInputType.number,
-                        decoration: const InputDecoration(
-                          hintText: 'опц.',
-                          suffixText: 'см',
-                          labelText: 'Высота',
+                        decoration: InputDecoration(
+                          hintText: AppLocalizations.of(
+                            context,
+                          ).form_field_height_optional,
+                          suffixText: AppLocalizations.of(
+                            context,
+                          ).unit_centimeters_short,
+                          labelText: AppLocalizations.of(
+                            context,
+                          ).form_field_height,
                           floatingLabelBehavior: FloatingLabelBehavior.always,
                         ),
                       ),
@@ -1216,12 +1254,12 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
                     tilePadding: EdgeInsets.zero,
                     childrenPadding: EdgeInsets.zero,
                     initiallyExpanded: _hasAdvancedData,
-                    title: const Text(
-                      'Дополнительно',
-                      style: TextStyle(fontWeight: FontWeight.w600),
+                    title: Text(
+                      AppLocalizations.of(context).form_section_extras_header,
+                      style: const TextStyle(fontWeight: FontWeight.w600),
                     ),
                     subtitle: Text(
-                      'вес, заметки, оценка, теги',
+                      AppLocalizations.of(context).form_section_extras_subtitle,
                       style: TextStyle(
                         fontSize: 12,
                         color: Colors.grey.shade500,
@@ -1229,41 +1267,48 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
                     ),
                     children: [
                       const SizedBox(height: 4),
-                      const Text(
-                        'Вес (необязательно)',
-                        style: TextStyle(fontWeight: FontWeight.w600),
+                      Text(
+                        AppLocalizations.of(
+                          context,
+                        ).form_field_weight_optional_label,
+                        style: const TextStyle(fontWeight: FontWeight.w600),
                       ),
                       const SizedBox(height: 8),
                       TextField(
                         controller: _weightController,
                         keyboardType: TextInputType.number,
-                        decoration: const InputDecoration(
+                        decoration: InputDecoration(
                           hintText: '2000',
-                          suffixText: 'г',
-                          labelText: 'Вес',
+                          suffixText: AppLocalizations.of(
+                            context,
+                          ).unit_grams_short,
+                          labelText: AppLocalizations.of(
+                            context,
+                          ).form_field_weight,
                         ),
                       ),
                       const SizedBox(height: 20),
-                      const Text(
-                        'Заметки / шаги (необязательно)',
-                        style: TextStyle(fontWeight: FontWeight.w600),
+                      Text(
+                        AppLocalizations.of(context).form_field_notes_label,
+                        style: const TextStyle(fontWeight: FontWeight.w600),
                       ),
                       const SizedBox(height: 8),
                       TextField(
                         controller: _notesController,
                         maxLines: 5,
                         minLines: 3,
-                        decoration: const InputDecoration(
-                          hintText:
-                              'Например: испечь при 170°C 35 мин. Бисквит — за день до сборки.',
+                        decoration: InputDecoration(
+                          hintText: AppLocalizations.of(
+                            context,
+                          ).form_field_notes_hint,
                         ),
                       ),
                       const SizedBox(height: 20),
                       Row(
                         children: [
-                          const Text(
-                            'Оценка',
-                            style: TextStyle(fontWeight: FontWeight.w600),
+                          Text(
+                            AppLocalizations.of(context).form_field_rating_label,
+                            style: const TextStyle(fontWeight: FontWeight.w600),
                           ),
                           const Spacer(),
                           ...List.generate(5, (i) {
@@ -1293,17 +1338,19 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
                                 _markDirty();
                                 setState(() => _rating = 0);
                               },
-                              child: const Text(
-                                'Снять',
-                                style: TextStyle(fontSize: 12),
+                              child: Text(
+                                AppLocalizations.of(context).form_rating_clear,
+                                style: const TextStyle(fontSize: 12),
                               ),
                             ),
                         ],
                       ),
                       const SizedBox(height: 20),
-                      const Text(
-                        'Теги (необязательно)',
-                        style: TextStyle(fontWeight: FontWeight.w600),
+                      Text(
+                        AppLocalizations.of(
+                          context,
+                        ).form_field_tags_label_optional,
+                        style: const TextStyle(fontWeight: FontWeight.w600),
                       ),
                       const SizedBox(height: 8),
                       TextField(
@@ -1311,9 +1358,12 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
                         textInputAction: TextInputAction.done,
                         onSubmitted: (_) => _addTag(),
                         decoration: InputDecoration(
-                          hintText: 'шоколадный, без глютена',
-                          helperText:
-                              'Введи тег и нажми Enter (или через запятую)',
+                          hintText: AppLocalizations.of(
+                            context,
+                          ).form_field_tags_input_hint,
+                          helperText: AppLocalizations.of(
+                            context,
+                          ).form_field_tags_helper,
                           suffixIcon: IconButton(
                             icon: const Icon(Icons.add),
                             onPressed: _addTag,
@@ -1347,9 +1397,11 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
                 // Секции
                 Row(
                   children: [
-                    const Text(
-                      'Состав',
-                      style: TextStyle(
+                    Text(
+                      AppLocalizations.of(
+                        context,
+                      ).form_section_composition_header,
+                      style: const TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.w600,
                       ),
@@ -1358,7 +1410,9 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
                     FilledButton.icon(
                       onPressed: () => _addSection(),
                       icon: const Icon(Icons.add, size: 18),
-                      label: const Text('Секция'),
+                      label: Text(
+                        AppLocalizations.of(context).form_section_button,
+                      ),
                       style: FilledButton.styleFrom(
                         backgroundColor: const Color(0xFFFF6B8A),
                       ),
@@ -1379,8 +1433,8 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
                     icon: const Icon(Icons.layers_outlined),
                     label: Text(
                       _additionalTiers.isEmpty
-                          ? 'Добавить ещё один ярус'
-                          : 'Ещё один ярус',
+                          ? AppLocalizations.of(context).form_add_tier_first
+                          : AppLocalizations.of(context).form_add_tier_more,
                     ),
                     style: OutlinedButton.styleFrom(
                       foregroundColor: const Color(0xFFE85D75),
@@ -1457,23 +1511,27 @@ class _SectionPicker extends StatelessWidget {
   }
 
   void _showCustomActions(BuildContext context, SectionType type) {
+    final l = AppLocalizations.of(context);
     showDialog<void>(
       context: context,
       builder: (ctx) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         title: Text('${type.icon} ${type.name}'),
-        content: const Text('Кастомный тип секции'),
+        content: Text(l.form_custom_type_actions_title),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Отмена'),
+            child: Text(l.common_cancel),
           ),
           TextButton(
             onPressed: () {
               Navigator.pop(ctx);
               if (onDeleteCustom != null) onDeleteCustom!(type);
             },
-            child: const Text('Удалить', style: TextStyle(color: Colors.red)),
+            child: Text(
+              l.common_delete,
+              style: const TextStyle(color: Colors.red),
+            ),
           ),
           FilledButton(
             onPressed: () {
@@ -1483,7 +1541,7 @@ class _SectionPicker extends StatelessWidget {
             style: FilledButton.styleFrom(
               backgroundColor: const Color(0xFFFF6B8A),
             ),
-            child: const Text('Изменить'),
+            child: Text(l.common_edit),
           ),
         ],
       ),
@@ -1491,11 +1549,22 @@ class _SectionPicker extends StatelessWidget {
   }
 
   /// Сгруппировано тематически — новичку проще понять, что для чего.
+  /// Ключи — внутренние идентификаторы категорий, отображаемое имя берётся
+  /// из ARB через `_categoryDisplay`. Имена пресетов («Бисквит» и т.д.) —
+  /// data, остаются на русском пока не локализуем сами пресеты.
   static const Map<String, List<String>> _categoryOrder = {
-    'Основа': ['Бисквит', 'Безе'],
-    'Кремы и начинки': ['Крем', 'Начинка', 'Мусс'],
-    'Покрытия и пропитки': ['Покрытие', 'Ганаш', 'Пропитка', 'Глазурь'],
-    'Декор': ['Декор'],
+    'base': ['Бисквит', 'Безе'],
+    'creams': ['Крем', 'Начинка', 'Мусс'],
+    'coatings': ['Покрытие', 'Ганаш', 'Пропитка', 'Глазурь'],
+    'decor': ['Декор'],
+  };
+
+  String _categoryDisplay(String key, AppLocalizations l) => switch (key) {
+    'base' => l.form_section_picker_cat_base,
+    'creams' => l.form_section_picker_cat_creams,
+    'coatings' => l.form_section_picker_cat_coatings,
+    'decor' => l.form_section_picker_cat_decor,
+    _ => key,
   };
 
   List<SectionType> _byCategory(String name) {
@@ -1526,18 +1595,19 @@ class _SectionPicker extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
     return SingleChildScrollView(
       padding: const EdgeInsets.fromLTRB(20, 20, 20, 40),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Выберите секцию',
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          Text(
+            l.form_section_picker_title,
+            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           ),
           for (final entry in _categoryOrder.entries) ...[
-            _categoryHeader(entry.key),
+            _categoryHeader(_categoryDisplay(entry.key, l)),
             Wrap(
               spacing: 8,
               runSpacing: 10,
@@ -1547,7 +1617,7 @@ class _SectionPicker extends StatelessWidget {
             ),
           ],
           if (customTypes.isNotEmpty) ...[
-            _categoryHeader('Свои типы'),
+            _categoryHeader(l.form_section_picker_custom_group),
             Wrap(
               spacing: 8,
               runSpacing: 10,
@@ -1570,14 +1640,14 @@ class _SectionPicker extends StatelessWidget {
                   borderRadius: BorderRadius.circular(20),
                   border: Border.all(color: const Color(0xFFFF6B8A)),
                 ),
-                child: const Row(
+                child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(Icons.add, size: 18, color: Color(0xFFE85D75)),
-                    SizedBox(width: 6),
+                    const Icon(Icons.add, size: 18, color: Color(0xFFE85D75)),
+                    const SizedBox(width: 6),
                     Text(
-                      'Создать свой тип',
-                      style: TextStyle(
+                      l.form_section_picker_create_custom,
+                      style: const TextStyle(
                         fontWeight: FontWeight.w600,
                         color: Color(0xFFE85D75),
                       ),
@@ -1633,6 +1703,9 @@ class _UnitToggle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
+    // Storage-id ('г'/'шт') стабильный; пользователь видит локализованную метку.
+    final display = unit == 'шт' ? l.unit_pieces_short : l.unit_grams_short;
     return InkWell(
       onTap: () => onChange(unit == 'г' ? 'шт' : 'г'),
       borderRadius: BorderRadius.circular(8),
@@ -1643,7 +1716,7 @@ class _UnitToggle extends StatelessWidget {
           borderRadius: BorderRadius.circular(6),
         ),
         child: Text(
-          unit,
+          display,
           style: const TextStyle(
             fontSize: 11,
             fontWeight: FontWeight.w600,

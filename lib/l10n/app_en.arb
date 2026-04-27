@@ -190,9 +190,52 @@
   },
   "form_photo_pick": "From gallery",
   "form_photo_camera": "Take photo",
-  "form_photo_remove": "Remove",
-  "form_photo_error_camera": "Couldn't open camera. Check permissions.",
-  "form_photo_error_gallery": "Couldn't open gallery.",
+  "form_photo_remove": "Remove photo",
+  "form_photo_error_camera": "Couldn't open camera: {err}",
+  "@form_photo_error_camera": {
+    "placeholders": { "err": { "type": "String" } }
+  },
+  "form_photo_error_gallery": "Couldn't pick photo: {err}",
+  "@form_photo_error_gallery": {
+    "placeholders": { "err": { "type": "String" } }
+  },
+  "form_photo_label": "Photo",
+  "form_field_title_hint": "e.g. Chocolate cake",
+  "form_field_diameter_short": "Diameter",
+  "form_field_height_optional": "opt.",
+  "form_field_weight_optional_label": "Weight (optional)",
+  "form_field_notes_label": "Notes / steps (optional)",
+  "form_field_notes_hint": "e.g. bake at 170°C for 35 min. Sponge — day before assembly.",
+  "form_field_rating_label": "Rating",
+  "form_field_tags_label_optional": "Tags (optional)",
+  "form_field_tags_input_hint": "chocolate, gluten-free",
+  "form_field_tags_helper": "Enter a tag and press Enter (or comma)",
+  "form_section_extras_subtitle": "weight, notes, rating, tags",
+  "form_tier_composition": "Tier composition",
+  "form_section_button": "Section",
+  "form_section_empty_title": "Add a section",
+  "form_section_empty_hint": "Sponge, cream, filling...",
+  "form_section_note_hint": "Section note (optional)",
+  "form_section_scale_label": "scale: {label}",
+  "@form_section_scale_label": {
+    "placeholders": { "label": { "type": "String" } }
+  },
+  "form_ingredient_hint": "Ingredient",
+  "form_add_tier_first": "Add another tier",
+  "form_add_tier_more": "One more tier",
+  "form_error_no_ingredients": "Fill at least one ingredient with weight > 0",
+  "form_error_tiers_skipped_full": "Tier(s) {numbers} skipped: no ingredients with weight > 0 or sizes not filled",
+  "@form_error_tiers_skipped_full": {
+    "placeholders": { "numbers": { "type": "String" } }
+  },
+  "form_section_picker_title": "Choose section",
+  "form_section_picker_create_custom": "Create custom type",
+  "form_section_picker_custom_group": "Custom types",
+  "form_section_picker_cat_base": "Base",
+  "form_section_picker_cat_creams": "Creams & fillings",
+  "form_section_picker_cat_coatings": "Coatings & syrups",
+  "form_section_picker_cat_decor": "Decor",
+  "form_custom_type_actions_title": "Custom section type",
 
   "scaler_title_size": "By size",
   "scaler_title_weight": "By weight",
@@ -214,6 +257,94 @@
   "scaler_share_pdf": "Save as PDF",
   "scaler_shopping_list": "Shopping list",
   "scaler_shopping_list_title": "Shopping list",
+  "scaler_shopping_list_total": "total {grams}",
+  "@scaler_shopping_list_total": {
+    "placeholders": { "grams": { "type": "String" } }
+  },
+  "scaler_shopping_list_empty": "No ingredients",
+  "scaler_total_label": "rescaled",
+  "scaler_export_tooltip": "Export",
+  "scaler_export_share_text": "Share as text",
+  "scaler_export_save_pdf": "Save as PDF",
+  "scaler_pdf_error": "PDF error: {err}",
+  "@scaler_pdf_error": {
+    "placeholders": { "err": { "type": "String" } }
+  },
+  "scaler_cooked_first": "Logged! First time 🎂",
+  "scaler_original_size": "Original: {sym} {d} {cm}",
+  "@scaler_original_size": {
+    "placeholders": {
+      "sym": { "type": "String" },
+      "d": { "type": "int" },
+      "cm": { "type": "String" }
+    }
+  },
+  "scaler_original_size_with_height": "Original: {sym} {d}×{h} {cm}",
+  "@scaler_original_size_with_height": {
+    "placeholders": {
+      "sym": { "type": "String" },
+      "d": { "type": "int" },
+      "h": { "type": "int" },
+      "cm": { "type": "String" }
+    }
+  },
+  "scaler_original_size_with_height_weight": "Original: {sym} {d}×{h} {cm} • {weight}",
+  "@scaler_original_size_with_height_weight": {
+    "placeholders": {
+      "sym": { "type": "String" },
+      "d": { "type": "int" },
+      "h": { "type": "int" },
+      "cm": { "type": "String" },
+      "weight": { "type": "String" }
+    }
+  },
+  "scaler_original_size_weight": "Original: {sym} {d} {cm} • {weight}",
+  "@scaler_original_size_weight": {
+    "placeholders": {
+      "sym": { "type": "String" },
+      "d": { "type": "int" },
+      "cm": { "type": "String" },
+      "weight": { "type": "String" }
+    }
+  },
+  "scaler_original_weight": "Original: {weight}",
+  "@scaler_original_weight": {
+    "placeholders": { "weight": { "type": "String" } }
+  },
+  "scaler_tier_label_named": "Tier {n}: {label}",
+  "@scaler_tier_label_named": {
+    "placeholders": {
+      "n": { "type": "int" },
+      "label": { "type": "String" }
+    }
+  },
+  "scaler_tier_label": "Tier {n}",
+  "@scaler_tier_label": {
+    "placeholders": { "n": { "type": "int" } }
+  },
+  "scaler_tiers_total": "{tiers} tier(s) • total {weight}",
+  "@scaler_tiers_total": {
+    "placeholders": {
+      "tiers": { "type": "int" },
+      "weight": { "type": "String" }
+    }
+  },
+  "share_diameter": "{sym} {d} {cm}",
+  "@share_diameter": {
+    "placeholders": {
+      "sym": { "type": "String" },
+      "d": { "type": "int" },
+      "cm": { "type": "String" }
+    }
+  },
+  "share_height": "height {h} {cm}",
+  "@share_height": {
+    "placeholders": {
+      "h": { "type": "int" },
+      "cm": { "type": "String" }
+    }
+  },
+  "share_notes_header": "📝 Notes",
 
   "settings_title": "Settings",
   "settings_group_appearance": "Appearance",
@@ -236,6 +367,84 @@
 
   "settings_quick_diameters": "Quick diameters",
   "settings_quick_diameters_hint": "Comma-separated, cm",
+  "settings_quick_diameters_helper": "These numbers appear as chip buttons under the diameter slider on the scaler screen.",
+  "settings_quick_diameters_saved": "Quick diameters saved",
+  "settings_default_mode_size_title": "Default: by size",
+  "settings_default_mode_weight_title": "Default: by weight",
+  "settings_default_mode_weight_subtitle": "Only if the recipe has weight set",
+  "settings_auto_update_subtitle": "On launch, the app asks GitHub for a new version",
+  "settings_export_done": "Exported",
+  "settings_export_empty": "Nothing to export — list is empty",
+  "settings_export_error": "Export error: {err}",
+  "@settings_export_error": {
+    "placeholders": { "err": { "type": "String" } }
+  },
+  "settings_import_nothing": "Nothing imported",
+  "settings_import_count": "Imported: {count}",
+  "@settings_import_count": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "settings_import_error_with": "Import error: {err}",
+  "@settings_import_error_with": {
+    "placeholders": { "err": { "type": "String" } }
+  },
+  "settings_open_link_failed": "Couldn't open link",
+  "settings_no_custom_types": "No custom types",
+  "settings_custom_type_scale_label": "scale: {name}",
+  "@settings_custom_type_scale_label": {
+    "placeholders": { "name": { "type": "String" } }
+  },
+  "settings_reset_dialog_title": "Reset settings?",
+  "settings_reset_dialog_body": "Theme, sort order, auto-update check, default scale mode and quick diameters will return to defaults. Recipes and custom section types will NOT be touched.",
+  "settings_reset_action": "Reset",
+  "settings_reset_subtitle": "Theme, sort, auto-update, default mode, quick diameters. Recipes are kept.",
+  "settings_delete_all_action": "Delete everything",
+  "settings_delete_all_full_body": "All recipes, custom section types and import snapshot will be deleted permanently. The previous backup will also disappear. Sure?",
+  "settings_check_update_done": "You're on the latest version",
+  "settings_check_update_available": "v{version} is available. Reopen the app — the update banner will show up.",
+  "@settings_check_update_available": {
+    "placeholders": { "version": { "type": "String" } }
+  },
+  "settings_show_welcome_again_subtitle": "Quick app tour",
+  "settings_version_label": "Version",
+  "settings_license_label": "License",
+  "settings_license_value": "MIT",
+  "settings_github_source": "Source on GitHub",
+  "settings_show_stats": "Show stats",
+  "settings_import_undo_action": "Undo last import",
+  "settings_save_action": "Save",
+  "stats_title": "Statistics",
+  "stats_recipes": "Recipes",
+  "stats_ingredients": "Total ingredients",
+  "stats_total_recipe_weights": "Sum of recipe weights",
+  "stats_top_ingredients_header": "TOP INGREDIENTS",
+  "stats_top_tags_header": "TOP TAGS",
+  "custom_type_dialog_new": "New section type",
+  "custom_type_dialog_edit": "Edit section type",
+  "custom_type_field_name": "Name",
+  "custom_type_field_name_hint": "e.g. Marshmallow",
+  "custom_type_field_icon": "Icon (emoji)",
+  "custom_type_field_scale_label": "How to scale",
+  "custom_type_scale_volume": "By volume (d² × h)",
+  "custom_type_scale_area": "By area (d²)",
+  "custom_type_scale_fixed": "Fixed (no change)",
+  "custom_type_create": "Create",
+  "custom_type_used_dialog_title": "Delete type «{name}»?",
+  "@custom_type_used_dialog_title": {
+    "placeholders": { "name": { "type": "String" } }
+  },
+  "custom_type_used_dialog_body": "This type is used in {count} recipe(s):\n\n{names}\n\nExisting sections will keep working as is. But you won't be able to add new sections of this type.",
+  "@custom_type_used_dialog_body": {
+    "placeholders": {
+      "count": { "type": "int" },
+      "names": { "type": "String" }
+    }
+  },
+  "custom_type_more": "... and {n} more",
+  "@custom_type_more": {
+    "placeholders": { "n": { "type": "int" } }
+  },
+  "custom_type_force_delete": "Delete anyway",
   "settings_default_scale_mode": "Default scale mode",
   "settings_default_scale_mode_size": "By size",
   "settings_default_scale_mode_weight": "By weight",

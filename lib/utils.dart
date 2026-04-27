@@ -15,17 +15,31 @@ String formatNumber(double v) {
 
 /// Форматирует вес в граммах для отображения: до 1000 г — целые граммы,
 /// от 1000 — килограммы с одной десятичной (RU-стиль с запятой).
-String formatGrams(double g) {
+/// Единицы по умолчанию русские; если нужны локализованные — передайте
+/// `gramsUnit` и `kilogramsUnit`. Сделано так, а не через BuildContext,
+/// чтобы функция оставалась чистой и вызывалась из shared_text/PDF/share.
+String formatGrams(double g, {String gramsUnit = 'г', String kilogramsUnit = 'кг'}) {
   if (g >= 1000) {
-    return '${(g / 1000).toStringAsFixed(1).replaceAll('.', ',')} кг';
+    return '${(g / 1000).toStringAsFixed(1).replaceAll('.', ',')} $kilogramsUnit';
   }
-  return '${g.round()} г';
+  return '${g.round()} $gramsUnit';
 }
 
 /// Форматирует количество ингредиента с учётом единицы:
-/// - 'г' → formatGrams (граммы / килограммы с запятой)
-/// - 'шт' → целое число штук, штучный round (1.5 → 2, 0.4 → 0)
-String formatAmount(double amount, String unit) {
-  if (unit == 'шт') return '${amount.round()} шт';
-  return formatGrams(amount);
+/// - storage-unit `'г'` → formatGrams (граммы / килограммы)
+/// - storage-unit `'шт'` → целое число штук, штучный round (1.5 → 2)
+/// Локализованные единицы передаются опционально (по умолчанию русские).
+String formatAmount(
+  double amount,
+  String unit, {
+  String gramsUnit = 'г',
+  String kilogramsUnit = 'кг',
+  String piecesUnit = 'шт',
+}) {
+  if (unit == 'шт') return '${amount.round()} $piecesUnit';
+  return formatGrams(
+    amount,
+    gramsUnit: gramsUnit,
+    kilogramsUnit: kilogramsUnit,
+  );
 }

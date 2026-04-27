@@ -435,14 +435,117 @@ class AppLocalizationsRu extends AppLocalizations {
   String get form_photo_camera => 'Сделать фото';
 
   @override
-  String get form_photo_remove => 'Убрать';
+  String get form_photo_remove => 'Убрать фото';
 
   @override
-  String get form_photo_error_camera =>
-      'Не удалось открыть камеру. Проверьте разрешения.';
+  String form_photo_error_camera(String err) {
+    return 'Не удалось открыть камеру: $err';
+  }
 
   @override
-  String get form_photo_error_gallery => 'Не удалось открыть галерею.';
+  String form_photo_error_gallery(String err) {
+    return 'Не удалось выбрать фото: $err';
+  }
+
+  @override
+  String get form_photo_label => 'Фото';
+
+  @override
+  String get form_field_title_hint => 'Например: Шоколадный торт';
+
+  @override
+  String get form_field_diameter_short => 'Диаметр';
+
+  @override
+  String get form_field_height_optional => 'опц.';
+
+  @override
+  String get form_field_weight_optional_label => 'Вес (необязательно)';
+
+  @override
+  String get form_field_notes_label => 'Заметки / шаги (необязательно)';
+
+  @override
+  String get form_field_notes_hint =>
+      'Например: испечь при 170°C 35 мин. Бисквит — за день до сборки.';
+
+  @override
+  String get form_field_rating_label => 'Оценка';
+
+  @override
+  String get form_field_tags_label_optional => 'Теги (необязательно)';
+
+  @override
+  String get form_field_tags_input_hint => 'шоколадный, без глютена';
+
+  @override
+  String get form_field_tags_helper =>
+      'Введи тег и нажми Enter (или через запятую)';
+
+  @override
+  String get form_section_extras_subtitle => 'вес, заметки, оценка, теги';
+
+  @override
+  String get form_tier_composition => 'Состав яруса';
+
+  @override
+  String get form_section_button => 'Секция';
+
+  @override
+  String get form_section_empty_title => 'Добавьте секцию';
+
+  @override
+  String get form_section_empty_hint => 'Бисквит, крем, начинка...';
+
+  @override
+  String get form_section_note_hint => 'Заметка к секции (опционально)';
+
+  @override
+  String form_section_scale_label(String label) {
+    return 'пересчёт: $label';
+  }
+
+  @override
+  String get form_ingredient_hint => 'Ингредиент';
+
+  @override
+  String get form_add_tier_first => 'Добавить ещё один ярус';
+
+  @override
+  String get form_add_tier_more => 'Ещё один ярус';
+
+  @override
+  String get form_error_no_ingredients =>
+      'Заполните хотя бы один ингредиент с весом > 0';
+
+  @override
+  String form_error_tiers_skipped_full(String numbers) {
+    return 'Ярус(ы) $numbers пропущены: нет ингредиентов с весом > 0 или не заполнены размеры';
+  }
+
+  @override
+  String get form_section_picker_title => 'Выберите секцию';
+
+  @override
+  String get form_section_picker_create_custom => 'Создать свой тип';
+
+  @override
+  String get form_section_picker_custom_group => 'Свои типы';
+
+  @override
+  String get form_section_picker_cat_base => 'Основа';
+
+  @override
+  String get form_section_picker_cat_creams => 'Кремы и начинки';
+
+  @override
+  String get form_section_picker_cat_coatings => 'Покрытия и пропитки';
+
+  @override
+  String get form_section_picker_cat_decor => 'Декор';
+
+  @override
+  String get form_custom_type_actions_title => 'Кастомный тип секции';
 
   @override
   String get scaler_title_size => 'По размеру';
@@ -489,6 +592,98 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get scaler_shopping_list_title => 'Список покупок';
+
+  @override
+  String scaler_shopping_list_total(String grams) {
+    return 'итого $grams';
+  }
+
+  @override
+  String get scaler_shopping_list_empty => 'Ингредиентов нет';
+
+  @override
+  String get scaler_total_label => 'пересчёт';
+
+  @override
+  String get scaler_export_tooltip => 'Экспорт';
+
+  @override
+  String get scaler_export_share_text => 'Поделиться текстом';
+
+  @override
+  String get scaler_export_save_pdf => 'Сохранить как PDF';
+
+  @override
+  String scaler_pdf_error(String err) {
+    return 'Ошибка PDF: $err';
+  }
+
+  @override
+  String get scaler_cooked_first => 'Записал! Первый раз 🎂';
+
+  @override
+  String scaler_original_size(String sym, int d, String cm) {
+    return 'Оригинал: $sym $d $cm';
+  }
+
+  @override
+  String scaler_original_size_with_height(String sym, int d, int h, String cm) {
+    return 'Оригинал: $sym $d×$h $cm';
+  }
+
+  @override
+  String scaler_original_size_with_height_weight(
+    String sym,
+    int d,
+    int h,
+    String cm,
+    String weight,
+  ) {
+    return 'Оригинал: $sym $d×$h $cm • $weight';
+  }
+
+  @override
+  String scaler_original_size_weight(
+    String sym,
+    int d,
+    String cm,
+    String weight,
+  ) {
+    return 'Оригинал: $sym $d $cm • $weight';
+  }
+
+  @override
+  String scaler_original_weight(String weight) {
+    return 'Оригинал: $weight';
+  }
+
+  @override
+  String scaler_tier_label_named(int n, String label) {
+    return 'Ярус $n: $label';
+  }
+
+  @override
+  String scaler_tier_label(int n) {
+    return 'Ярус $n';
+  }
+
+  @override
+  String scaler_tiers_total(int tiers, String weight) {
+    return '$tiers ярус(ов) • итого $weight';
+  }
+
+  @override
+  String share_diameter(String sym, int d, String cm) {
+    return '$sym $d $cm';
+  }
+
+  @override
+  String share_height(int h, String cm) {
+    return 'высота $h $cm';
+  }
+
+  @override
+  String get share_notes_header => '📝 Заметки';
 
   @override
   String get settings_title => 'Настройки';
@@ -543,6 +738,182 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get settings_quick_diameters_hint => 'Через запятую, см';
+
+  @override
+  String get settings_quick_diameters_helper =>
+      'Эти числа показываются как кнопки-чипы под слайдером диаметра на экране пересчёта.';
+
+  @override
+  String get settings_quick_diameters_saved => 'Быстрые диаметры сохранены';
+
+  @override
+  String get settings_default_mode_size_title => 'По умолчанию: По размеру';
+
+  @override
+  String get settings_default_mode_weight_title => 'По умолчанию: По весу';
+
+  @override
+  String get settings_default_mode_weight_subtitle =>
+      'Только если у рецепта указан вес';
+
+  @override
+  String get settings_auto_update_subtitle =>
+      'При запуске приложение спрашивает GitHub о новой версии';
+
+  @override
+  String get settings_export_done => 'Экспортировано';
+
+  @override
+  String get settings_export_empty => 'Нечего экспортировать — список пустой';
+
+  @override
+  String settings_export_error(String err) {
+    return 'Ошибка экспорта: $err';
+  }
+
+  @override
+  String get settings_import_nothing => 'Ничего не импортировано';
+
+  @override
+  String settings_import_count(int count) {
+    return 'Импортировано: $count';
+  }
+
+  @override
+  String settings_import_error_with(String err) {
+    return 'Ошибка импорта: $err';
+  }
+
+  @override
+  String get settings_open_link_failed => 'Не удалось открыть ссылку';
+
+  @override
+  String get settings_no_custom_types => 'Нет кастомных типов';
+
+  @override
+  String settings_custom_type_scale_label(String name) {
+    return 'масштаб: $name';
+  }
+
+  @override
+  String get settings_reset_dialog_title => 'Сбросить настройки?';
+
+  @override
+  String get settings_reset_dialog_body =>
+      'Тема, сортировка, авто-проверка обновлений, default-режим пересчёта и быстрые диаметры вернутся к дефолтам. Рецепты и кастомные типы секций НЕ затронутся.';
+
+  @override
+  String get settings_reset_action => 'Сбросить';
+
+  @override
+  String get settings_reset_subtitle =>
+      'Тема, сортировка, авто-обновление, default режим, быстрые диаметры. Рецепты не трогаются.';
+
+  @override
+  String get settings_delete_all_action => 'Удалить всё';
+
+  @override
+  String get settings_delete_all_full_body =>
+      'Все рецепты, кастомные типы секций и snapshot импорта будут удалены безвозвратно. Резервная копия предыдущего сохранения тоже исчезнет. Уверен?';
+
+  @override
+  String get settings_check_update_done => 'Установлена последняя версия';
+
+  @override
+  String settings_check_update_available(String version) {
+    return 'Доступна v$version. Открой приложение заново — появится баннер с обновлением.';
+  }
+
+  @override
+  String get settings_show_welcome_again_subtitle =>
+      'Краткий тур по приложению';
+
+  @override
+  String get settings_version_label => 'Версия';
+
+  @override
+  String get settings_license_label => 'Лицензия';
+
+  @override
+  String get settings_license_value => 'MIT';
+
+  @override
+  String get settings_github_source => 'Исходники на GitHub';
+
+  @override
+  String get settings_show_stats => 'Показать статистику';
+
+  @override
+  String get settings_import_undo_action => 'Откатить последний импорт';
+
+  @override
+  String get settings_save_action => 'Сохранить';
+
+  @override
+  String get stats_title => 'Статистика';
+
+  @override
+  String get stats_recipes => 'Рецептов';
+
+  @override
+  String get stats_ingredients => 'Ингредиентов всего';
+
+  @override
+  String get stats_total_recipe_weights => 'Сумма весов рецептов';
+
+  @override
+  String get stats_top_ingredients_header => 'ТОП ИНГРЕДИЕНТОВ';
+
+  @override
+  String get stats_top_tags_header => 'ТОП ТЕГОВ';
+
+  @override
+  String get custom_type_dialog_new => 'Новый тип секции';
+
+  @override
+  String get custom_type_dialog_edit => 'Изменить тип секции';
+
+  @override
+  String get custom_type_field_name => 'Название';
+
+  @override
+  String get custom_type_field_name_hint => 'Например, Маршмеллоу';
+
+  @override
+  String get custom_type_field_icon => 'Иконка (эмодзи)';
+
+  @override
+  String get custom_type_field_scale_label => 'Как масштабировать';
+
+  @override
+  String get custom_type_scale_volume => 'По объёму (d² × h)';
+
+  @override
+  String get custom_type_scale_area => 'По площади (d²)';
+
+  @override
+  String get custom_type_scale_fixed => 'Фикс (не меняется)';
+
+  @override
+  String get custom_type_create => 'Создать';
+
+  @override
+  String custom_type_used_dialog_title(String name) {
+    return 'Удалить тип «$name»?';
+  }
+
+  @override
+  String custom_type_used_dialog_body(int count, String names) {
+    return 'Этот тип используется в $count рецепте(ах):\n\n$names\n\nУже сохранённые секции продолжат работать как есть. Но добавить новые секции этого типа будет нельзя.';
+  }
+
+  @override
+  String custom_type_more(int n) {
+    return '... и ещё $n';
+  }
+
+  @override
+  String get custom_type_force_delete => 'Всё равно удалить';
 
   @override
   String get settings_default_scale_mode => 'Режим пересчёта по умолчанию';

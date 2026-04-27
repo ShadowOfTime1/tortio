@@ -2,6 +2,28 @@
 
 Все значимые изменения по версиям. Формат — обратный хронологический.
 
+## v0.0.11 — 2026-04-27 (английская локализация — фаза 2: формы и пересчёт)
+
+Доделка локализации после самопроверки в эмуляторе. Теперь все 4 основных экрана полностью на английском при выбранном языке English.
+
+### Что добавилось в этом релизе
+- **Форма создания/редактирования рецепта** — целиком: name / size / extras (notes / rating / tags) / composition / add tier / unsaved-dialog / photo picker / validation errors.
+- **Экран пересчёта (scaler)** — полностью: tabs by size/by weight, slider labels, original size/weight, total weight, height label, "I cooked it" snackbar, export menu, shopping list bottom sheet.
+- **Settings — оставшиеся экраны:** custom types (empty state + add), quick diameters + helper text + default mode radios, auto-update toggle + subtitle + check-now, export/import/undo, stats sheet, danger zone (reset settings + delete all + confirmation dialogs), about (version, welcome again, GitHub source, license).
+- **Section picker dialog**: «Choose section», категории (Base / Creams & fillings / Coatings & syrups / Decor), «Create custom type».
+- **Custom section type dialog** (создание/редактирование) с полями name / icon / scale type радиогруппой.
+- **Localized units everywhere**: `formatGrams` и `formatAmount` теперь принимают unit-suffix параметры (g/kg/pcs vs г/кг/шт). Пересчёт, scaler-итоги, ингредиент-amounts, shopping list — всё показывает в выбранном языке.
+- **`_UnitToggle`** в форме рецепта показывает локализованный label, при этом storage-id ('г'/'шт') остаётся стабильным — старые рецепты не ломаются.
+
+### Что НЕ переведено (намеренно — data, не UI)
+- **Названия preset-секций** («Бисквит», «Крем», «Мусс», «Декор» и т.д.) — это data в `SectionType.presets`. Чтобы локализовать, нужна миграция: ввести stable internal IDs ('sponge', 'cream', ...), хранить их в storage, отображать через ARB. Существующие рецепты ссылаются на эти имена — простой rename сломает их данные.
+- **Пресет-категории scale-types** ("объём" / "площадь" / "фикс") — приходят через `section.type.scaleType.name` (Dart enum name). Нужен helper.
+- **Sample recipe** ("Шоколадный торт (пример)" + ingredient names + notes) — это demo-data, генерируется sample_recipe.dart на русском.
+- **PDF export** и **share-text** оставлены на русском — это output для отправки/печати, не in-app UI.
+- **Имена ингредиентов** в существующих рецептах — пользовательские данные, не подлежат автопереводу.
+
+После Phase 2 пользователь с выбранным English видит весь UI на английском, включая формы, диалоги и юнит-суффиксы. Остаётся только data (названия пресет-секций и contents sample-recipe).
+
 ## v0.0.10 — 2026-04-27 (английская локализация — фаза 1)
 
 Первая фаза i18n. Инфраструктура + основные экраны переведены на английский. Глубокие экраны (форма рецепта, экран пересчёта) пока на русском — добью в следующем релизе.
