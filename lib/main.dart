@@ -1,6 +1,9 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'screens/recipe_list_screen.dart';
+import 'services/drive_backup_service.dart';
 import 'services/theme_service.dart';
 import 'services/update_service.dart';
 import 'theme.dart';
@@ -12,6 +15,9 @@ void main() async {
   // подсказку «повернуть» Android тогда не показывает (она перекрывала FAB).
   await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
   await ThemeService.instance.load();
+  // Тихий восстановление сессии Google Drive — без UI. Если был залогинен —
+  // подтянет user, иначе тихо вернёт null.
+  unawaited(DriveBackupService.instance.init());
   runApp(const TortioApp());
 }
 

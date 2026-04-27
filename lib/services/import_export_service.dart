@@ -80,6 +80,16 @@ class ImportExportService {
     return renumbered.length;
   }
 
+  /// Сериализует рецепты в тот же JSON-формат, что и `exportRecipes`.
+  /// Используется облачным бэкапом — он формирует тот же файл.
+  static String recipesToJsonString(List<Recipe> recipes) => _toJson(recipes);
+
+  /// Парсит JSON в список Recipe (тот же формат, что и при импорте файла).
+  /// Используется облачным бэкапом для restore'а.
+  static List<Recipe> parseJsonString(String jsonContent) {
+    return _fromJson(jsonContent);
+  }
+
   static String _toJson(List<Recipe> recipes) {
     final list = recipes.map((r) => _recipeToMap(r)).toList();
     return const JsonEncoder.withIndent('  ').convert(list);

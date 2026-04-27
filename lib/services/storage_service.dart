@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/recipe.dart';
+import 'drive_backup_service.dart';
 
 class StorageService {
   static const String _key = 'recipes';
@@ -33,7 +34,11 @@ class StorageService {
       await prefs.setString(_backupKey, previous);
     }
     final jsonList = recipes.map((r) => _recipeToJson(r)).toList();
-    await prefs.setString(_key, json.encode(jsonList));
+    final encoded = json.encode(jsonList);
+    await prefs.setString(_key, encoded);
+    // Если пользователь подключил Google Drive — планируем фоновую загрузку
+    // через debounce (no-op если не залогинен).
+    DriveBackupService.instance.scheduleUpload(encoded);
   }
 
   /// Снимок текущей коллекции, чтобы можно было откатить недавний импорт.

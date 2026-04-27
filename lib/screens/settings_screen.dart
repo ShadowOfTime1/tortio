@@ -5,6 +5,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../models/recipe.dart';
 import '../services/app_settings.dart';
 import '../services/custom_types_service.dart';
+import '../services/drive_backup_service.dart';
 import '../services/import_export_service.dart';
 import '../services/stats.dart';
 import '../services/storage_service.dart';
@@ -174,6 +175,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
     await StorageService.restoreImportSnapshot();
     await _load();
     _toast('Импорт откачен');
+  }
+
+  /// Колбэк после успешного восстановления из Google Drive — родительский
+  /// MainWrapper перечитает рецепты с диска при следующем resume.
+  void _onCloudRestored(int count) {
+    _toast('Восстановлено рецептов: $count');
   }
 
   Future<void> _clearAll() async {
@@ -625,6 +632,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
             onTap: _checkingUpdate ? null : _checkUpdateNow,
           ),
 
+          // === Облачный бэкап ===
+          _groupHeader('Облачный бэкап'),
+          _DriveBackupTile(onRestored: _onCloudRestored),
+
           // === Резервные копии ===
           _groupHeader('Резервные копии'),
           ListTile(
@@ -746,3 +757,195 @@ class _SettingsScreenState extends State<SettingsScreen> {
     ThemeMode.dark => 'Тёмная',
   };
 }
+
+class _DriveBackupTile extends StatefulWidget {
+  final void Function(int restoredCount) onRestored;
+  const _DriveBackupTile({required this.onRestored});
+
+  @override
+  State<_DriveBackupTile> createState() => _DriveBackupTileState();
+}
+
+class _DriveBackupTileState extends State<_DriveBackupTile> {
+  final _service = DriveBackupService.instance;
+
+  @override
+  void initState() {
+    super.initState();
+    _service.addListener(_onChange);
+  }
+
+  @override
+  void dispose() {
+    _service.removeListener(_onChange);
+    super.dispose();
+  }
+
+  void _onChange() {
+    if (mounted) setState(() {});
+  }
+
+  Future<void> _signIn() async {
+    final ok = await _service.signIn();
+    if (!ok || !mounted) return;
+    // После логина — проверяем есть ли существующий бэкап.
+    final remoteTime = await _service.remoteBackupTime();
+    if (!mounted) return;
+    if (remoteTime != null) {
+      final restore = await showDialog<bool>(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          title: const Text('Найден бэкап'),
+          content: Text(
+            'В Google Drive есть резервная копия от '
+            '${_formatDate(remoteTime)}. Восстановить её?\n\n'
+            'Если откажетесь — текущие рецепты на устройстве '
+            'перезапишут бэкап.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: const Text('Не восстанавливать'),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.pop(ctx, true),
+              child: const Text('Восстановить'),
+            ),
+          ],
+        ),
+      );
+      if (restore == true) {
+        await _restoreFromCloud();
+        return;
+      }
+    }
+    // Иначе — заливаем текущее на сервер.
+    final recipes = await StorageService.loadRecipes();
+    await _service.uploadNow(_recipesToJson(recipes));
+  }
+
+  Future<void> _restoreFromCloud() async {
+    final json = await _service.download();
+    if (json == null || !mounted) return;
+    final count = await _applyCloudJson(json);
+    widget.onRestored(count);
+  }
+
+  Future<int> _applyCloudJson(String jsonContent) async {
+    // Restore: replace (не merge) — облачный бэкап это снимок состояния,
+    // не приращение.
+    final restored = ImportExportService.parseJsonString(jsonContent);
+    await StorageService.saveRecipes(restored);
+    return restored.length;
+  }
+
+  String _recipesToJson(List<Recipe> recipes) {
+    return ImportExportService.recipesToJsonString(recipes);
+  }
+
+  String _formatDate(DateTime t) {
+    final local = t.toLocal();
+    final d = local.day.toString().padLeft(2, '0');
+    final m = local.month.toString().padLeft(2, '0');
+    final h = local.hour.toString().padLeft(2, '0');
+    final min = local.minute.toString().padLeft(2, '0');
+    return '$d.$m.${local.year} $h:$min';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final user = _service.user;
+    if (user == null) {
+      return ListTile(
+        leading: const Icon(Icons.cloud_off_outlined),
+        title: const Text('Подключить Google Drive'),
+        subtitle: const Text(
+          'Автобэкап рецептов в скрытой папке вашего Google Drive',
+        ),
+        trailing: _service.busy
+            ? const SizedBox(
+                width: 24,
+                height: 24,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              )
+            : null,
+        onTap: _service.busy ? null : _signIn,
+      );
+    }
+
+    final last = _service.lastSync;
+    final subtitle = last == null
+        ? user.email
+        : '${user.email}\nПоследняя синхр.: ${_formatDate(last)}';
+
+    return Column(
+      children: [
+        ListTile(
+          leading: const Icon(
+            Icons.cloud_done_outlined,
+            color: Color(0xFFE85D75),
+          ),
+          title: const Text('Google Drive подключён'),
+          subtitle: Text(subtitle),
+          isThreeLine: last != null,
+        ),
+        ListTile(
+          leading: const Icon(Icons.sync),
+          title: const Text('Синхронизировать сейчас'),
+          enabled: !_service.busy,
+          onTap: () async {
+            final messenger = ScaffoldMessenger.of(context);
+            final recipes = await StorageService.loadRecipes();
+            final ok = await _service.uploadNow(_recipesToJson(recipes));
+            if (!mounted) return;
+            messenger.showSnackBar(
+              SnackBar(
+                content: Text(ok ? 'Загружено в облако' : 'Не удалось'),
+                behavior: SnackBarBehavior.floating,
+              ),
+            );
+          },
+        ),
+        ListTile(
+          leading: const Icon(Icons.cloud_download_outlined),
+          title: const Text('Восстановить из облака'),
+          subtitle: const Text('Заменит текущие рецепты содержимым бэкапа'),
+          enabled: !_service.busy,
+          onTap: () async {
+            final confirm = await showDialog<bool>(
+              context: context,
+              builder: (ctx) => AlertDialog(
+                title: const Text('Восстановить из облака?'),
+                content: const Text(
+                  'Текущие рецепты на этом устройстве будут заменены '
+                  'содержимым бэкапа. Продолжить?',
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(ctx, false),
+                    child: const Text('Отмена'),
+                  ),
+                  FilledButton(
+                    onPressed: () => Navigator.pop(ctx, true),
+                    style: FilledButton.styleFrom(backgroundColor: Colors.red),
+                    child: const Text('Восстановить'),
+                  ),
+                ],
+              ),
+            );
+            if (confirm == true) await _restoreFromCloud();
+          },
+        ),
+        ListTile(
+          leading: const Icon(Icons.logout, color: Colors.grey),
+          title: const Text(
+            'Выйти из Google',
+            style: TextStyle(color: Colors.grey),
+          ),
+          onTap: () async => _service.signOut(),
+        ),
+      ],
+    );
+  }
+}
+
