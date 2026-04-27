@@ -1,3 +1,5 @@
+import 'package:tortio/l10n/app_localizations.dart';
+
 enum ScaleType { volume, area, fixed }
 
 class SectionType {
@@ -28,6 +30,28 @@ class SectionType {
     ScaleType.volume => 'объём',
     ScaleType.area => 'площадь',
     ScaleType.fixed => 'фикс',
+  };
+
+  String scaleLabelLocalized(AppLocalizations l) => switch (scaleType) {
+    ScaleType.volume => l.scale_label_volume,
+    ScaleType.area => l.scale_label_area,
+    ScaleType.fixed => l.scale_label_fixed,
+  };
+
+  /// Локализованное имя пресета. Для custom-типов и нераспознанных имён —
+  /// возвращает `name` как есть (имя custom-типа = user input).
+  String displayName(AppLocalizations l) => switch (name) {
+    'Бисквит' => l.preset_sponge,
+    'Крем' => l.preset_cream,
+    'Начинка' => l.preset_filling,
+    'Покрытие' => l.preset_coating,
+    'Ганаш' => l.preset_ganache,
+    'Пропитка' => l.preset_syrup,
+    'Мусс' => l.preset_mousse,
+    'Безе' => l.preset_meringue,
+    'Глазурь' => l.preset_glaze,
+    'Декор' => l.preset_decor,
+    _ => name,
   };
 }
 

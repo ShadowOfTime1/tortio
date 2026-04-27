@@ -835,7 +835,7 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    section.type.name,
+                                    section.type.displayName(l),
                                     style: const TextStyle(
                                       fontSize: 16,
                                       fontWeight: FontWeight.w600,
@@ -843,7 +843,7 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
                                   ),
                                   Text(
                                     l.form_section_scale_label(
-                                      section.type.scaleLabel,
+                                      section.type.scaleLabelLocalized(l),
                                     ),
                                     style: TextStyle(
                                       fontSize: 11,
@@ -1497,7 +1497,7 @@ class _SectionPicker extends StatelessWidget {
             Text(type.icon, style: const TextStyle(fontSize: 18)),
             const SizedBox(width: 6),
             Text(
-              type.name,
+              type.displayName(AppLocalizations.of(context)),
               style: const TextStyle(fontWeight: FontWeight.w500),
             ),
             if (isCustom) ...[
@@ -1516,7 +1516,7 @@ class _SectionPicker extends StatelessWidget {
       context: context,
       builder: (ctx) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: Text('${type.icon} ${type.name}'),
+        title: Text('${type.icon} ${type.displayName(l)}'),
         content: Text(l.form_custom_type_actions_title),
         actions: [
           TextButton(

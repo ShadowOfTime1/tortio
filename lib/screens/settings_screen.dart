@@ -584,9 +584,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
               (t) => ListTile(
                 dense: true,
                 leading: Text(t.icon, style: const TextStyle(fontSize: 22)),
-                title: Text(t.name),
+                title: Text(t.displayName(l)),
                 subtitle: Text(
-                  l.settings_custom_type_scale_label(t.scaleType.name),
+                  l.settings_custom_type_scale_label(t.scaleLabelLocalized(l)),
                 ),
                 trailing: Row(
                   mainAxisSize: MainAxisSize.min,

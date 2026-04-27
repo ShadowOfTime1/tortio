@@ -39,7 +39,7 @@
   "list_no_results_reset": "Reset filters",
   "list_filter_all_tags": "All",
   "list_fab_new_recipe": "Recipe",
-  "list_section_count": "{count, plural, one{{count} sec.} other{{count} sec.}}",
+  "list_section_count": "{count, plural, one{{count} sect.} other{{count} sect.}}",
   "@list_section_count": {
     "placeholders": { "count": { "type": "int" } }
   },
@@ -122,7 +122,7 @@
   "@time_years_ago": {
     "placeholders": { "n": { "type": "int" } }
   },
-  "list_card_summary": "{diameter_sym} {diameter} {cm} • {sections} sec. • {ingredients} ingr.",
+  "list_card_summary": "{diameter_sym} {diameter} {cm} • {sections} sect. • {ingredients} ingr.",
   "@list_card_summary": {
     "placeholders": {
       "diameter_sym": { "type": "String" },
@@ -428,6 +428,19 @@
   "custom_type_scale_volume": "By volume (d² × h)",
   "custom_type_scale_area": "By area (d²)",
   "custom_type_scale_fixed": "Fixed (no change)",
+  "scale_label_volume": "volume",
+  "scale_label_area": "area",
+  "scale_label_fixed": "fixed",
+  "preset_sponge": "Sponge",
+  "preset_cream": "Cream",
+  "preset_filling": "Filling",
+  "preset_coating": "Coating",
+  "preset_ganache": "Ganache",
+  "preset_syrup": "Syrup",
+  "preset_mousse": "Mousse",
+  "preset_meringue": "Meringue",
+  "preset_glaze": "Glaze",
+  "preset_decor": "Decor",
   "custom_type_create": "Create",
   "custom_type_used_dialog_title": "Delete type «{name}»?",
   "@custom_type_used_dialog_title": {

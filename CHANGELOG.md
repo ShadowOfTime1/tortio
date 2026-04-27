@@ -2,6 +2,24 @@
 
 Все значимые изменения по версиям. Формат — обратный хронологический.
 
+## v0.0.12 — 2026-04-27 (английская локализация — фаза 3: preset section names)
+
+Закрываем последний крупный гэп локализации, найденный при пост-релизной верификации v0.0.11.
+
+### Что добавилось
+- **Preset section names локализованы**: 10 ARB-ключей (`preset_sponge` / `preset_cream` / `preset_filling` / `preset_coating` / `preset_ganache` / `preset_syrup` / `preset_mousse` / `preset_meringue` / `preset_glaze` / `preset_decor`). Метод `SectionType.displayName(l)` возвращает локализованное имя для пресета (узнаётся по канонической русской строке `name`) или сам `name` как есть для custom-типов. Storage-формат не меняется — backward compatible.
+- **Scale labels локализованы**: новые ARB-ключи `scale_label_volume` / `scale_label_area` / `scale_label_fixed` + метод `SectionType.scaleLabelLocalized(l)`. Используется в form section card subtitle, scaler section header badge, settings → custom types subtitle (раньше там вообще английский enum.name "volume" просачивался даже в RU локали — заодно фикс багу).
+- **Display sites переключены на `displayName(l)`**: scaler tier card section header (single + multi), shopping list bottom sheet, add-recipe form section card, section picker chip, custom-type actions dialog title.
+- **«3 sec.» → «3 sect.»** в карточке рецепта — снимаем двусмысленность (мог читаться как seconds).
+
+### Verified на эмуляторе
+Section picker полностью английский: Sponge / Cream / Filling / Coating / Ganache / Syrup / Mousse / Meringue / Glaze / Decor. Scaler tier card показывает «🍰 Sponge | volume», «🍦 Cream | volume», «✨ Glaze | area». Карточка списка — «3 sect. • 9 ingr.».
+
+### Что осталось (намеренно)
+- Sample recipe content (Шоколадный торт пример + ингредиенты + notes) — данные, не UI.
+- PDF/share-text — output для печати/отправки.
+- Имена custom-типов и ингредиентов пользователя — user-input.
+
 ## v0.0.11 — 2026-04-27 (английская локализация — фаза 2: формы и пересчёт)
 
 Доделка локализации после самопроверки в эмуляторе. Теперь все 4 основных экрана полностью на английском при выбранном языке English.

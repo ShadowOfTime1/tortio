@@ -895,6 +895,45 @@ class AppLocalizationsRu extends AppLocalizations {
   String get custom_type_scale_fixed => 'Фикс (не меняется)';
 
   @override
+  String get scale_label_volume => 'объём';
+
+  @override
+  String get scale_label_area => 'площадь';
+
+  @override
+  String get scale_label_fixed => 'фикс';
+
+  @override
+  String get preset_sponge => 'Бисквит';
+
+  @override
+  String get preset_cream => 'Крем';
+
+  @override
+  String get preset_filling => 'Начинка';
+
+  @override
+  String get preset_coating => 'Покрытие';
+
+  @override
+  String get preset_ganache => 'Ганаш';
+
+  @override
+  String get preset_syrup => 'Пропитка';
+
+  @override
+  String get preset_mousse => 'Мусс';
+
+  @override
+  String get preset_meringue => 'Безе';
+
+  @override
+  String get preset_glaze => 'Глазурь';
+
+  @override
+  String get preset_decor => 'Декор';
+
+  @override
   String get custom_type_create => 'Создать';
 
   @override

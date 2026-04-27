@@ -1579,6 +1579,84 @@ abstract class AppLocalizations {
   /// **'Фикс (не меняется)'**
   String get custom_type_scale_fixed;
 
+  /// No description provided for @scale_label_volume.
+  ///
+  /// In ru, this message translates to:
+  /// **'объём'**
+  String get scale_label_volume;
+
+  /// No description provided for @scale_label_area.
+  ///
+  /// In ru, this message translates to:
+  /// **'площадь'**
+  String get scale_label_area;
+
+  /// No description provided for @scale_label_fixed.
+  ///
+  /// In ru, this message translates to:
+  /// **'фикс'**
+  String get scale_label_fixed;
+
+  /// No description provided for @preset_sponge.
+  ///
+  /// In ru, this message translates to:
+  /// **'Бисквит'**
+  String get preset_sponge;
+
+  /// No description provided for @preset_cream.
+  ///
+  /// In ru, this message translates to:
+  /// **'Крем'**
+  String get preset_cream;
+
+  /// No description provided for @preset_filling.
+  ///
+  /// In ru, this message translates to:
+  /// **'Начинка'**
+  String get preset_filling;
+
+  /// No description provided for @preset_coating.
+  ///
+  /// In ru, this message translates to:
+  /// **'Покрытие'**
+  String get preset_coating;
+
+  /// No description provided for @preset_ganache.
+  ///
+  /// In ru, this message translates to:
+  /// **'Ганаш'**
+  String get preset_ganache;
+
+  /// No description provided for @preset_syrup.
+  ///
+  /// In ru, this message translates to:
+  /// **'Пропитка'**
+  String get preset_syrup;
+
+  /// No description provided for @preset_mousse.
+  ///
+  /// In ru, this message translates to:
+  /// **'Мусс'**
+  String get preset_mousse;
+
+  /// No description provided for @preset_meringue.
+  ///
+  /// In ru, this message translates to:
+  /// **'Безе'**
+  String get preset_meringue;
+
+  /// No description provided for @preset_glaze.
+  ///
+  /// In ru, this message translates to:
+  /// **'Глазурь'**
+  String get preset_glaze;
+
+  /// No description provided for @preset_decor.
+  ///
+  /// In ru, this message translates to:
+  /// **'Декор'**
+  String get preset_decor;
+
   /// No description provided for @custom_type_create.
   ///
   /// In ru, this message translates to:

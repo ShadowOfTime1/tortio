@@ -118,8 +118,8 @@ class AppLocalizationsEn extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count sec.',
-      one: '$count sec.',
+      other: '$count sect.',
+      one: '$count sect.',
     );
     return '$_temp0';
   }
@@ -283,7 +283,7 @@ class AppLocalizationsEn extends AppLocalizations {
     int sections,
     int ingredients,
   ) {
-    return '$diameter_sym $diameter $cm • $sections sec. • $ingredients ingr.';
+    return '$diameter_sym $diameter $cm • $sections sect. • $ingredients ingr.';
   }
 
   @override
@@ -886,6 +886,45 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get custom_type_scale_fixed => 'Fixed (no change)';
+
+  @override
+  String get scale_label_volume => 'volume';
+
+  @override
+  String get scale_label_area => 'area';
+
+  @override
+  String get scale_label_fixed => 'fixed';
+
+  @override
+  String get preset_sponge => 'Sponge';
+
+  @override
+  String get preset_cream => 'Cream';
+
+  @override
+  String get preset_filling => 'Filling';
+
+  @override
+  String get preset_coating => 'Coating';
+
+  @override
+  String get preset_ganache => 'Ganache';
+
+  @override
+  String get preset_syrup => 'Syrup';
+
+  @override
+  String get preset_mousse => 'Mousse';
+
+  @override
+  String get preset_meringue => 'Meringue';
+
+  @override
+  String get preset_glaze => 'Glaze';
+
+  @override
+  String get preset_decor => 'Decor';
 
   @override
   String get custom_type_create => 'Create';

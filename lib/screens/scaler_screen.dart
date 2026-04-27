@@ -128,6 +128,7 @@ class _ScalerScreenState extends State<ScalerScreen> {
 
   Widget _buildSingleTier() {
     final recipe = widget.recipe;
+    final l = AppLocalizations.of(context);
     final hasWeight = recipe.weight > 0;
 
     List<RecipeSection> scaled;
@@ -419,7 +420,7 @@ class _ScalerScreenState extends State<ScalerScreen> {
                               ),
                               const SizedBox(width: 8),
                               Text(
-                                scaledSection.type.name,
+                                scaledSection.type.displayName(l),
                                 style: const TextStyle(
                                   fontSize: 15,
                                   fontWeight: FontWeight.w600,
@@ -438,7 +439,7 @@ class _ScalerScreenState extends State<ScalerScreen> {
                                   borderRadius: BorderRadius.circular(8),
                                 ),
                                 child: Text(
-                                  scaledSection.type.scaleLabel,
+                                  scaledSection.type.scaleLabelLocalized(l),
                                   style: const TextStyle(
                                     fontSize: 10,
                                     color: Color(0xFFFF6B8A),
@@ -999,7 +1000,7 @@ class _ScalerScreenState extends State<ScalerScreen> {
                       ),
                       const SizedBox(width: 6),
                       Text(
-                        scaledSection.type.name,
+                        scaledSection.type.displayName(l),
                         style: const TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
