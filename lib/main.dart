@@ -2,8 +2,11 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'l10n/app_localizations.dart';
 import 'screens/recipe_list_screen.dart';
 import 'services/drive_backup_service.dart';
+import 'services/locale_service.dart';
 import 'services/theme_service.dart';
 import 'services/update_service.dart';
 import 'theme.dart';
@@ -15,6 +18,7 @@ void main() async {
   // подсказку «повернуть» Android тогда не показывает (она перекрывала FAB).
   await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
   await ThemeService.instance.load();
+  await LocaleService.instance.load();
   // Тихий восстановление сессии Google Drive — без UI. Если был залогинен —
   // подтянет user, иначе тихо вернёт null.
   unawaited(DriveBackupService.instance.init());
@@ -27,7 +31,10 @@ class TortioApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListenableBuilder(
-      listenable: ThemeService.instance,
+      listenable: Listenable.merge([
+        ThemeService.instance,
+        LocaleService.instance,
+      ]),
       builder: (context, _) {
         return MaterialApp(
           title: 'Tortio',
@@ -35,6 +42,14 @@ class TortioApp extends StatelessWidget {
           theme: buildLightTheme(),
           darkTheme: buildDarkTheme(),
           themeMode: ThemeService.instance.effectiveMode,
+          locale: LocaleService.instance.locale,
+          localizationsDelegates: const [
+            AppLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          supportedLocales: LocaleService.supportedLocales,
           // Заворачиваем всё в AnnotatedRegion, чтобы система рисовала иконки
           // статус-бара контрастно фону: тёмные иконки на светлой теме,
           // светлые на тёмной. Без этого в светлой теме часы/wifi/батарея
@@ -106,9 +121,8 @@ class _MainWrapperState extends State<MainWrapper> {
     } catch (e) {
       if (mounted) {
         setState(() => _downloading = false);
-        final msg = e is UpdateException
-            ? e.message
-            : 'Ошибка обновления. Проверьте интернет.';
+        final l = AppLocalizations.of(context);
+        final msg = e is UpdateException ? e.message : l.update_error_generic;
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(SnackBar(content: Text(msg)));
@@ -118,6 +132,7 @@ class _MainWrapperState extends State<MainWrapper> {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
     return Scaffold(
       body: Column(
         children: [
@@ -169,8 +184,12 @@ class _MainWrapperState extends State<MainWrapper> {
                                   children: [
                                     Text(
                                       _downloading
-                                          ? 'Скачивание... ${(_progress * 100).toInt()}%'
-                                          : 'Версия ${_update!.version} доступна',
+                                          ? l.update_banner_downloading(
+                                              (_progress * 100).toInt(),
+                                            )
+                                          : l.update_banner_available(
+                                              _update!.version,
+                                            ),
                                       style: const TextStyle(
                                         color: Colors.white,
                                         fontWeight: FontWeight.w600,
@@ -178,9 +197,9 @@ class _MainWrapperState extends State<MainWrapper> {
                                       ),
                                     ),
                                     if (!_downloading)
-                                      const Text(
-                                        'Нажмите чтобы обновить',
-                                        style: TextStyle(
+                                      Text(
+                                        l.update_banner_tap,
+                                        style: const TextStyle(
                                           color: Colors.white70,
                                           fontSize: 12,
                                         ),

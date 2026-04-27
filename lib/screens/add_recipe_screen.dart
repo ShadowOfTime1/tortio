@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import '../l10n/app_localizations.dart';
 import '../models/recipe.dart';
 import '../services/custom_types_service.dart';
 import '../services/image_picker_service.dart';
@@ -1028,22 +1029,21 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
   }
 
   Future<bool> _confirmDiscard() async {
+    final l = AppLocalizations.of(context);
     final ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Несохранённые изменения'),
-        content: const Text(
-          'Если вы выйдете сейчас — изменения потеряются. Выйти без сохранения?',
-        ),
+        title: Text(l.form_unsaved_dialog_title),
+        content: Text(l.form_unsaved_dialog_body),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Остаться'),
+            child: Text(l.form_unsaved_stay),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(ctx, true),
             style: FilledButton.styleFrom(backgroundColor: Colors.red),
-            child: const Text('Выйти'),
+            child: Text(l.form_unsaved_leave),
           ),
         ],
       ),
@@ -1063,7 +1063,11 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
       },
       child: Scaffold(
       appBar: AppBar(
-        title: Text(_isEditing ? 'Редактировать' : 'Новый рецепт'),
+        title: Text(
+          _isEditing
+              ? AppLocalizations.of(context).form_title_edit
+              : AppLocalizations.of(context).form_title_new,
+        ),
         actions: [
           Padding(
             padding: const EdgeInsets.only(right: 8),
@@ -1072,7 +1076,7 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
               style: FilledButton.styleFrom(
                 backgroundColor: const Color(0xFFFF6B8A),
               ),
-              child: const Text('Сохранить'),
+              child: Text(AppLocalizations.of(context).common_save),
             ),
           ),
         ],

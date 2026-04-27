@@ -1,0 +1,344 @@
+{
+  "@@locale": "en",
+
+  "appTitle": "Tortio",
+
+  "common_save": "Save",
+  "common_cancel": "Cancel",
+  "common_delete": "Delete",
+  "common_edit": "Edit",
+  "common_close": "Close",
+  "common_confirm": "Confirm",
+  "common_yes": "Yes",
+  "common_no": "No",
+  "common_ok": "OK",
+  "common_back": "Back",
+  "common_done": "Done",
+  "common_optional": "optional",
+  "common_undo": "Undo",
+  "common_retry": "Retry",
+  "common_loading": "Loading…",
+  "common_error": "Error",
+  "common_continue": "Continue",
+  "common_skip": "Skip",
+  "common_open": "Open",
+  "common_share": "Share",
+
+  "unit_grams_short": "g",
+  "unit_kilograms_short": "kg",
+  "unit_centimeters_short": "cm",
+  "unit_pieces_short": "pcs",
+  "unit_diameter_symbol": "⌀",
+
+  "list_title": "Recipes",
+  "list_search_hint": "Search by name or ingredient",
+  "list_empty_title": "No cakes yet",
+  "list_empty_subtitle": "Add your first cake!",
+  "list_empty_demo_button": "Create sample recipe",
+  "list_no_results_title": "Nothing found",
+  "list_no_results_reset": "Reset filters",
+  "list_filter_all_tags": "All",
+  "list_fab_new_recipe": "Recipe",
+  "list_section_count": "{count, plural, one{{count} sec.} other{{count} sec.}}",
+  "@list_section_count": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "list_ingredient_count": "{count, plural, one{{count} ingr.} other{{count} ingr.}}",
+  "@list_ingredient_count": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "list_tier_count": "{count, plural, one{{count} tier} other{{count} tiers}}",
+  "@list_tier_count": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "list_cooked_times": "Cooked {count, plural, one{{count} time} other{{count} times}}",
+  "@list_cooked_times": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "list_cooked_days_ago": "{count, plural, =0{today} one{{count} day ago} other{{count} days ago}}",
+  "@list_cooked_days_ago": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "list_badge_new": "NEW",
+  "list_menu_edit": "Edit",
+  "list_menu_duplicate": "Duplicate",
+  "list_menu_pin": "Pin",
+  "list_menu_unpin": "Unpin",
+  "list_menu_delete": "Delete",
+  "list_menu_select_bulk": "Select (bulk delete)",
+  "list_selection_count": "Selected: {count}",
+  "@list_selection_count": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "list_recipe_deleted": "Recipe deleted",
+  "list_recipe_named_deleted": "«{title}» deleted",
+  "@list_recipe_named_deleted": {
+    "placeholders": { "title": { "type": "String" } }
+  },
+  "list_bulk_delete_title": "Delete {count} recipe(s)?",
+  "@list_bulk_delete_title": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "list_bulk_delete_body": "All selected recipes will be permanently deleted.",
+  "list_bulk_deleted": "Deleted: {count}",
+  "@list_bulk_deleted": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "list_tooltip_sort": "Sort: {label}",
+  "@list_tooltip_sort": {
+    "placeholders": { "label": { "type": "String" } }
+  },
+  "list_tooltip_settings": "Settings",
+  "list_tooltip_cancel_selection": "Cancel selection",
+  "list_tooltip_delete_selected": "Delete selected",
+  "list_no_results_filtered": "no recipes {filters}",
+  "@list_no_results_filtered": {
+    "placeholders": { "filters": { "type": "String" } }
+  },
+  "list_no_results_empty": "nothing found",
+  "list_filter_by_query": "matching «{q}»",
+  "@list_filter_by_query": {
+    "placeholders": { "q": { "type": "String" } }
+  },
+  "list_filter_by_tag": "with tag «{t}»",
+  "@list_filter_by_tag": {
+    "placeholders": { "t": { "type": "String" } }
+  },
+  "time_today": "today",
+  "time_yesterday": "yesterday",
+  "time_days_ago": "{n} day(s) ago",
+  "@time_days_ago": {
+    "placeholders": { "n": { "type": "int" } }
+  },
+  "time_weeks_ago": "{n} week(s) ago",
+  "@time_weeks_ago": {
+    "placeholders": { "n": { "type": "int" } }
+  },
+  "time_months_ago": "{n} month(s) ago",
+  "@time_months_ago": {
+    "placeholders": { "n": { "type": "int" } }
+  },
+  "time_years_ago": "{n} year(s) ago",
+  "@time_years_ago": {
+    "placeholders": { "n": { "type": "int" } }
+  },
+  "list_card_summary": "{diameter_sym} {diameter} {cm} • {sections} sec. • {ingredients} ingr.",
+  "@list_card_summary": {
+    "placeholders": {
+      "diameter_sym": { "type": "String" },
+      "diameter": { "type": "int" },
+      "cm": { "type": "String" },
+      "sections": { "type": "int" },
+      "ingredients": { "type": "int" }
+    }
+  },
+  "list_card_cooked": "Cooked {count} time(s){suffix}",
+  "@list_card_cooked": {
+    "placeholders": {
+      "count": { "type": "int" },
+      "suffix": { "type": "String" }
+    }
+  },
+  "list_recipe_duplicate_suffix": "(copy)",
+  "list_sort_label": "Sort",
+  "list_sort_manual": "Manual",
+  "list_sort_newest": "Newest first",
+  "list_sort_oldest": "Oldest first",
+  "list_sort_alpha": "Alphabetical",
+  "list_sort_rating": "By rating",
+  "list_sort_cook_count": "Most cooked",
+  "list_sort_recently_cooked": "Recently cooked",
+  "list_menu_stats": "Stats",
+
+  "form_title_new": "New recipe",
+  "form_title_edit": "Edit recipe",
+  "form_field_title": "Name",
+  "form_field_diameter": "Diameter",
+  "form_field_height": "Height",
+  "form_field_weight": "Weight",
+  "form_field_notes": "Notes",
+  "form_field_tags": "Tags",
+  "form_field_tags_hint": "comma-separated",
+  "form_field_ingredient": "Ingredient",
+  "form_field_amount": "Amount",
+  "form_section_size_header": "Cake form size",
+  "form_section_size_subtitle": "(height — optional)",
+  "form_section_extras_header": "More",
+  "form_section_composition_header": "Composition",
+  "form_add_section": "Add section",
+  "form_add_ingredient": "Add ingredient",
+  "form_add_tier": "Add tier",
+  "form_remove_tier": "Remove tier",
+  "form_tier_label": "Tier {n}",
+  "@form_tier_label": {
+    "placeholders": { "n": { "type": "int" } }
+  },
+  "form_tier_name_optional": "Name (opt)",
+  "form_section_note_label": "Section note",
+  "form_rating_label": "Personal rating",
+  "form_rating_clear": "Clear",
+  "form_unsaved_dialog_title": "Unsaved changes",
+  "form_unsaved_dialog_body": "You made changes. Leave without saving?",
+  "form_unsaved_stay": "Stay",
+  "form_unsaved_leave": "Leave",
+  "form_error_title_required": "Enter recipe name",
+  "form_error_diameter_required": "Enter diameter",
+  "form_error_no_sections": "Add at least one section with ingredients",
+  "form_error_tiers_skipped": "Tier(s) {numbers} skipped: no ingredients with weight > 0",
+  "@form_error_tiers_skipped": {
+    "placeholders": { "numbers": { "type": "String" } }
+  },
+  "form_photo_pick": "From gallery",
+  "form_photo_camera": "Take photo",
+  "form_photo_remove": "Remove",
+  "form_photo_error_camera": "Couldn't open camera. Check permissions.",
+  "form_photo_error_gallery": "Couldn't open gallery.",
+
+  "scaler_title_size": "By size",
+  "scaler_title_weight": "By weight",
+  "scaler_target_diameter": "Target diameter",
+  "scaler_target_height": "Target height",
+  "scaler_target_weight": "Target weight",
+  "scaler_total_weight": "total ≈ {grams}",
+  "@scaler_total_weight": {
+    "placeholders": { "grams": { "type": "String" } }
+  },
+  "scaler_height_label_short": "H",
+  "scaler_height_label_full": "Height",
+  "scaler_cooked_today": "Logged! Cooking time #{n}",
+  "@scaler_cooked_today": {
+    "placeholders": { "n": { "type": "int" } }
+  },
+  "scaler_cooked_button": "I cooked it",
+  "scaler_share_text": "Share as text",
+  "scaler_share_pdf": "Save as PDF",
+  "scaler_shopping_list": "Shopping list",
+  "scaler_shopping_list_title": "Shopping list",
+
+  "settings_title": "Settings",
+  "settings_group_appearance": "Appearance",
+  "settings_group_behavior": "Behaviour",
+  "settings_group_cloud": "Cloud backup",
+  "settings_group_backup": "Backup files",
+  "settings_group_data": "Data",
+  "settings_group_danger": "Danger zone",
+  "settings_group_about": "About",
+
+  "settings_theme": "Theme",
+  "settings_theme_auto": "Auto (light by day, dark by evening)",
+  "settings_theme_light": "Light",
+  "settings_theme_dark": "Dark",
+
+  "settings_language": "Language",
+  "settings_language_system": "System",
+  "settings_language_ru": "Русский",
+  "settings_language_en": "English",
+
+  "settings_quick_diameters": "Quick diameters",
+  "settings_quick_diameters_hint": "Comma-separated, cm",
+  "settings_default_scale_mode": "Default scale mode",
+  "settings_default_scale_mode_size": "By size",
+  "settings_default_scale_mode_weight": "By weight",
+
+  "settings_custom_types": "Custom section types",
+  "settings_custom_types_add": "Add type",
+  "settings_custom_type_in_use_title": "Type in use",
+  "settings_custom_type_in_use_body": "This type is used in {count} recipe(s). Existing sections will keep working but new ones can't be added.",
+  "@settings_custom_type_in_use_body": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+
+  "settings_auto_update": "Check for updates automatically",
+  "settings_check_update_now": "Check for update now",
+  "settings_update_no_new": "You're on the latest version",
+  "settings_update_found": "Version {version} available",
+  "@settings_update_found": {
+    "placeholders": { "version": { "type": "String" } }
+  },
+
+  "settings_cloud_connect": "Connect Google Drive",
+  "settings_cloud_connect_subtitle": "Automatic recipe backup",
+  "settings_cloud_connected": "Connected",
+  "settings_cloud_email": "Account",
+  "settings_cloud_last_sync": "Last sync: {when}",
+  "@settings_cloud_last_sync": {
+    "placeholders": { "when": { "type": "String" } }
+  },
+  "settings_cloud_never_synced": "Never synced",
+  "settings_cloud_sync_now": "Sync now",
+  "settings_cloud_restore": "Restore from cloud",
+  "settings_cloud_sign_out": "Sign out",
+  "settings_cloud_busy": "Please wait…",
+  "settings_cloud_restore_prompt_title": "Restore from backup?",
+  "settings_cloud_restore_prompt_body": "Backup found from {when}. Restore?",
+  "@settings_cloud_restore_prompt_body": {
+    "placeholders": { "when": { "type": "String" } }
+  },
+  "settings_cloud_restore_keep_local": "No, keep local",
+  "settings_cloud_restore_replace": "Restore",
+  "settings_cloud_restore_done": "Restored {count} recipe(s)",
+  "@settings_cloud_restore_done": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+
+  "settings_export": "Export to JSON",
+  "settings_import": "Import from JSON",
+  "settings_import_undo": "Undo last import",
+  "settings_import_done": "Imported {count} recipe(s)",
+  "@settings_import_done": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "settings_import_undone": "Import undone",
+  "settings_import_error": "Couldn't read file",
+
+  "settings_stats": "Stats",
+  "settings_show_welcome_again": "Show welcome again",
+  "settings_reset_settings": "Reset settings to defaults",
+  "settings_reset_settings_done": "Settings reset",
+  "settings_delete_all": "Delete all recipes and custom types",
+  "settings_delete_all_confirm_title": "Delete everything?",
+  "settings_delete_all_confirm_body": "All recipes and custom types will be deleted. This cannot be undone.",
+  "settings_delete_all_done": "Everything deleted",
+
+  "about_version": "Version {v}",
+  "@about_version": {
+    "placeholders": { "v": { "type": "String" } }
+  },
+  "about_repo": "Source on GitHub",
+  "about_license": "License: MIT",
+
+  "stats_recipes_total": "Total recipes",
+  "stats_ingredients_total": "Total ingredients",
+  "stats_total_weight": "Sum of recipe weights",
+  "stats_top_ingredients": "Top 5 ingredients",
+  "stats_top_tags": "Top 5 tags",
+
+  "welcome_title": "Hi, baker!",
+  "welcome_subtitle": "Tortio rescales ingredients to the cake size you need.",
+  "welcome_bullet_add": "«+ Recipe» button below — add a new one. You can start from a sample.",
+  "welcome_bullet_scale": "Open a recipe → change diameter or weight → ingredients rescale automatically.",
+  "welcome_bullet_tiers": "Tiered cake? Add a tier right in the recipe form — each tier has its own size.",
+  "welcome_bullet_sort": "↕ — list sort. ⚙ — settings (theme, backups, stats).",
+  "welcome_bullet_inside": "Inside a recipe: ✓ «I cooked it», ↗ «Export» (PDF / share), 🛒 «Shopping list».",
+  "welcome_button_start": "Get started!",
+
+  "snack_recipe_saved": "Recipe saved",
+  "snack_export_done": "Exported",
+  "snack_no_internet": "No internet",
+  "snack_drive_connected": "Google Drive connected",
+  "snack_drive_uploaded": "Uploaded to cloud",
+  "snack_drive_failed": "Cloud error. Try again later",
+
+  "update_banner_available": "Version {version} available",
+  "@update_banner_available": {
+    "placeholders": { "version": { "type": "String" } }
+  },
+  "update_banner_tap": "Tap to update",
+  "update_banner_downloading": "Downloading... {percent}%",
+  "@update_banner_downloading": {
+    "placeholders": { "percent": { "type": "int" } }
+  },
+  "update_error_generic": "Update error. Check your internet.",
+  "update_error_no_internet": "No internet. Check your connection.",
+  "update_error_install_permission": "Allow install from unknown sources in Android settings."
+}

@@ -6,7 +6,9 @@ import '../models/recipe.dart';
 import '../services/app_settings.dart';
 import '../services/custom_types_service.dart';
 import '../services/drive_backup_service.dart';
+import '../l10n/app_localizations.dart';
 import '../services/import_export_service.dart';
+import '../services/locale_service.dart';
 import '../services/stats.dart';
 import '../services/storage_service.dart';
 import '../services/theme_service.dart';
@@ -488,12 +490,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
     return Scaffold(
-      appBar: AppBar(title: const Text('Настройки')),
+      appBar: AppBar(title: Text(l.settings_title)),
       body: ListView(
         children: [
           // === Внешний вид ===
-          _groupHeader('Внешний вид'),
+          _groupHeader(l.settings_group_appearance),
           ListenableBuilder(
             listenable: ThemeService.instance,
             builder: (context, _) {
@@ -515,8 +518,37 @@ class _SettingsScreenState extends State<SettingsScreen> {
             },
           ),
 
+          // === Язык ===
+          _groupHeader(AppLocalizations.of(context).settings_language),
+          ListenableBuilder(
+            listenable: LocaleService.instance,
+            builder: (context, _) {
+              final l = AppLocalizations.of(context);
+              final entries = [
+                ('system', l.settings_language_system),
+                ('ru', l.settings_language_ru),
+                ('en', l.settings_language_en),
+              ];
+              return Column(
+                children: entries.map((e) {
+                  return RadioGroup<String>(
+                    groupValue: LocaleService.instance.pref,
+                    onChanged: (v) {
+                      if (v != null) LocaleService.instance.setPref(v);
+                    },
+                    child: RadioListTile<String>(
+                      dense: true,
+                      title: Text(e.$2),
+                      value: e.$1,
+                    ),
+                  );
+                }).toList(),
+              );
+            },
+          ),
+
           // === Кастомные типы секций ===
-          _groupHeader('Кастомные типы секций'),
+          _groupHeader(l.settings_custom_types),
           if (_customTypes.isEmpty)
             const ListTile(
               dense: true,
@@ -561,7 +593,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
 
           // === Пересчёт ===
-          _groupHeader('Пересчёт'),
+          _groupHeader(l.settings_default_scale_mode),
           ListTile(
             dense: true,
             title: const Text('Quick-диаметры'),
@@ -611,7 +643,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
 
           // === Обновления ===
-          _groupHeader('Обновления'),
+          _groupHeader(l.settings_auto_update),
           SwitchListTile(
             title: const Text('Автоматически проверять обновления'),
             subtitle: const Text(
@@ -633,11 +665,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
 
           // === Облачный бэкап ===
-          _groupHeader('Облачный бэкап'),
+          _groupHeader(l.settings_group_cloud),
           _DriveBackupTile(onRestored: _onCloudRestored),
 
           // === Резервные копии ===
-          _groupHeader('Резервные копии'),
+          _groupHeader(l.settings_group_backup),
           ListTile(
             leading: const Icon(Icons.upload_file_outlined),
             title: const Text('Экспортировать в JSON'),
@@ -659,7 +691,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
 
           // === Статистика ===
-          _groupHeader('Статистика'),
+          _groupHeader(l.settings_stats),
           ListTile(
             leading: const Icon(Icons.bar_chart_outlined),
             title: const Text('Показать статистику'),
@@ -667,7 +699,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
 
           // === Опасная зона ===
-          _groupHeader('Опасная зона', color: Colors.red),
+          _groupHeader(l.settings_group_danger, color: Colors.red),
           ListTile(
             leading: const Icon(Icons.refresh, color: Color(0xFFFF6B8A)),
             title: const Text(
@@ -696,7 +728,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           const SizedBox(height: 8),
 
           // === О приложении ===
-          _groupHeader('О приложении'),
+          _groupHeader(l.settings_group_about),
           ListTile(
             leading: const Icon(Icons.info_outline),
             title: const Text('Версия'),
@@ -751,11 +783,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  String _themeLabel(ThemeMode m) => switch (m) {
-    ThemeMode.system => 'Авто (день — светлая, вечер — тёмная)',
-    ThemeMode.light => 'Светлая',
-    ThemeMode.dark => 'Тёмная',
-  };
+  String _themeLabel(ThemeMode m) {
+    final l = AppLocalizations.of(context);
+    return switch (m) {
+      ThemeMode.system => l.settings_theme_auto,
+      ThemeMode.light => l.settings_theme_light,
+      ThemeMode.dark => l.settings_theme_dark,
+    };
+  }
 }
 
 class _DriveBackupTile extends StatefulWidget {
@@ -788,6 +823,7 @@ class _DriveBackupTileState extends State<_DriveBackupTile> {
   Future<void> _signIn() async {
     final ok = await _service.signIn();
     if (!ok || !mounted) return;
+    final l = AppLocalizations.of(context);
     // После логина — проверяем есть ли существующий бэкап.
     final remoteTime = await _service.remoteBackupTime();
     if (!mounted) return;
@@ -795,21 +831,18 @@ class _DriveBackupTileState extends State<_DriveBackupTile> {
       final restore = await showDialog<bool>(
         context: context,
         builder: (ctx) => AlertDialog(
-          title: const Text('Найден бэкап'),
+          title: Text(l.settings_cloud_restore_prompt_title),
           content: Text(
-            'В Google Drive есть резервная копия от '
-            '${_formatDate(remoteTime)}. Восстановить её?\n\n'
-            'Если откажетесь — текущие рецепты на устройстве '
-            'перезапишут бэкап.',
+            l.settings_cloud_restore_prompt_body(_formatDate(remoteTime)),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(ctx, false),
-              child: const Text('Не восстанавливать'),
+              child: Text(l.settings_cloud_restore_keep_local),
             ),
             FilledButton(
               onPressed: () => Navigator.pop(ctx, true),
-              child: const Text('Восстановить'),
+              child: Text(l.settings_cloud_restore_replace),
             ),
           ],
         ),
@@ -854,14 +887,13 @@ class _DriveBackupTileState extends State<_DriveBackupTile> {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
     final user = _service.user;
     if (user == null) {
       return ListTile(
         leading: const Icon(Icons.cloud_off_outlined),
-        title: const Text('Подключить Google Drive'),
-        subtitle: const Text(
-          'Автобэкап рецептов в скрытой папке вашего Google Drive',
-        ),
+        title: Text(l.settings_cloud_connect),
+        subtitle: Text(l.settings_cloud_connect_subtitle),
         trailing: _service.busy
             ? const SizedBox(
                 width: 24,
@@ -876,7 +908,7 @@ class _DriveBackupTileState extends State<_DriveBackupTile> {
     final last = _service.lastSync;
     final subtitle = last == null
         ? user.email
-        : '${user.email}\nПоследняя синхр.: ${_formatDate(last)}';
+        : '${user.email}\n${l.settings_cloud_last_sync(_formatDate(last))}';
 
     return Column(
       children: [
@@ -885,13 +917,13 @@ class _DriveBackupTileState extends State<_DriveBackupTile> {
             Icons.cloud_done_outlined,
             color: Color(0xFFE85D75),
           ),
-          title: const Text('Google Drive подключён'),
+          title: Text(l.settings_cloud_connected),
           subtitle: Text(subtitle),
           isThreeLine: last != null,
         ),
         ListTile(
           leading: const Icon(Icons.sync),
-          title: const Text('Синхронизировать сейчас'),
+          title: Text(l.settings_cloud_sync_now),
           enabled: !_service.busy,
           onTap: () async {
             final messenger = ScaffoldMessenger.of(context);
@@ -900,7 +932,9 @@ class _DriveBackupTileState extends State<_DriveBackupTile> {
             if (!mounted) return;
             messenger.showSnackBar(
               SnackBar(
-                content: Text(ok ? 'Загружено в облако' : 'Не удалось'),
+                content: Text(
+                  ok ? l.snack_drive_uploaded : l.snack_drive_failed,
+                ),
                 behavior: SnackBarBehavior.floating,
               ),
             );
@@ -908,27 +942,29 @@ class _DriveBackupTileState extends State<_DriveBackupTile> {
         ),
         ListTile(
           leading: const Icon(Icons.cloud_download_outlined),
-          title: const Text('Восстановить из облака'),
-          subtitle: const Text('Заменит текущие рецепты содержимым бэкапа'),
+          title: Text(l.settings_cloud_restore),
           enabled: !_service.busy,
           onTap: () async {
             final confirm = await showDialog<bool>(
               context: context,
               builder: (ctx) => AlertDialog(
-                title: const Text('Восстановить из облака?'),
-                content: const Text(
-                  'Текущие рецепты на этом устройстве будут заменены '
-                  'содержимым бэкапа. Продолжить?',
+                title: Text(l.settings_cloud_restore_prompt_title),
+                content: Text(
+                  l.settings_cloud_restore_prompt_body(
+                    _service.lastSync != null
+                        ? _formatDate(_service.lastSync!)
+                        : '?',
+                  ),
                 ),
                 actions: [
                   TextButton(
                     onPressed: () => Navigator.pop(ctx, false),
-                    child: const Text('Отмена'),
+                    child: Text(l.common_cancel),
                   ),
                   FilledButton(
                     onPressed: () => Navigator.pop(ctx, true),
                     style: FilledButton.styleFrom(backgroundColor: Colors.red),
-                    child: const Text('Восстановить'),
+                    child: Text(l.settings_cloud_restore_replace),
                   ),
                 ],
               ),
@@ -938,9 +974,9 @@ class _DriveBackupTileState extends State<_DriveBackupTile> {
         ),
         ListTile(
           leading: const Icon(Icons.logout, color: Colors.grey),
-          title: const Text(
-            'Выйти из Google',
-            style: TextStyle(color: Colors.grey),
+          title: Text(
+            l.settings_cloud_sign_out,
+            style: const TextStyle(color: Colors.grey),
           ),
           onTap: () async => _service.signOut(),
         ),

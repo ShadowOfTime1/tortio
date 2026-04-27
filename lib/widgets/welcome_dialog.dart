@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../l10n/app_localizations.dart';
 
 const _kWelcomeSeenKey = 'welcome_seen';
 
@@ -28,6 +29,7 @@ class _WelcomeSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
     return SafeArea(
       child: Padding(
         padding: const EdgeInsets.fromLTRB(24, 24, 24, 32),
@@ -56,45 +58,31 @@ class _WelcomeSheet extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 16),
-            const Center(
+            Center(
               child: Text(
-                'Привет, кондитер!',
-                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                l.welcome_title,
+                style: const TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
             const SizedBox(height: 4),
             Center(
               child: Text(
-                'Tortio пересчитает ингредиенты под нужный размер торта.',
+                l.welcome_subtitle,
                 style: TextStyle(fontSize: 13, color: Colors.grey.shade600),
                 textAlign: TextAlign.center,
               ),
             ),
             const SizedBox(height: 24),
-            const _Bullet(
-              icon: Icons.add,
-              text:
-                  'Кнопка «+ Рецепт» снизу — добавить новый. Можно начать с готового примера.',
-            ),
-            const _Bullet(
-              icon: Icons.straighten,
-              text:
-                  'Открыл рецепт → меняй диаметр или вес → ингредиенты пересчитываются автоматически.',
-            ),
-            const _Bullet(
-              icon: Icons.layers_outlined,
-              text:
-                  'Многоярусный торт? Добавь ярус прямо в форме рецепта — у каждого свой размер.',
-            ),
-            const _Bullet(
-              icon: Icons.swap_vert,
-              text:
-                  '↕ — сортировка списка. ⚙ — настройки (тема, бэкапы, статистика).',
-            ),
-            const _Bullet(
+            _Bullet(icon: Icons.add, text: l.welcome_bullet_add),
+            _Bullet(icon: Icons.straighten, text: l.welcome_bullet_scale),
+            _Bullet(icon: Icons.layers_outlined, text: l.welcome_bullet_tiers),
+            _Bullet(icon: Icons.swap_vert, text: l.welcome_bullet_sort),
+            _Bullet(
               icon: Icons.check_circle_outline,
-              text:
-                  'Внутри рецепта: ✓ «Я приготовил», ↗ «Экспорт» (PDF / шаринг), 🛒 «Список покупок».',
+              text: l.welcome_bullet_inside,
             ),
             const SizedBox(height: 16),
             SizedBox(
@@ -106,9 +94,12 @@ class _WelcomeSheet extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(vertical: 14),
                   shape: const StadiumBorder(),
                 ),
-                child: const Text(
-                  'Начать!',
-                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
+                child: Text(
+                  l.welcome_button_start,
+                  style: const TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
               ),
             ),

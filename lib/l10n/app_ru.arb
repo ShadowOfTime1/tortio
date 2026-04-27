@@ -1,0 +1,344 @@
+{
+  "@@locale": "ru",
+
+  "appTitle": "Tortio",
+
+  "common_save": "Сохранить",
+  "common_cancel": "Отмена",
+  "common_delete": "Удалить",
+  "common_edit": "Редактировать",
+  "common_close": "Закрыть",
+  "common_confirm": "Подтвердить",
+  "common_yes": "Да",
+  "common_no": "Нет",
+  "common_ok": "ОК",
+  "common_back": "Назад",
+  "common_done": "Готово",
+  "common_optional": "необязательно",
+  "common_undo": "Отменить",
+  "common_retry": "Повторить",
+  "common_loading": "Загрузка…",
+  "common_error": "Ошибка",
+  "common_continue": "Продолжить",
+  "common_skip": "Пропустить",
+  "common_open": "Открыть",
+  "common_share": "Поделиться",
+
+  "unit_grams_short": "г",
+  "unit_kilograms_short": "кг",
+  "unit_centimeters_short": "см",
+  "unit_pieces_short": "шт",
+  "unit_diameter_symbol": "⌀",
+
+  "list_title": "Рецепты",
+  "list_search_hint": "Поиск по названию или ингредиенту",
+  "list_empty_title": "Пока ни одного торта",
+  "list_empty_subtitle": "Добавьте свой первый торт!",
+  "list_empty_demo_button": "Создать примерный рецепт",
+  "list_no_results_title": "Ничего не найдено",
+  "list_no_results_reset": "Сбросить фильтры",
+  "list_filter_all_tags": "Все",
+  "list_fab_new_recipe": "Рецепт",
+  "list_section_count": "{count, plural, one{{count} секц.} few{{count} секц.} other{{count} секц.}}",
+  "@list_section_count": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "list_ingredient_count": "{count, plural, one{{count} ингр.} few{{count} ингр.} other{{count} ингр.}}",
+  "@list_ingredient_count": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "list_tier_count": "{count, plural, one{{count} ярус} few{{count} яруса} other{{count} ярусов}}",
+  "@list_tier_count": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "list_cooked_times": "Готовили {count, plural, one{{count} раз} few{{count} раза} other{{count} раз}}",
+  "@list_cooked_times": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "list_cooked_days_ago": "{count, plural, =0{сегодня} one{{count} дн. назад} few{{count} дн. назад} other{{count} дн. назад}}",
+  "@list_cooked_days_ago": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "list_badge_new": "NEW",
+  "list_menu_edit": "Редактировать",
+  "list_menu_duplicate": "Дублировать",
+  "list_menu_pin": "Закрепить",
+  "list_menu_unpin": "Открепить",
+  "list_menu_delete": "Удалить",
+  "list_menu_select_bulk": "Выбрать (массовое удаление)",
+  "list_selection_count": "Выбрано: {count}",
+  "@list_selection_count": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "list_recipe_deleted": "Рецепт удалён",
+  "list_recipe_named_deleted": "«{title}» удалён",
+  "@list_recipe_named_deleted": {
+    "placeholders": { "title": { "type": "String" } }
+  },
+  "list_bulk_delete_title": "Удалить {count} рецепт(ов)?",
+  "@list_bulk_delete_title": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "list_bulk_delete_body": "Все выбранные рецепты будут удалены безвозвратно.",
+  "list_bulk_deleted": "Удалено: {count}",
+  "@list_bulk_deleted": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "list_tooltip_sort": "Сортировка: {label}",
+  "@list_tooltip_sort": {
+    "placeholders": { "label": { "type": "String" } }
+  },
+  "list_tooltip_settings": "Настройки",
+  "list_tooltip_cancel_selection": "Отменить выбор",
+  "list_tooltip_delete_selected": "Удалить выбранные",
+  "list_no_results_filtered": "нет рецептов {filters}",
+  "@list_no_results_filtered": {
+    "placeholders": { "filters": { "type": "String" } }
+  },
+  "list_no_results_empty": "ничего не найдено",
+  "list_filter_by_query": "по запросу «{q}»",
+  "@list_filter_by_query": {
+    "placeholders": { "q": { "type": "String" } }
+  },
+  "list_filter_by_tag": "с тегом «{t}»",
+  "@list_filter_by_tag": {
+    "placeholders": { "t": { "type": "String" } }
+  },
+  "time_today": "сегодня",
+  "time_yesterday": "вчера",
+  "time_days_ago": "{n} дн. назад",
+  "@time_days_ago": {
+    "placeholders": { "n": { "type": "int" } }
+  },
+  "time_weeks_ago": "{n} нед. назад",
+  "@time_weeks_ago": {
+    "placeholders": { "n": { "type": "int" } }
+  },
+  "time_months_ago": "{n} мес. назад",
+  "@time_months_ago": {
+    "placeholders": { "n": { "type": "int" } }
+  },
+  "time_years_ago": "{n} г. назад",
+  "@time_years_ago": {
+    "placeholders": { "n": { "type": "int" } }
+  },
+  "list_card_summary": "{diameter_sym} {diameter} {cm} • {sections} секц. • {ingredients} ингр.",
+  "@list_card_summary": {
+    "placeholders": {
+      "diameter_sym": { "type": "String" },
+      "diameter": { "type": "int" },
+      "cm": { "type": "String" },
+      "sections": { "type": "int" },
+      "ingredients": { "type": "int" }
+    }
+  },
+  "list_card_cooked": "Готовили {count} раз{suffix}",
+  "@list_card_cooked": {
+    "placeholders": {
+      "count": { "type": "int" },
+      "suffix": { "type": "String" }
+    }
+  },
+  "list_recipe_duplicate_suffix": "(копия)",
+  "list_sort_label": "Сортировка",
+  "list_sort_manual": "Вручную",
+  "list_sort_newest": "Новые сначала",
+  "list_sort_oldest": "Старые сначала",
+  "list_sort_alpha": "По алфавиту",
+  "list_sort_rating": "По рейтингу",
+  "list_sort_cook_count": "Чаще готовлю",
+  "list_sort_recently_cooked": "Недавно готовил",
+  "list_menu_stats": "Статистика",
+
+  "form_title_new": "Новый рецепт",
+  "form_title_edit": "Редактирование рецепта",
+  "form_field_title": "Название",
+  "form_field_diameter": "Диаметр",
+  "form_field_height": "Высота",
+  "form_field_weight": "Вес",
+  "form_field_notes": "Заметки",
+  "form_field_tags": "Теги",
+  "form_field_tags_hint": "через запятую",
+  "form_field_ingredient": "Ингредиент",
+  "form_field_amount": "Кол-во",
+  "form_section_size_header": "Размеры формы",
+  "form_section_size_subtitle": "(высота — опционально)",
+  "form_section_extras_header": "Дополнительно",
+  "form_section_composition_header": "Состав",
+  "form_add_section": "Добавить секцию",
+  "form_add_ingredient": "Добавить ингредиент",
+  "form_add_tier": "Добавить ярус",
+  "form_remove_tier": "Удалить ярус",
+  "form_tier_label": "Ярус {n}",
+  "@form_tier_label": {
+    "placeholders": { "n": { "type": "int" } }
+  },
+  "form_tier_name_optional": "Название (опц)",
+  "form_section_note_label": "Заметка к секции",
+  "form_rating_label": "Личная оценка",
+  "form_rating_clear": "Снять",
+  "form_unsaved_dialog_title": "Несохранённые изменения",
+  "form_unsaved_dialog_body": "Вы внесли изменения. Выйти без сохранения?",
+  "form_unsaved_stay": "Остаться",
+  "form_unsaved_leave": "Выйти",
+  "form_error_title_required": "Введите название рецепта",
+  "form_error_diameter_required": "Введите диаметр",
+  "form_error_no_sections": "Добавьте хотя бы одну секцию с ингредиентами",
+  "form_error_tiers_skipped": "Ярус(ы) {numbers} пропущены: нет ингредиентов с весом > 0",
+  "@form_error_tiers_skipped": {
+    "placeholders": { "numbers": { "type": "String" } }
+  },
+  "form_photo_pick": "Из галереи",
+  "form_photo_camera": "Сделать фото",
+  "form_photo_remove": "Убрать",
+  "form_photo_error_camera": "Не удалось открыть камеру. Проверьте разрешения.",
+  "form_photo_error_gallery": "Не удалось открыть галерею.",
+
+  "scaler_title_size": "По размеру",
+  "scaler_title_weight": "По весу",
+  "scaler_target_diameter": "Целевой диаметр",
+  "scaler_target_height": "Целевая высота",
+  "scaler_target_weight": "Целевой вес",
+  "scaler_total_weight": "итого ≈ {grams}",
+  "@scaler_total_weight": {
+    "placeholders": { "grams": { "type": "String" } }
+  },
+  "scaler_height_label_short": "В",
+  "scaler_height_label_full": "Высота",
+  "scaler_cooked_today": "Записал! Готовите {n}-й раз",
+  "@scaler_cooked_today": {
+    "placeholders": { "n": { "type": "int" } }
+  },
+  "scaler_cooked_button": "Я приготовил",
+  "scaler_share_text": "Поделиться текстом",
+  "scaler_share_pdf": "Сохранить как PDF",
+  "scaler_shopping_list": "Список покупок",
+  "scaler_shopping_list_title": "Список покупок",
+
+  "settings_title": "Настройки",
+  "settings_group_appearance": "Внешний вид",
+  "settings_group_behavior": "Поведение",
+  "settings_group_cloud": "Облачный бэкап",
+  "settings_group_backup": "Резервные копии",
+  "settings_group_data": "Данные",
+  "settings_group_danger": "Опасная зона",
+  "settings_group_about": "О приложении",
+
+  "settings_theme": "Тема",
+  "settings_theme_auto": "Авто (день — светлая, вечер — тёмная)",
+  "settings_theme_light": "Светлая",
+  "settings_theme_dark": "Тёмная",
+
+  "settings_language": "Язык",
+  "settings_language_system": "Системный",
+  "settings_language_ru": "Русский",
+  "settings_language_en": "English",
+
+  "settings_quick_diameters": "Быстрые диаметры",
+  "settings_quick_diameters_hint": "Через запятую, см",
+  "settings_default_scale_mode": "Режим пересчёта по умолчанию",
+  "settings_default_scale_mode_size": "По размеру",
+  "settings_default_scale_mode_weight": "По весу",
+
+  "settings_custom_types": "Кастомные типы секций",
+  "settings_custom_types_add": "Добавить тип",
+  "settings_custom_type_in_use_title": "Тип используется",
+  "settings_custom_type_in_use_body": "Этот тип используется в {count} рецепт(ах). Уже сохранённые секции продолжат работать, но добавить новые будет нельзя.",
+  "@settings_custom_type_in_use_body": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+
+  "settings_auto_update": "Автоматически проверять обновления",
+  "settings_check_update_now": "Проверить обновление сейчас",
+  "settings_update_no_new": "У вас актуальная версия",
+  "settings_update_found": "Доступна версия {version}",
+  "@settings_update_found": {
+    "placeholders": { "version": { "type": "String" } }
+  },
+
+  "settings_cloud_connect": "Подключить Google Drive",
+  "settings_cloud_connect_subtitle": "Автоматический бэкап рецептов",
+  "settings_cloud_connected": "Подключено",
+  "settings_cloud_email": "Аккаунт",
+  "settings_cloud_last_sync": "Последняя синхронизация: {when}",
+  "@settings_cloud_last_sync": {
+    "placeholders": { "when": { "type": "String" } }
+  },
+  "settings_cloud_never_synced": "Ещё не синхронизировано",
+  "settings_cloud_sync_now": "Синхронизировать сейчас",
+  "settings_cloud_restore": "Восстановить из облака",
+  "settings_cloud_sign_out": "Выйти",
+  "settings_cloud_busy": "Подождите…",
+  "settings_cloud_restore_prompt_title": "Восстановить из бэкапа?",
+  "settings_cloud_restore_prompt_body": "Найден бэкап от {when}. Восстановить?",
+  "@settings_cloud_restore_prompt_body": {
+    "placeholders": { "when": { "type": "String" } }
+  },
+  "settings_cloud_restore_keep_local": "Нет, оставить локальные",
+  "settings_cloud_restore_replace": "Восстановить",
+  "settings_cloud_restore_done": "Восстановлено {count} рецепт(ов)",
+  "@settings_cloud_restore_done": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+
+  "settings_export": "Экспортировать в JSON",
+  "settings_import": "Импортировать из JSON",
+  "settings_import_undo": "Откатить последний импорт",
+  "settings_import_done": "Импортировано {count} рецепт(ов)",
+  "@settings_import_done": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "settings_import_undone": "Импорт отменён",
+  "settings_import_error": "Не удалось прочитать файл",
+
+  "settings_stats": "Статистика",
+  "settings_show_welcome_again": "Показать приветствие снова",
+  "settings_reset_settings": "Сбросить настройки до дефолтов",
+  "settings_reset_settings_done": "Настройки сброшены",
+  "settings_delete_all": "Удалить все рецепты и кастомные типы",
+  "settings_delete_all_confirm_title": "Удалить всё?",
+  "settings_delete_all_confirm_body": "Будут удалены все рецепты и кастомные типы. Действие необратимо.",
+  "settings_delete_all_done": "Всё удалено",
+
+  "about_version": "Версия {v}",
+  "@about_version": {
+    "placeholders": { "v": { "type": "String" } }
+  },
+  "about_repo": "Исходный код на GitHub",
+  "about_license": "Лицензия: MIT",
+
+  "stats_recipes_total": "Всего рецептов",
+  "stats_ingredients_total": "Всего ингредиентов",
+  "stats_total_weight": "Сумма весов рецептов",
+  "stats_top_ingredients": "Топ-5 ингредиентов",
+  "stats_top_tags": "Топ-5 тегов",
+
+  "welcome_title": "Привет, кондитер!",
+  "welcome_subtitle": "Tortio пересчитает ингредиенты под нужный размер торта.",
+  "welcome_bullet_add": "Кнопка «+ Рецепт» снизу — добавить новый. Можно начать с готового примера.",
+  "welcome_bullet_scale": "Открыл рецепт → меняй диаметр или вес → ингредиенты пересчитываются автоматически.",
+  "welcome_bullet_tiers": "Многоярусный торт? Добавь ярус прямо в форме рецепта — у каждого свой размер.",
+  "welcome_bullet_sort": "↕ — сортировка списка. ⚙ — настройки (тема, бэкапы, статистика).",
+  "welcome_bullet_inside": "Внутри рецепта: ✓ «Я приготовил», ↗ «Экспорт» (PDF / шаринг), 🛒 «Список покупок».",
+  "welcome_button_start": "Начать!",
+
+  "snack_recipe_saved": "Рецепт сохранён",
+  "snack_export_done": "Экспортировано",
+  "snack_no_internet": "Нет интернета",
+  "snack_drive_connected": "Google Drive подключён",
+  "snack_drive_uploaded": "Загружено в облако",
+  "snack_drive_failed": "Ошибка облака. Попробуйте позже",
+
+  "update_banner_available": "Версия {version} доступна",
+  "@update_banner_available": {
+    "placeholders": { "version": { "type": "String" } }
+  },
+  "update_banner_tap": "Нажмите чтобы обновить",
+  "update_banner_downloading": "Скачивание... {percent}%",
+  "@update_banner_downloading": {
+    "placeholders": { "percent": { "type": "int" } }
+  },
+  "update_error_generic": "Ошибка обновления. Проверьте интернет.",
+  "update_error_no_internet": "Нет интернета. Проверьте подключение.",
+  "update_error_install_permission": "Нужно разрешить установку из неизвестных источников в настройках Android."
+}

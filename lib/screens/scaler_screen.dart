@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:share_plus/share_plus.dart';
+import '../l10n/app_localizations.dart';
 import '../models/recipe.dart';
 import '../models/scaler.dart';
 import '../services/app_settings.dart';
@@ -217,7 +218,9 @@ class _ScalerScreenState extends State<ScalerScreen> {
                           ),
                         ),
                         IconButton(
-                          tooltip: 'Список покупок',
+                          tooltip: AppLocalizations.of(
+                            context,
+                          ).scaler_shopping_list,
                           onPressed: () => _showShoppingList(scaled),
                           icon: const Icon(
                             Icons.shopping_basket_outlined,
@@ -225,7 +228,9 @@ class _ScalerScreenState extends State<ScalerScreen> {
                           ),
                         ),
                         IconButton(
-                          tooltip: 'Я приготовил',
+                          tooltip: AppLocalizations.of(
+                            context,
+                          ).scaler_cooked_button,
                           onPressed: () => _markCooked(recipe),
                           icon: const Icon(
                             Icons.check_circle_outline,

@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../l10n/app_localizations.dart';
 import '../models/recipe.dart';
 import '../services/sample_recipe.dart';
 import '../services/storage_service.dart';
@@ -63,14 +64,14 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
     await prefs.setString('sort_order', o.name);
   }
 
-  String _sortLabel(SortOrder o) => switch (o) {
-    SortOrder.manual => 'Вручную',
-    SortOrder.newest => 'Новые сначала',
-    SortOrder.oldest => 'Старые сначала',
-    SortOrder.alpha => 'По алфавиту',
-    SortOrder.rating => 'По рейтингу',
-    SortOrder.cookedOften => 'Чаще готовлю',
-    SortOrder.cookedRecently => 'Недавно готовил',
+  String _sortLabel(SortOrder o, AppLocalizations l) => switch (o) {
+    SortOrder.manual => l.list_sort_manual,
+    SortOrder.newest => l.list_sort_newest,
+    SortOrder.oldest => l.list_sort_oldest,
+    SortOrder.alpha => l.list_sort_alpha,
+    SortOrder.rating => l.list_sort_rating,
+    SortOrder.cookedOften => l.list_sort_cook_count,
+    SortOrder.cookedRecently => l.list_sort_recently_cooked,
   };
 
   Future<void> _loadRecipes() async {
@@ -158,23 +159,22 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
 
   Future<void> _deleteSelected() async {
     final count = _selectedIds.length;
+    final l = AppLocalizations.of(context);
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: Text('Удалить $count рецепт(ов)?'),
-        content: const Text(
-          'Все выбранные рецепты будут удалены безвозвратно.',
-        ),
+        title: Text(l.list_bulk_delete_title(count)),
+        content: Text(l.list_bulk_delete_body),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Отмена'),
+            child: Text(l.common_cancel),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(ctx, true),
             style: FilledButton.styleFrom(backgroundColor: Colors.red.shade400),
-            child: const Text('Удалить'),
+            child: Text(l.common_delete),
           ),
         ],
       ),
@@ -188,13 +188,14 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
     if (!mounted) return;
     ScaffoldMessenger.of(
       context,
-    ).showSnackBar(SnackBar(content: Text('Удалено: $count')));
+    ).showSnackBar(SnackBar(content: Text(l.list_bulk_deleted(count))));
   }
 
   void _duplicateRecipe(Recipe recipe) {
+    final l = AppLocalizations.of(context);
     final copy = Recipe(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
-      title: '${recipe.title} (копия)',
+      title: '${recipe.title} ${l.list_recipe_duplicate_suffix}',
       diameter: recipe.diameter,
       height: recipe.height,
       weight: recipe.weight,
@@ -241,6 +242,7 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
     final index = _recipes.indexWhere((r) => r.id == recipe.id);
     if (index == -1) return;
 
+    final l = AppLocalizations.of(context);
     setState(() => _recipes.removeAt(index));
     _saveRecipes();
 
@@ -257,7 +259,7 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
             children: [
               Expanded(
                 child: Text(
-                  '«${recipe.title}» удалён',
+                  l.list_recipe_named_deleted(recipe.title),
                   style: const TextStyle(color: Colors.white),
                 ),
               ),
@@ -270,10 +272,10 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
                 style: TextButton.styleFrom(
                   foregroundColor: const Color(0xFFFFB3C1),
                 ),
-                child: const Text('Отменить'),
+                child: Text(l.common_undo),
               ),
               IconButton(
-                tooltip: 'Закрыть',
+                tooltip: l.common_close,
                 onPressed: messenger.hideCurrentSnackBar,
                 icon: const Icon(Icons.close, size: 18, color: Colors.white70),
               ),
@@ -293,6 +295,7 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
     return Scaffold(
       body: Stack(
         children: [
@@ -307,7 +310,7 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
                 child: TextField(
                   controller: _searchController,
                   decoration: InputDecoration(
-                    hintText: 'Поиск по названию или ингредиенту',
+                    hintText: l.list_search_hint,
                     prefixIcon: const Icon(Icons.search, size: 20),
                     suffixIcon: _searchQuery.isEmpty
                         ? null
@@ -336,7 +339,7 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
                         vertical: 4,
                       ),
                       child: FilterChip(
-                        label: const Text('Все'),
+                        label: Text(l.list_filter_all_tags),
                         selected: _selectedTag == null,
                         onSelected: (_) => setState(() => _selectedTag = null),
                       ),
@@ -373,7 +376,7 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
       floatingActionButton: FloatingActionButton.extended(
         onPressed: _addRecipe,
         icon: const Icon(Icons.add),
-        label: const Text('Рецепт'),
+        label: Text(l.list_fab_new_recipe),
         backgroundColor: const Color(0xFFFF6B8A),
         foregroundColor: Colors.white,
       ),
@@ -381,6 +384,7 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
   }
 
   Widget _buildEmpty() {
+    final l = AppLocalizations.of(context);
     return Center(
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -399,20 +403,20 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
             child: const Text('🎂', style: TextStyle(fontSize: 56)),
           ),
           const SizedBox(height: 24),
-          const Text(
-            'Пока нет рецептов',
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
+          Text(
+            l.list_empty_title,
+            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
           ),
           const SizedBox(height: 8),
           Text(
-            'Добавьте свой первый торт!',
+            l.list_empty_subtitle,
             style: TextStyle(fontSize: 15, color: Colors.grey.shade500),
           ),
           const SizedBox(height: 24),
           OutlinedButton.icon(
             onPressed: _addSampleRecipe,
             icon: const Icon(Icons.auto_awesome, size: 18),
-            label: const Text('Создать примерный рецепт'),
+            label: Text(l.list_empty_demo_button),
             style: OutlinedButton.styleFrom(
               foregroundColor: const Color(0xFFE85D75),
               side: const BorderSide(color: Color(0xFFE85D75)),
@@ -483,6 +487,7 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
   }
 
   Widget _buildHeader() {
+    final l = AppLocalizations.of(context);
     return Container(
       padding: const EdgeInsets.fromLTRB(24, 20, 16, 16),
       child: Row(
@@ -512,7 +517,7 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
             ),
           ),
           PopupMenuButton<SortOrder>(
-            tooltip: 'Сортировка: ${_sortLabel(_sortOrder)}',
+            tooltip: l.list_tooltip_sort(_sortLabel(_sortOrder, l)),
             icon: const Icon(Icons.swap_vert),
             onSelected: _setSortOrder,
             itemBuilder: (_) => SortOrder.values.map((o) {
@@ -525,7 +530,7 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
                         : Icons.radio_button_off,
                     size: 20,
                   ),
-                  title: Text(_sortLabel(o)),
+                  title: Text(_sortLabel(o, l)),
                   dense: true,
                   contentPadding: EdgeInsets.zero,
                 ),
@@ -533,7 +538,7 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
             }).toList(),
           ),
           IconButton(
-            tooltip: 'Настройки',
+            tooltip: l.list_tooltip_settings,
             icon: const Icon(Icons.settings_outlined),
             onPressed: _openSettings,
           ),
@@ -543,24 +548,25 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
   }
 
   Widget _buildSelectionHeader() {
+    final l = AppLocalizations.of(context);
     return Container(
       padding: const EdgeInsets.fromLTRB(8, 12, 16, 12),
       color: const Color(0xFFFF6B8A).withValues(alpha: 0.12),
       child: Row(
         children: [
           IconButton(
-            tooltip: 'Отменить выбор',
+            tooltip: l.list_tooltip_cancel_selection,
             icon: const Icon(Icons.close),
             onPressed: _exitSelection,
           ),
           Expanded(
             child: Text(
-              'Выбрано: ${_selectedIds.length}',
+              l.list_selection_count(_selectedIds.length),
               style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
             ),
           ),
           IconButton(
-            tooltip: 'Удалить выбранные',
+            tooltip: l.list_tooltip_delete_selected,
             icon: const Icon(Icons.delete_outline, color: Colors.red),
             onPressed: _deleteSelected,
           ),
@@ -571,16 +577,16 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
 
   /// Возвращает читаемый суффикс «· Х дней назад» / «· сегодня» для
   /// последнего приготовления. Пустая строка если lastCookedAt = 0.
-  String _lastCookedSuffix(Recipe r) {
+  String _lastCookedSuffix(Recipe r, AppLocalizations l) {
     if (r.lastCookedAt == 0) return '';
     final ms = DateTime.now().millisecondsSinceEpoch - r.lastCookedAt;
     final days = ms ~/ (24 * 3600 * 1000);
-    if (days == 0) return ' · сегодня';
-    if (days == 1) return ' · вчера';
-    if (days < 7) return ' · $days дн. назад';
-    if (days < 30) return ' · ${days ~/ 7} нед. назад';
-    if (days < 365) return ' · ${days ~/ 30} мес. назад';
-    return ' · ${days ~/ 365} г. назад';
+    if (days == 0) return ' · ${l.time_today}';
+    if (days == 1) return ' · ${l.time_yesterday}';
+    if (days < 7) return ' · ${l.time_days_ago(days)}';
+    if (days < 30) return ' · ${l.time_weeks_ago(days ~/ 7)}';
+    if (days < 365) return ' · ${l.time_months_ago(days ~/ 30)}';
+    return ' · ${l.time_years_ago(days ~/ 365)}';
   }
 
   /// Рецепт «свежий», если создан меньше 24 часов назад.
@@ -601,14 +607,19 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
   }
 
   Widget _buildList() {
+    final l = AppLocalizations.of(context);
     final visible = _visibleRecipes;
     if (visible.isEmpty) {
       final parts = <String>[];
-      if (_searchQuery.isNotEmpty) parts.add('по запросу «$_searchQuery»');
-      if (_selectedTag != null) parts.add('с тегом «$_selectedTag»');
+      if (_searchQuery.isNotEmpty) {
+        parts.add(l.list_filter_by_query(_searchQuery));
+      }
+      if (_selectedTag != null) {
+        parts.add(l.list_filter_by_tag(_selectedTag!));
+      }
       final desc = parts.isEmpty
-          ? 'ничего не найдено'
-          : 'нет рецептов ${parts.join(' ')}';
+          ? l.list_no_results_empty
+          : l.list_no_results_filtered(parts.join(' '));
       return Center(
         child: Padding(
           padding: const EdgeInsets.all(24),
@@ -623,7 +634,7 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
               const SizedBox(height: 16),
               FilledButton.icon(
                 icon: const Icon(Icons.filter_alt_off, size: 18),
-                label: const Text('Сбросить фильтры'),
+                label: Text(l.list_no_results_reset),
                 onPressed: () {
                   _searchController.clear();
                   setState(() {
@@ -683,6 +694,7 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
   }
 
   Widget _buildRecipeCard(Recipe r, int i) {
+    final l = AppLocalizations.of(context);
     final gradient = _cardGradients[i % _cardGradients.length];
     final selected = _selectedIds.contains(r.id);
     return Padding(
@@ -777,7 +789,13 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
                         children: [
                           Expanded(
                             child: Text(
-                              '⌀ ${r.diameter.round()} см  •  ${r.sections.length} секц.  •  ${r.allIngredients.length} ингр.',
+                              l.list_card_summary(
+                                l.unit_diameter_symbol,
+                                r.diameter.round(),
+                                l.unit_centimeters_short,
+                                r.sections.length,
+                                r.allIngredients.length,
+                              ),
                               style: TextStyle(
                                 color: Colors.grey.shade600,
                                 fontSize: 13,
@@ -797,9 +815,9 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
                                 color: const Color(0xFFE85D75),
                                 borderRadius: BorderRadius.circular(6),
                               ),
-                              child: const Text(
-                                'NEW',
-                                style: TextStyle(
+                              child: Text(
+                                l.list_badge_new,
+                                style: const TextStyle(
                                   fontSize: 9,
                                   fontWeight: FontWeight.w700,
                                   color: Colors.white,
@@ -830,7 +848,10 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
                       if (r.cookCount > 0) ...[
                         const SizedBox(height: 2),
                         Text(
-                          'Готовили ${r.cookCount} раз${_lastCookedSuffix(r)}',
+                          l.list_card_cooked(
+                            r.cookCount,
+                            _lastCookedSuffix(r, l),
+                          ),
                           style: TextStyle(
                             color: Colors.grey.shade500,
                             fontSize: 12,
@@ -893,45 +914,50 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
                           r.pinned ? Icons.push_pin : Icons.push_pin_outlined,
                           color: const Color(0xFFE85D75),
                         ),
-                        title: Text(r.pinned ? 'Открепить' : 'Закрепить'),
+                        title: Text(
+                          r.pinned ? l.list_menu_unpin : l.list_menu_pin,
+                        ),
                         dense: true,
                         contentPadding: EdgeInsets.zero,
                       ),
                     ),
-                    const PopupMenuItem(
+                    PopupMenuItem(
                       value: 'edit',
                       child: ListTile(
-                        leading: Icon(Icons.edit_outlined),
-                        title: Text('Редактировать'),
+                        leading: const Icon(Icons.edit_outlined),
+                        title: Text(l.list_menu_edit),
                         dense: true,
                         contentPadding: EdgeInsets.zero,
                       ),
                     ),
-                    const PopupMenuItem(
+                    PopupMenuItem(
                       value: 'duplicate',
                       child: ListTile(
-                        leading: Icon(Icons.copy_outlined),
-                        title: Text('Дублировать'),
+                        leading: const Icon(Icons.copy_outlined),
+                        title: Text(l.list_menu_duplicate),
                         dense: true,
                         contentPadding: EdgeInsets.zero,
                       ),
                     ),
-                    const PopupMenuItem(
+                    PopupMenuItem(
                       value: 'select',
                       child: ListTile(
-                        leading: Icon(Icons.check_box_outlined),
-                        title: Text('Выбрать (массовое удаление)'),
+                        leading: const Icon(Icons.check_box_outlined),
+                        title: Text(l.list_menu_select_bulk),
                         dense: true,
                         contentPadding: EdgeInsets.zero,
                       ),
                     ),
-                    const PopupMenuItem(
+                    PopupMenuItem(
                       value: 'delete',
                       child: ListTile(
-                        leading: Icon(Icons.delete_outline, color: Colors.red),
+                        leading: const Icon(
+                          Icons.delete_outline,
+                          color: Colors.red,
+                        ),
                         title: Text(
-                          'Удалить',
-                          style: TextStyle(color: Colors.red),
+                          l.list_menu_delete,
+                          style: const TextStyle(color: Colors.red),
                         ),
                         dense: true,
                         contentPadding: EdgeInsets.zero,
