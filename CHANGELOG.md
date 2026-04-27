@@ -2,6 +2,22 @@
 
 Все значимые изменения по версиям. Формат — обратный хронологический.
 
+## v0.0.13 — 2026-04-27 (sample recipe localization)
+
+Закрываем последний UI-видимый русский кусок при чистой установке в EN локали.
+
+### Что добавилось
+- **Sample recipe генерируется в текущей локали**: `buildSampleRecipe(AppLocalizations l)` вместо хардкода. 13 новых ARB-ключей: `sample_title`, `sample_notes`, `sample_sponge_notes`, `sample_tag_chocolate`, `sample_tag_sample`, `sample_ing_flour/cocoa/sugar/eggs/butter/cream33/powdered_sugar/dark_chocolate`.
+- **EN-юзер при первом запуске** видит «Chocolate cake (sample)», теги «chocolate»/«sample», ингредиенты Flour/Cocoa/Sugar/Eggs/Butter/Cream 33%/Powdered sugar/Dark chocolate, английские notes. Русский юзер — то же самое на русском.
+- **Поведение**: содержимое фиксируется в момент создания sample, после смены локали уже не пересоздаётся (это user data).
+
+### Verified на эмуляторе
+Чистая установка → welcome (English) → Get started → Create sample recipe → карточка «Chocolate cake (sample) ⌀ 22 cm • 3 sect. • 9 ingr.» → scaler показывает Sponge/Cream/Glaze со всеми английскими ингредиентами и notes на английском.
+
+### Что осталось намеренно на русском
+- PDF/share-text export — output для печати/отправки.
+- Имена custom-типов и ингредиентов пользователя — user input.
+
 ## v0.0.12 — 2026-04-27 (английская локализация — фаза 3: preset section names)
 
 Закрываем последний крупный гэп локализации, найденный при пост-релизной верификации v0.0.11.

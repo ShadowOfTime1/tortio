@@ -562,5 +562,19 @@
   },
   "update_error_generic": "Update error. Check your internet.",
   "update_error_no_internet": "No internet. Check your connection.",
-  "update_error_install_permission": "Allow install from unknown sources in Android settings."
+  "update_error_install_permission": "Allow install from unknown sources in Android settings.",
+
+  "sample_title": "Chocolate cake (sample)",
+  "sample_notes": "Bake the sponge at 180°C for 35–40 min. Let it cool, slice into 2 layers. Layer with cream, top with glaze.",
+  "sample_sponge_notes": "Sift flour with cocoa before mixing",
+  "sample_tag_chocolate": "chocolate",
+  "sample_tag_sample": "sample",
+  "sample_ing_flour": "Flour",
+  "sample_ing_cocoa": "Cocoa",
+  "sample_ing_sugar": "Sugar",
+  "sample_ing_eggs": "Eggs",
+  "sample_ing_butter": "Butter",
+  "sample_ing_cream33": "Cream 33%",
+  "sample_ing_powdered_sugar": "Powdered sugar",
+  "sample_ing_dark_chocolate": "Dark chocolate"
 }

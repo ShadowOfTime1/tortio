@@ -1,18 +1,20 @@
+import '../l10n/app_localizations.dart';
 import '../models/recipe.dart';
 
 /// Демо-рецепт для пустого списка — даёт новичку увидеть структуру:
 /// несколько секций разного scaleType, ингредиенты, заметки.
-Recipe buildSampleRecipe() {
+/// Текстовое содержимое (title, notes, ингредиенты, теги) генерится в
+/// текущей локали — после создания это уже user data, которая не пересоздаётся
+/// при смене языка.
+Recipe buildSampleRecipe(AppLocalizations l) {
   return Recipe(
     id: DateTime.now().millisecondsSinceEpoch.toString(),
-    title: 'Шоколадный торт (пример)',
+    title: l.sample_title,
     diameter: 22,
     height: 8,
     weight: 1500,
-    notes:
-        'Печь бисквит при 180°C 35–40 мин. Дать остыть, разрезать на 2 коржа. '
-        'Прослоить кремом, покрыть глазурью.',
-    tags: const ['шоколадный', 'пример'],
+    notes: l.sample_notes,
+    tags: [l.sample_tag_chocolate, l.sample_tag_sample],
     rating: 5,
     sections: [
       RecipeSection(
@@ -21,14 +23,30 @@ Recipe buildSampleRecipe() {
           icon: '🍰',
           scaleType: ScaleType.volume,
         ),
-        notes: 'Просеять муку с какао перед смешиванием',
+        notes: l.sample_sponge_notes,
         ingredients: [
-          Ingredient(name: 'Мука', amount: 200, scaleType: ScaleType.volume),
-          Ingredient(name: 'Какао', amount: 50, scaleType: ScaleType.volume),
-          Ingredient(name: 'Сахар', amount: 200, scaleType: ScaleType.volume),
-          Ingredient(name: 'Яйца', amount: 200, scaleType: ScaleType.volume),
           Ingredient(
-            name: 'Сливочное масло',
+            name: l.sample_ing_flour,
+            amount: 200,
+            scaleType: ScaleType.volume,
+          ),
+          Ingredient(
+            name: l.sample_ing_cocoa,
+            amount: 50,
+            scaleType: ScaleType.volume,
+          ),
+          Ingredient(
+            name: l.sample_ing_sugar,
+            amount: 200,
+            scaleType: ScaleType.volume,
+          ),
+          Ingredient(
+            name: l.sample_ing_eggs,
+            amount: 200,
+            scaleType: ScaleType.volume,
+          ),
+          Ingredient(
+            name: l.sample_ing_butter,
             amount: 100,
             scaleType: ScaleType.volume,
           ),
@@ -42,12 +60,12 @@ Recipe buildSampleRecipe() {
         ),
         ingredients: [
           Ingredient(
-            name: 'Сливки 33%',
+            name: l.sample_ing_cream33,
             amount: 400,
             scaleType: ScaleType.volume,
           ),
           Ingredient(
-            name: 'Сахарная пудра',
+            name: l.sample_ing_powdered_sugar,
             amount: 80,
             scaleType: ScaleType.volume,
           ),
@@ -61,12 +79,12 @@ Recipe buildSampleRecipe() {
         ),
         ingredients: [
           Ingredient(
-            name: 'Тёмный шоколад',
+            name: l.sample_ing_dark_chocolate,
             amount: 200,
             scaleType: ScaleType.area,
           ),
           Ingredient(
-            name: 'Сливки 33%',
+            name: l.sample_ing_cream33,
             amount: 100,
             scaleType: ScaleType.area,
           ),

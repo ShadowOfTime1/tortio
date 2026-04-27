@@ -433,7 +433,7 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
   }
 
   Future<void> _addSampleRecipe() async {
-    setState(() => _recipes.add(buildSampleRecipe()));
+    setState(() => _recipes.add(buildSampleRecipe(AppLocalizations.of(context))));
     _saveRecipes();
   }
 

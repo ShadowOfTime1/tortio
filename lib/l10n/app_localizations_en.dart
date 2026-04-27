@@ -1176,4 +1176,44 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get update_error_install_permission =>
       'Allow install from unknown sources in Android settings.';
+
+  @override
+  String get sample_title => 'Chocolate cake (sample)';
+
+  @override
+  String get sample_notes =>
+      'Bake the sponge at 180°C for 35–40 min. Let it cool, slice into 2 layers. Layer with cream, top with glaze.';
+
+  @override
+  String get sample_sponge_notes => 'Sift flour with cocoa before mixing';
+
+  @override
+  String get sample_tag_chocolate => 'chocolate';
+
+  @override
+  String get sample_tag_sample => 'sample';
+
+  @override
+  String get sample_ing_flour => 'Flour';
+
+  @override
+  String get sample_ing_cocoa => 'Cocoa';
+
+  @override
+  String get sample_ing_sugar => 'Sugar';
+
+  @override
+  String get sample_ing_eggs => 'Eggs';
+
+  @override
+  String get sample_ing_butter => 'Butter';
+
+  @override
+  String get sample_ing_cream33 => 'Cream 33%';
+
+  @override
+  String get sample_ing_powdered_sugar => 'Powdered sugar';
+
+  @override
+  String get sample_ing_dark_chocolate => 'Dark chocolate';
 }

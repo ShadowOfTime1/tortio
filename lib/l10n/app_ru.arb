@@ -562,5 +562,19 @@
   },
   "update_error_generic": "Ошибка обновления. Проверьте интернет.",
   "update_error_no_internet": "Нет интернета. Проверьте подключение.",
-  "update_error_install_permission": "Нужно разрешить установку из неизвестных источников в настройках Android."
+  "update_error_install_permission": "Нужно разрешить установку из неизвестных источников в настройках Android.",
+
+  "sample_title": "Шоколадный торт (пример)",
+  "sample_notes": "Печь бисквит при 180°C 35–40 мин. Дать остыть, разрезать на 2 коржа. Прослоить кремом, покрыть глазурью.",
+  "sample_sponge_notes": "Просеять муку с какао перед смешиванием",
+  "sample_tag_chocolate": "шоколадный",
+  "sample_tag_sample": "пример",
+  "sample_ing_flour": "Мука",
+  "sample_ing_cocoa": "Какао",
+  "sample_ing_sugar": "Сахар",
+  "sample_ing_eggs": "Яйца",
+  "sample_ing_butter": "Сливочное масло",
+  "sample_ing_cream33": "Сливки 33%",
+  "sample_ing_powdered_sugar": "Сахарная пудра",
+  "sample_ing_dark_chocolate": "Тёмный шоколад"
 }

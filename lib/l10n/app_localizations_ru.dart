@@ -1184,4 +1184,44 @@ class AppLocalizationsRu extends AppLocalizations {
   @override
   String get update_error_install_permission =>
       'Нужно разрешить установку из неизвестных источников в настройках Android.';
+
+  @override
+  String get sample_title => 'Шоколадный торт (пример)';
+
+  @override
+  String get sample_notes =>
+      'Печь бисквит при 180°C 35–40 мин. Дать остыть, разрезать на 2 коржа. Прослоить кремом, покрыть глазурью.';
+
+  @override
+  String get sample_sponge_notes => 'Просеять муку с какао перед смешиванием';
+
+  @override
+  String get sample_tag_chocolate => 'шоколадный';
+
+  @override
+  String get sample_tag_sample => 'пример';
+
+  @override
+  String get sample_ing_flour => 'Мука';
+
+  @override
+  String get sample_ing_cocoa => 'Какао';
+
+  @override
+  String get sample_ing_sugar => 'Сахар';
+
+  @override
+  String get sample_ing_eggs => 'Яйца';
+
+  @override
+  String get sample_ing_butter => 'Сливочное масло';
+
+  @override
+  String get sample_ing_cream33 => 'Сливки 33%';
+
+  @override
+  String get sample_ing_powdered_sugar => 'Сахарная пудра';
+
+  @override
+  String get sample_ing_dark_chocolate => 'Тёмный шоколад';
 }

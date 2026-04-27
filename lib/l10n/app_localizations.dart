@@ -2094,6 +2094,84 @@ abstract class AppLocalizations {
   /// In ru, this message translates to:
   /// **'Нужно разрешить установку из неизвестных источников в настройках Android.'**
   String get update_error_install_permission;
+
+  /// No description provided for @sample_title.
+  ///
+  /// In ru, this message translates to:
+  /// **'Шоколадный торт (пример)'**
+  String get sample_title;
+
+  /// No description provided for @sample_notes.
+  ///
+  /// In ru, this message translates to:
+  /// **'Печь бисквит при 180°C 35–40 мин. Дать остыть, разрезать на 2 коржа. Прослоить кремом, покрыть глазурью.'**
+  String get sample_notes;
+
+  /// No description provided for @sample_sponge_notes.
+  ///
+  /// In ru, this message translates to:
+  /// **'Просеять муку с какао перед смешиванием'**
+  String get sample_sponge_notes;
+
+  /// No description provided for @sample_tag_chocolate.
+  ///
+  /// In ru, this message translates to:
+  /// **'шоколадный'**
+  String get sample_tag_chocolate;
+
+  /// No description provided for @sample_tag_sample.
+  ///
+  /// In ru, this message translates to:
+  /// **'пример'**
+  String get sample_tag_sample;
+
+  /// No description provided for @sample_ing_flour.
+  ///
+  /// In ru, this message translates to:
+  /// **'Мука'**
+  String get sample_ing_flour;
+
+  /// No description provided for @sample_ing_cocoa.
+  ///
+  /// In ru, this message translates to:
+  /// **'Какао'**
+  String get sample_ing_cocoa;
+
+  /// No description provided for @sample_ing_sugar.
+  ///
+  /// In ru, this message translates to:
+  /// **'Сахар'**
+  String get sample_ing_sugar;
+
+  /// No description provided for @sample_ing_eggs.
+  ///
+  /// In ru, this message translates to:
+  /// **'Яйца'**
+  String get sample_ing_eggs;
+
+  /// No description provided for @sample_ing_butter.
+  ///
+  /// In ru, this message translates to:
+  /// **'Сливочное масло'**
+  String get sample_ing_butter;
+
+  /// No description provided for @sample_ing_cream33.
+  ///
+  /// In ru, this message translates to:
+  /// **'Сливки 33%'**
+  String get sample_ing_cream33;
+
+  /// No description provided for @sample_ing_powdered_sugar.
+  ///
+  /// In ru, this message translates to:
+  /// **'Сахарная пудра'**
+  String get sample_ing_powdered_sugar;
+
+  /// No description provided for @sample_ing_dark_chocolate.
+  ///
+  /// In ru, this message translates to:
+  /// **'Тёмный шоколад'**
+  String get sample_ing_dark_chocolate;
 }
 
 class _AppLocalizationsDelegate
