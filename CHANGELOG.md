@@ -2,7 +2,7 @@
 
 Все значимые изменения по версиям. Формат — обратный хронологический.
 
-## Unreleased — package rename `com.example.tortio` → `com.tortio.app` (Play Store prep)
+## v0.1.0 — 2026-04-28 (package rename + Play Store signing)
 
 **Breaking change для существующих установок**: новый applicationId означает, что Android считает это **другим приложением**. Старая `com.example.tortio` НЕ может быть автоматически обновлена до `com.tortio.app` — это невозможно технически. Существующие тестовые установки нужно вручную удалить и переустановить новую версию.
 
