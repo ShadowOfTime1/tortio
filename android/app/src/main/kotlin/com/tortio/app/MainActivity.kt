@@ -1,4 +1,4 @@
-package com.example.tortio
+package com.tortio.app
 
 import io.flutter.embedding.android.FlutterActivity
 

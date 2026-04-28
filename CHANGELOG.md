@@ -2,6 +2,26 @@
 
 Все значимые изменения по версиям. Формат — обратный хронологический.
 
+## Unreleased — package rename `com.example.tortio` → `com.tortio.app` (Play Store prep)
+
+**Breaking change для существующих установок**: новый applicationId означает, что Android считает это **другим приложением**. Старая `com.example.tortio` НЕ может быть автоматически обновлена до `com.tortio.app` — это невозможно технически. Существующие тестовые установки нужно вручную удалить и переустановить новую версию.
+
+### Что изменилось
+- **Android applicationId / namespace**: `com.example.tortio` → `com.tortio.app` в `android/app/build.gradle.kts`.
+- **MainActivity.kt** перемещён `kotlin/com/example/tortio/` → `kotlin/com/tortio/app/`, package declaration обновлён.
+- **iOS / macOS / Linux bundle IDs** — обновлены для консистентности (для будущих платформ).
+- **Keystore infrastructure**: добавлена поддержка release-signing через `key.properties` (build.gradle.kts уже её ожидал, но файла не было). `key.properties`, `*.jks`, `*.keystore` добавлены в `.gitignore`.
+- **`docs/SIGNING.md`** — гайд для maintainer'а: создание keystore, бэкапы, signed APK/AAB сборка, опциональная интеграция в GitHub Actions.
+
+### Что осталось до Play-релиза
+- [ ] Создать release keystore (требует пароля от user'а) и `key.properties`.
+- [ ] Сборка signed AAB локально (`flutter build appbundle --release`).
+- [ ] Проверка signed APK/AAB на эмуляторе.
+- [ ] Решение по GitHub Actions: добавить keystore в secrets для автоподписи в CI или оставить ручную локальную сборку для Play.
+- [ ] Listing assets (icon 512×512, feature graphic 1024×500, screenshots EN+RU, описания).
+- [ ] Регистрация Google Play Developer Account.
+- [ ] Internal testing track → Closed → Production.
+
 ## v0.0.16 — 2026-04-28 (Privacy Policy + GitHub Pages site)
 
 Подготовка к Google Play: поднят публичный сайт-документация и in-app ссылка на Privacy Policy.

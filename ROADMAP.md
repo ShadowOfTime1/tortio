@@ -116,8 +116,8 @@
 
 ### 3.1 Google Play Store
 - [ ] **Регистрация Developer Account** ($25 единоразово).
-- [ ] Изменить `applicationId` (сейчас `com.example.tortio` — нельзя в Play). Будет breaking change для старых установок — нужен migration plan.
-- [ ] Privacy policy URL (например через GitHub Pages).
+- [x] Изменить `applicationId` `com.example.tortio` → `com.tortio.app` (breaking change для тестовых установок — переустановить вручную).
+- [x] Privacy policy URL: https://shadowoftime1.github.io/tortio/privacy-policy/ (на GitHub Pages из docs/).
 - [ ] Подготовить store listing: иконка 512×512, feature graphic, скриншоты (телефон + планшет), описание RU + EN, категория.
 - [ ] Внутреннее тестирование (Internal testing track).
 - [ ] Закрытое тестирование (Closed track) — пригласить пару бета-тестеров.
