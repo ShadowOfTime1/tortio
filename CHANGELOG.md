@@ -2,6 +2,24 @@
 
 Все значимые изменения по версиям. Формат — обратный хронологический.
 
+## v0.0.15 — 2026-04-28 (3 sample recipes + multi-tier section count fix)
+
+Богаче onboarding для новых юзеров — вместо одного sample-рецепта создаются 3 разной сложности, чтобы можно было сразу пощупать одноярусные, многоярусные и разные scale-types.
+
+### Что добавилось
+- **Светлый бисквит (sample)** — самый простой, 18 cm, 2 секции (бисквит + крем). Для новичков, демонстрирует базовый flow.
+- **Шоколадный торт (sample)** — средняя сложность, 22 cm, 3 секции (бисквит + крем + глазурь). Уже был, остался как есть.
+- **Свадебный торт (sample)** — двухъярусный, 26 cm + 16 cm, демонстрирует multi-tier scaler и фиксированный декор (sugar figures, scale=fixed).
+- Кнопка пустого экрана: «Create sample recipe» → «Create sample recipes» (plural).
+- 17 новых ARB-ключей для нового контента.
+
+### Bug fix
+- **Multi-tier карточка показывала неправильное число секций**: `r.sections.length` считал только root tier. Теперь `r.allTiers.expand((t) => t.sections).length` — все секции из всех ярусов. Wedding cake теперь корректно показывает «5 sect.» вместо «2 sect.».
+
+### Verified на эмуляторе
+- Wipe data → welcome → Get started → Create sample recipes → 3 рецепта в списке.
+- Wedding cake → scaler: «2 tier(s) • total 2,4 kg», Tier 1 (26×8 cm), Tier 2: Top (16×8 cm) с decor section, все ингредиенты и units английские.
+
 ## v0.0.14 — 2026-04-28 (PDF/share-text localization + Ø glyph fix)
 
 Закрываем последний UI-русизм: PDF-экспорт и share-text. Теперь EN-юзер делится и сохраняет рецепты в полностью английском формате.

@@ -99,7 +99,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get list_empty_subtitle => 'Добавьте свой первый торт!';
 
   @override
-  String get list_empty_demo_button => 'Создать примерный рецепт';
+  String get list_empty_demo_button => 'Создать примерные рецепты';
 
   @override
   String get list_no_results_title => 'Ничего не найдено';
@@ -1260,4 +1260,48 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get sample_ing_dark_chocolate => 'Тёмный шоколад';
+
+  @override
+  String get sample_simple_title => 'Лёгкий бисквит (пример)';
+
+  @override
+  String get sample_simple_notes =>
+      'Взбить яйца с сахаром до пышной пены. Аккуратно вмешать просеянную муку с разрыхлителем. Выпекать при 175°C 25 мин. Прослоить взбитыми сливками.';
+
+  @override
+  String get sample_simple_tag_easy => 'простой';
+
+  @override
+  String get sample_simple_tag_birthday => 'день рождения';
+
+  @override
+  String get sample_wedding_title => 'Свадебный торт (пример)';
+
+  @override
+  String get sample_wedding_notes =>
+      'Печь каждый ярус отдельно. В нижний ярус перед сборкой вставить 4 шпильки для опоры верхнего. Сахарные фигурки ставить в самом конце.';
+
+  @override
+  String get sample_wedding_tier_bottom => 'Низ';
+
+  @override
+  String get sample_wedding_tier_top => 'Верх';
+
+  @override
+  String get sample_wedding_tag_wedding => 'свадебный';
+
+  @override
+  String get sample_wedding_tag_tiered => 'ярусный';
+
+  @override
+  String get sample_wedding_tag_celebration => 'торжество';
+
+  @override
+  String get sample_ing_baking_powder => 'Разрыхлитель';
+
+  @override
+  String get sample_ing_vanilla => 'Ваниль';
+
+  @override
+  String get sample_ing_sugar_figures => 'Сахарные фигурки';
 }

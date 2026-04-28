@@ -34,7 +34,7 @@
   "list_search_hint": "Search by name or ingredient",
   "list_empty_title": "No cakes yet",
   "list_empty_subtitle": "Add your first cake!",
-  "list_empty_demo_button": "Create sample recipe",
+  "list_empty_demo_button": "Create sample recipes",
   "list_no_results_title": "Nothing found",
   "list_no_results_reset": "Reset filters",
   "list_filter_all_tags": "All",
@@ -624,5 +624,22 @@
   "sample_ing_butter": "Butter",
   "sample_ing_cream33": "Cream 33%",
   "sample_ing_powdered_sugar": "Powdered sugar",
-  "sample_ing_dark_chocolate": "Dark chocolate"
+  "sample_ing_dark_chocolate": "Dark chocolate",
+
+  "sample_simple_title": "Light sponge (sample)",
+  "sample_simple_notes": "Whip eggs with sugar until pale and fluffy. Fold in sifted flour with baking powder. Bake at 175°C for 25 min. Layer with whipped cream.",
+  "sample_simple_tag_easy": "easy",
+  "sample_simple_tag_birthday": "birthday",
+
+  "sample_wedding_title": "Wedding cake (sample)",
+  "sample_wedding_notes": "Bake each tier separately. Use 4 dowels in the bottom tier for support before stacking the top. Decorate the top tier with sugar figures last.",
+  "sample_wedding_tier_bottom": "Bottom",
+  "sample_wedding_tier_top": "Top",
+  "sample_wedding_tag_wedding": "wedding",
+  "sample_wedding_tag_tiered": "tiered",
+  "sample_wedding_tag_celebration": "celebration",
+
+  "sample_ing_baking_powder": "Baking powder",
+  "sample_ing_vanilla": "Vanilla",
+  "sample_ing_sugar_figures": "Sugar figures"
 }

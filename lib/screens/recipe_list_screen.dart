@@ -433,7 +433,7 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
   }
 
   Future<void> _addSampleRecipe() async {
-    setState(() => _recipes.add(buildSampleRecipe(AppLocalizations.of(context))));
+    setState(() => _recipes.addAll(buildSampleRecipes(AppLocalizations.of(context))));
     _saveRecipes();
   }
 
@@ -793,7 +793,7 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
                                 l.unit_diameter_symbol,
                                 r.diameter.round(),
                                 l.unit_centimeters_short,
-                                r.sections.length,
+                                r.allTiers.expand((t) => t.sections).length,
                                 r.allIngredients.length,
                               ),
                               style: TextStyle(

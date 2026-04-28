@@ -34,7 +34,7 @@
   "list_search_hint": "Поиск по названию или ингредиенту",
   "list_empty_title": "Пока ни одного торта",
   "list_empty_subtitle": "Добавьте свой первый торт!",
-  "list_empty_demo_button": "Создать примерный рецепт",
+  "list_empty_demo_button": "Создать примерные рецепты",
   "list_no_results_title": "Ничего не найдено",
   "list_no_results_reset": "Сбросить фильтры",
   "list_filter_all_tags": "Все",
@@ -624,5 +624,22 @@
   "sample_ing_butter": "Сливочное масло",
   "sample_ing_cream33": "Сливки 33%",
   "sample_ing_powdered_sugar": "Сахарная пудра",
-  "sample_ing_dark_chocolate": "Тёмный шоколад"
+  "sample_ing_dark_chocolate": "Тёмный шоколад",
+
+  "sample_simple_title": "Лёгкий бисквит (пример)",
+  "sample_simple_notes": "Взбить яйца с сахаром до пышной пены. Аккуратно вмешать просеянную муку с разрыхлителем. Выпекать при 175°C 25 мин. Прослоить взбитыми сливками.",
+  "sample_simple_tag_easy": "простой",
+  "sample_simple_tag_birthday": "день рождения",
+
+  "sample_wedding_title": "Свадебный торт (пример)",
+  "sample_wedding_notes": "Печь каждый ярус отдельно. В нижний ярус перед сборкой вставить 4 шпильки для опоры верхнего. Сахарные фигурки ставить в самом конце.",
+  "sample_wedding_tier_bottom": "Низ",
+  "sample_wedding_tier_top": "Верх",
+  "sample_wedding_tag_wedding": "свадебный",
+  "sample_wedding_tag_tiered": "ярусный",
+  "sample_wedding_tag_celebration": "торжество",
+
+  "sample_ing_baking_powder": "Разрыхлитель",
+  "sample_ing_vanilla": "Ваниль",
+  "sample_ing_sugar_figures": "Сахарные фигурки"
 }

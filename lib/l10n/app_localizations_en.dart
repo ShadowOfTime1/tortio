@@ -99,7 +99,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get list_empty_subtitle => 'Add your first cake!';
 
   @override
-  String get list_empty_demo_button => 'Create sample recipe';
+  String get list_empty_demo_button => 'Create sample recipes';
 
   @override
   String get list_no_results_title => 'Nothing found';
@@ -1252,4 +1252,48 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get sample_ing_dark_chocolate => 'Dark chocolate';
+
+  @override
+  String get sample_simple_title => 'Light sponge (sample)';
+
+  @override
+  String get sample_simple_notes =>
+      'Whip eggs with sugar until pale and fluffy. Fold in sifted flour with baking powder. Bake at 175°C for 25 min. Layer with whipped cream.';
+
+  @override
+  String get sample_simple_tag_easy => 'easy';
+
+  @override
+  String get sample_simple_tag_birthday => 'birthday';
+
+  @override
+  String get sample_wedding_title => 'Wedding cake (sample)';
+
+  @override
+  String get sample_wedding_notes =>
+      'Bake each tier separately. Use 4 dowels in the bottom tier for support before stacking the top. Decorate the top tier with sugar figures last.';
+
+  @override
+  String get sample_wedding_tier_bottom => 'Bottom';
+
+  @override
+  String get sample_wedding_tier_top => 'Top';
+
+  @override
+  String get sample_wedding_tag_wedding => 'wedding';
+
+  @override
+  String get sample_wedding_tag_tiered => 'tiered';
+
+  @override
+  String get sample_wedding_tag_celebration => 'celebration';
+
+  @override
+  String get sample_ing_baking_powder => 'Baking powder';
+
+  @override
+  String get sample_ing_vanilla => 'Vanilla';
+
+  @override
+  String get sample_ing_sugar_figures => 'Sugar figures';
 }

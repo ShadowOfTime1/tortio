@@ -281,7 +281,7 @@ abstract class AppLocalizations {
   /// No description provided for @list_empty_demo_button.
   ///
   /// In ru, this message translates to:
-  /// **'Создать примерный рецепт'**
+  /// **'Создать примерные рецепты'**
   String get list_empty_demo_button;
 
   /// No description provided for @list_no_results_title.
@@ -2214,6 +2214,90 @@ abstract class AppLocalizations {
   /// In ru, this message translates to:
   /// **'Тёмный шоколад'**
   String get sample_ing_dark_chocolate;
+
+  /// No description provided for @sample_simple_title.
+  ///
+  /// In ru, this message translates to:
+  /// **'Лёгкий бисквит (пример)'**
+  String get sample_simple_title;
+
+  /// No description provided for @sample_simple_notes.
+  ///
+  /// In ru, this message translates to:
+  /// **'Взбить яйца с сахаром до пышной пены. Аккуратно вмешать просеянную муку с разрыхлителем. Выпекать при 175°C 25 мин. Прослоить взбитыми сливками.'**
+  String get sample_simple_notes;
+
+  /// No description provided for @sample_simple_tag_easy.
+  ///
+  /// In ru, this message translates to:
+  /// **'простой'**
+  String get sample_simple_tag_easy;
+
+  /// No description provided for @sample_simple_tag_birthday.
+  ///
+  /// In ru, this message translates to:
+  /// **'день рождения'**
+  String get sample_simple_tag_birthday;
+
+  /// No description provided for @sample_wedding_title.
+  ///
+  /// In ru, this message translates to:
+  /// **'Свадебный торт (пример)'**
+  String get sample_wedding_title;
+
+  /// No description provided for @sample_wedding_notes.
+  ///
+  /// In ru, this message translates to:
+  /// **'Печь каждый ярус отдельно. В нижний ярус перед сборкой вставить 4 шпильки для опоры верхнего. Сахарные фигурки ставить в самом конце.'**
+  String get sample_wedding_notes;
+
+  /// No description provided for @sample_wedding_tier_bottom.
+  ///
+  /// In ru, this message translates to:
+  /// **'Низ'**
+  String get sample_wedding_tier_bottom;
+
+  /// No description provided for @sample_wedding_tier_top.
+  ///
+  /// In ru, this message translates to:
+  /// **'Верх'**
+  String get sample_wedding_tier_top;
+
+  /// No description provided for @sample_wedding_tag_wedding.
+  ///
+  /// In ru, this message translates to:
+  /// **'свадебный'**
+  String get sample_wedding_tag_wedding;
+
+  /// No description provided for @sample_wedding_tag_tiered.
+  ///
+  /// In ru, this message translates to:
+  /// **'ярусный'**
+  String get sample_wedding_tag_tiered;
+
+  /// No description provided for @sample_wedding_tag_celebration.
+  ///
+  /// In ru, this message translates to:
+  /// **'торжество'**
+  String get sample_wedding_tag_celebration;
+
+  /// No description provided for @sample_ing_baking_powder.
+  ///
+  /// In ru, this message translates to:
+  /// **'Разрыхлитель'**
+  String get sample_ing_baking_powder;
+
+  /// No description provided for @sample_ing_vanilla.
+  ///
+  /// In ru, this message translates to:
+  /// **'Ваниль'**
+  String get sample_ing_vanilla;
+
+  /// No description provided for @sample_ing_sugar_figures.
+  ///
+  /// In ru, this message translates to:
+  /// **'Сахарные фигурки'**
+  String get sample_ing_sugar_figures;
 }
 
 class _AppLocalizationsDelegate
