@@ -2,6 +2,27 @@
 
 Все значимые изменения по версиям. Формат — обратный хронологический.
 
+## v0.0.14 — 2026-04-28 (PDF/share-text localization + Ø glyph fix)
+
+Закрываем последний UI-русизм: PDF-экспорт и share-text. Теперь EN-юзер делится и сохраняет рецепты в полностью английском формате.
+
+### Что добавилось
+- **PDF-экспорт локализован**: `PdfExportService.exportScaledRecipe(... required AppLocalizations l)`. Все строки идут через ARB:
+  - Subtitle (`pdf_subtitle_multitier` / `pdf_subtitle_size_h` / `pdf_subtitle_size`)
+  - Tier label (`scaler_tier_label` / `scaler_tier_label_named`)
+  - Tier summary (`pdf_tier_summary_h` / `pdf_tier_summary`)
+  - Section header через `displayName(l)` (был хардкод `s.type.name`)
+  - Units (`unit_grams_short` / `unit_kilograms_short` / `unit_pieces_short` / `unit_centimeters_short`)
+- **Share-text локализован** в `_shareRecipe`: dimensions через `share_diameter`/`share_height`/`share_total_approx`, section names через `displayName(l)`, units через локализованные suffix'ы, `share_notes_header` вместо хардкода «📝 Заметки».
+- **Ø glyph fix в PDF**: символ `⌀` (U+2300) отсутствует в Roboto и рендерился квадратиком. Заменяем PDF-локально на `Ø` (U+00D8) через `_pdfSafe()` helper. UI остаётся с `⌀` — системные шрифты на Android его рендерят корректно.
+
+### Verified на эмуляторе
+- Share as text: 🍰 Chocolate cake (sample) / Ø 22 cm • height 8 cm • ~1,5 kg / Sponge → Flour 200 g, ... / 📝 Notes / ... — всё английское.
+- PDF: title «Chocolate cake (sample)», subtitle «Ø 22×8 cm • total ≈ 1,5 kg», tier label «Tier 1 • Ø 22×8 cm • 1,5 kg», section headers Sponge/Cream/Glaze, ингредиенты, units g/kg/cm, footer «Tortio • 28.04.2026». Глиф Ø рендерится корректно.
+
+### Локализация — полностью закрыта
+Теперь во всех output-форматах (UI, PDF, share-text) контент идёт в выбранной локали. Из «русского» в EN-локали остаются только: имена custom-типов и user-input ингредиентов (это user data) и labels пользовательских secций/тегов.
+
 ## v0.0.13 — 2026-04-27 (sample recipe localization)
 
 Закрываем последний UI-видимый русский кусок при чистой установке в EN локали.

@@ -345,6 +345,54 @@
     }
   },
   "share_notes_header": "📝 Notes",
+  "share_total_approx": "~{weight}",
+  "@share_total_approx": {
+    "placeholders": { "weight": { "type": "String" } }
+  },
+
+  "pdf_subtitle_multitier": "{tiers} tier(s) • total ≈ {weight}",
+  "@pdf_subtitle_multitier": {
+    "placeholders": {
+      "tiers": { "type": "int" },
+      "weight": { "type": "String" }
+    }
+  },
+  "pdf_subtitle_size_h": "⌀ {d}×{h} {cm} • total ≈ {weight}",
+  "@pdf_subtitle_size_h": {
+    "placeholders": {
+      "d": { "type": "int" },
+      "h": { "type": "int" },
+      "cm": { "type": "String" },
+      "weight": { "type": "String" }
+    }
+  },
+  "pdf_subtitle_size": "⌀ {d} {cm} • total ≈ {weight}",
+  "@pdf_subtitle_size": {
+    "placeholders": {
+      "d": { "type": "int" },
+      "cm": { "type": "String" },
+      "weight": { "type": "String" }
+    }
+  },
+  "pdf_tier_summary_h": "{label} • ⌀ {d}×{h} {cm} • {weight}",
+  "@pdf_tier_summary_h": {
+    "placeholders": {
+      "label": { "type": "String" },
+      "d": { "type": "int" },
+      "h": { "type": "int" },
+      "cm": { "type": "String" },
+      "weight": { "type": "String" }
+    }
+  },
+  "pdf_tier_summary": "{label} • ⌀ {d} {cm} • {weight}",
+  "@pdf_tier_summary": {
+    "placeholders": {
+      "label": { "type": "String" },
+      "d": { "type": "int" },
+      "cm": { "type": "String" },
+      "weight": { "type": "String" }
+    }
+  },
 
   "settings_title": "Settings",
   "settings_group_appearance": "Appearance",

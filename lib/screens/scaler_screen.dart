@@ -614,6 +614,7 @@ class _ScalerScreenState extends State<ScalerScreen> {
       await PdfExportService.exportScaledRecipe(
         recipe: recipe,
         scaledByTier: scaledByTier,
+        l: AppLocalizations.of(context),
       );
     } catch (e) {
       if (!mounted) return;
@@ -1166,17 +1167,21 @@ class _ScalerScreenState extends State<ScalerScreen> {
   }
 
   void _shareRecipe(Recipe recipe, List<RecipeSection> scaled) {
+    final l = AppLocalizations.of(context);
+    final cm = l.unit_centimeters_short;
     final buf = StringBuffer();
     buf.writeln('🍰 ${recipe.title}');
 
     final dimensions = <String>[
-      '⌀ ${recipe.diameter.round()} см',
-      if (recipe.height > 0) 'высота ${recipe.height.round()} см',
+      l.share_diameter(l.unit_diameter_symbol, recipe.diameter.round(), cm),
+      if (recipe.height > 0) l.share_height(recipe.height.round(), cm),
     ];
     final totalWeight = scaled
         .expand((s) => s.ingredients)
         .fold<double>(0, (sum, i) => sum + i.amount);
-    if (totalWeight > 0) dimensions.add('~${_formatWeight(totalWeight)}');
+    if (totalWeight > 0) {
+      dimensions.add(l.share_total_approx(_formatWeight(totalWeight)));
+    }
     buf.writeln(dimensions.join(' • '));
     buf.writeln();
 
@@ -1185,15 +1190,15 @@ class _ScalerScreenState extends State<ScalerScreen> {
           .where((i) => i.name.trim().isNotEmpty)
           .toList();
       if (ingredients.isEmpty) continue;
-      buf.writeln('${section.type.icon} ${section.type.name}');
+      buf.writeln('${section.type.icon} ${section.type.displayName(l)}');
       for (final ing in ingredients) {
-        buf.writeln('  • ${ing.name} — ${formatAmount(ing.amount, ing.unit)}');
+        buf.writeln('  • ${ing.name} — ${_formatAmount(ing.amount, ing.unit)}');
       }
       buf.writeln();
     }
 
     if (recipe.notes.trim().isNotEmpty) {
-      buf.writeln('📝 Заметки');
+      buf.writeln(l.share_notes_header);
       buf.writeln(recipe.notes.trim());
     }
 

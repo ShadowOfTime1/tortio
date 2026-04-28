@@ -1,6 +1,7 @@
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
+import '../l10n/app_localizations.dart';
 import '../models/recipe.dart';
 import '../utils.dart';
 
@@ -13,6 +14,7 @@ class PdfExportService {
   static Future<void> exportScaledRecipe({
     required Recipe recipe,
     required List<List<RecipeSection>> scaledByTier,
+    required AppLocalizations l,
   }) async {
     final font = await PdfGoogleFonts.robotoRegular();
     final fontBold = await PdfGoogleFonts.robotoBold();
@@ -41,14 +43,14 @@ class PdfExportService {
         margin: const pw.EdgeInsets.fromLTRB(36, 36, 36, 32),
         theme: theme,
         build: (context) => [
-          _buildHeader(recipe, totalWeight),
+          _buildHeader(recipe, totalWeight, l),
           if (recipe.notes.trim().isNotEmpty) ...[
             pw.SizedBox(height: 12),
             _buildNotesBlock(recipe.notes),
           ],
           for (var ti = 0; ti < tiers.length; ti++) ...[
             pw.SizedBox(height: 18),
-            _buildTierBlock(tiers[ti], ti, scaledByTier[ti]),
+            _buildTierBlock(tiers[ti], ti, scaledByTier[ti], l),
           ],
           pw.SizedBox(height: 24),
           _buildFooter(),
@@ -67,7 +69,34 @@ class PdfExportService {
     );
   }
 
-  static pw.Widget _buildHeader(Recipe recipe, double totalWeight) {
+  static String _formatWeight(double g, AppLocalizations l) =>
+      formatGrams(g, gramsUnit: l.unit_grams_short, kilogramsUnit: l.unit_kilograms_short);
+
+  static String _formatAmount(double amount, String unit, AppLocalizations l) =>
+      formatAmount(
+        amount,
+        unit,
+        gramsUnit: l.unit_grams_short,
+        kilogramsUnit: l.unit_kilograms_short,
+        piecesUnit: l.unit_pieces_short,
+      );
+
+  /// Roboto не содержит глифа `⌀` (U+2300). Заменяем на `Ø` (U+00D8) —
+  /// визуально идентично, есть в любой латинской подмножестве шрифта.
+  static String _pdfSafe(String s) => s.replaceAll('⌀', 'Ø');
+
+  static pw.Widget _buildHeader(
+    Recipe recipe,
+    double totalWeight,
+    AppLocalizations l,
+  ) {
+    final w = _formatWeight(totalWeight, l);
+    final cm = l.unit_centimeters_short;
+    final subtitle = recipe.isMultiTier
+        ? l.pdf_subtitle_multitier(recipe.allTiers.length, w)
+        : recipe.height > 0
+            ? l.pdf_subtitle_size_h(recipe.diameter.round(), recipe.height.round(), cm, w)
+            : l.pdf_subtitle_size(recipe.diameter.round(), cm, w);
     return pw.Column(
       crossAxisAlignment: pw.CrossAxisAlignment.start,
       children: [
@@ -81,11 +110,7 @@ class PdfExportService {
         ),
         pw.SizedBox(height: 4),
         pw.Text(
-          recipe.isMultiTier
-              ? '${recipe.allTiers.length} ярус(ов) • итого ≈ ${formatGrams(totalWeight)}'
-              : recipe.height > 0
-                  ? '⌀ ${recipe.diameter.round()}×${recipe.height.round()} см • итого ≈ ${formatGrams(totalWeight)}'
-                  : '⌀ ${recipe.diameter.round()} см • итого ≈ ${formatGrams(totalWeight)}',
+          _pdfSafe(subtitle),
           style: const pw.TextStyle(fontSize: 12, color: PdfColors.grey700),
         ),
         if (recipe.tags.isNotEmpty) ...[
@@ -149,13 +174,19 @@ class PdfExportService {
     TierData tier,
     int idx,
     List<RecipeSection> scaledSections,
+    AppLocalizations l,
   ) {
     final tierWeight = scaledSections
         .expand((s) => s.ingredients)
         .fold<double>(0, (sum, i) => sum + i.amount);
     final label = tier.label.isNotEmpty
-        ? 'Ярус ${idx + 1}: ${tier.label}'
-        : 'Ярус ${idx + 1}';
+        ? l.scaler_tier_label_named(idx + 1, tier.label)
+        : l.scaler_tier_label(idx + 1);
+    final w = _formatWeight(tierWeight, l);
+    final cm = l.unit_centimeters_short;
+    final summary = tier.height > 0
+        ? l.pdf_tier_summary_h(label, tier.diameter.round(), tier.height.round(), cm, w)
+        : l.pdf_tier_summary(label, tier.diameter.round(), cm, w);
     return pw.Column(
       crossAxisAlignment: pw.CrossAxisAlignment.start,
       children: [
@@ -166,9 +197,7 @@ class PdfExportService {
             borderRadius: const pw.BorderRadius.all(pw.Radius.circular(4)),
           ),
           child: pw.Text(
-            tier.height > 0
-                ? '$label  •  ⌀ ${tier.diameter.round()}×${tier.height.round()} см  •  ${formatGrams(tierWeight)}'
-                : '$label  •  ⌀ ${tier.diameter.round()} см  •  ${formatGrams(tierWeight)}',
+            _pdfSafe(summary),
             style: pw.TextStyle(
               fontSize: 12,
               fontWeight: pw.FontWeight.bold,
@@ -177,19 +206,19 @@ class PdfExportService {
           ),
         ),
         pw.SizedBox(height: 8),
-        for (final section in scaledSections) _buildSectionTable(section),
+        for (final section in scaledSections) _buildSectionTable(section, l),
       ],
     );
   }
 
-  static pw.Widget _buildSectionTable(RecipeSection s) {
+  static pw.Widget _buildSectionTable(RecipeSection s, AppLocalizations l) {
     return pw.Padding(
       padding: const pw.EdgeInsets.only(bottom: 10),
       child: pw.Column(
         crossAxisAlignment: pw.CrossAxisAlignment.start,
         children: [
           pw.Text(
-            s.type.name,
+            s.type.displayName(l),
             style: pw.TextStyle(
               fontSize: 13,
               fontWeight: pw.FontWeight.bold,
@@ -228,7 +257,7 @@ class PdfExportService {
                         vertical: 4,
                       ),
                       child: pw.Text(
-                        formatAmount(ing.amount, ing.unit),
+                        _formatAmount(ing.amount, ing.unit, l),
                         textAlign: pw.TextAlign.right,
                         style: pw.TextStyle(
                           fontSize: 11,

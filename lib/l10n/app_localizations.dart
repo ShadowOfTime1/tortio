@@ -1195,6 +1195,48 @@ abstract class AppLocalizations {
   /// **'📝 Заметки'**
   String get share_notes_header;
 
+  /// No description provided for @share_total_approx.
+  ///
+  /// In ru, this message translates to:
+  /// **'~{weight}'**
+  String share_total_approx(String weight);
+
+  /// No description provided for @pdf_subtitle_multitier.
+  ///
+  /// In ru, this message translates to:
+  /// **'{tiers} ярус(ов) • итого ≈ {weight}'**
+  String pdf_subtitle_multitier(int tiers, String weight);
+
+  /// No description provided for @pdf_subtitle_size_h.
+  ///
+  /// In ru, this message translates to:
+  /// **'⌀ {d}×{h} {cm} • итого ≈ {weight}'**
+  String pdf_subtitle_size_h(int d, int h, String cm, String weight);
+
+  /// No description provided for @pdf_subtitle_size.
+  ///
+  /// In ru, this message translates to:
+  /// **'⌀ {d} {cm} • итого ≈ {weight}'**
+  String pdf_subtitle_size(int d, String cm, String weight);
+
+  /// No description provided for @pdf_tier_summary_h.
+  ///
+  /// In ru, this message translates to:
+  /// **'{label} • ⌀ {d}×{h} {cm} • {weight}'**
+  String pdf_tier_summary_h(
+    String label,
+    int d,
+    int h,
+    String cm,
+    String weight,
+  );
+
+  /// No description provided for @pdf_tier_summary.
+  ///
+  /// In ru, this message translates to:
+  /// **'{label} • ⌀ {d} {cm} • {weight}'**
+  String pdf_tier_summary(String label, int d, String cm, String weight);
+
   /// No description provided for @settings_title.
   ///
   /// In ru, this message translates to:

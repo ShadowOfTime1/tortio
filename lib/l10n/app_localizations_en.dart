@@ -680,6 +680,42 @@ class AppLocalizationsEn extends AppLocalizations {
   String get share_notes_header => '📝 Notes';
 
   @override
+  String share_total_approx(String weight) {
+    return '~$weight';
+  }
+
+  @override
+  String pdf_subtitle_multitier(int tiers, String weight) {
+    return '$tiers tier(s) • total ≈ $weight';
+  }
+
+  @override
+  String pdf_subtitle_size_h(int d, int h, String cm, String weight) {
+    return '⌀ $d×$h $cm • total ≈ $weight';
+  }
+
+  @override
+  String pdf_subtitle_size(int d, String cm, String weight) {
+    return '⌀ $d $cm • total ≈ $weight';
+  }
+
+  @override
+  String pdf_tier_summary_h(
+    String label,
+    int d,
+    int h,
+    String cm,
+    String weight,
+  ) {
+    return '$label • ⌀ $d×$h $cm • $weight';
+  }
+
+  @override
+  String pdf_tier_summary(String label, int d, String cm, String weight) {
+    return '$label • ⌀ $d $cm • $weight';
+  }
+
+  @override
   String get settings_title => 'Settings';
 
   @override
