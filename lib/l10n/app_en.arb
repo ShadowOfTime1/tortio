@@ -455,6 +455,7 @@
   },
   "settings_show_welcome_again_subtitle": "Quick app tour",
   "settings_version_label": "Version",
+  "settings_privacy_policy": "Privacy policy",
   "settings_license_label": "License",
   "settings_license_value": "MIT",
   "settings_github_source": "Source on GitHub",

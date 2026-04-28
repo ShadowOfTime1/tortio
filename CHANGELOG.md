@@ -2,6 +2,22 @@
 
 Все значимые изменения по версиям. Формат — обратный хронологический.
 
+## v0.0.16 — 2026-04-28 (Privacy Policy + GitHub Pages site)
+
+Подготовка к Google Play: поднят публичный сайт-документация и in-app ссылка на Privacy Policy.
+
+### Что добавилось
+- **GitHub Pages site** на `https://shadowoftime1.github.io/tortio/` из папки `docs/` ветки `main`. Включает:
+  - `index.md` — landing page с описанием приложения и ссылками.
+  - `privacy-policy.md` — Privacy Policy (English).
+  - `privacy-policy-ru.md` — Политика конфиденциальности (Russian).
+- **Privacy Policy** покрывает: что приложение НЕ собирает (всё локально), Google Drive scope (`drive.appdata` only), GitHub Releases для апдейтов, отсутствие аналитики/рекламы/трекинга, права пользователя, контакты.
+- **In-app ссылка**: Settings → About → Privacy policy. Открывает русскую или английскую версию в зависимости от текущей локали приложения.
+
+### Verified
+- Оба URL `/privacy-policy/` и `/privacy-policy-ru/` отдают HTTP 200.
+- Эмулятор: тап на ListTile в settings открывает Chrome с правильным URL.
+
 ## v0.0.15 — 2026-04-28 (3 sample recipes + multi-tier section count fix)
 
 Богаче onboarding для новых юзеров — вместо одного sample-рецепта создаются 3 разной сложности, чтобы можно было сразу пощупать одноярусные, многоярусные и разные scale-types.

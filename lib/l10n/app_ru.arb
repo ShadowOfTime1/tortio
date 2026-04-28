@@ -455,6 +455,7 @@
   },
   "settings_show_welcome_again_subtitle": "Краткий тур по приложению",
   "settings_version_label": "Версия",
+  "settings_privacy_policy": "Политика конфиденциальности",
   "settings_license_label": "Лицензия",
   "settings_license_value": "MIT",
   "settings_github_source": "Исходники на GitHub",

@@ -868,6 +868,9 @@ class AppLocalizationsRu extends AppLocalizations {
   String get settings_version_label => 'Версия';
 
   @override
+  String get settings_privacy_policy => 'Политика конфиденциальности';
+
+  @override
   String get settings_license_label => 'Лицензия';
 
   @override

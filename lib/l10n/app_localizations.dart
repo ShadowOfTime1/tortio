@@ -1495,6 +1495,12 @@ abstract class AppLocalizations {
   /// **'Версия'**
   String get settings_version_label;
 
+  /// No description provided for @settings_privacy_policy.
+  ///
+  /// In ru, this message translates to:
+  /// **'Политика конфиденциальности'**
+  String get settings_privacy_policy;
+
   /// No description provided for @settings_license_label.
   ///
   /// In ru, this message translates to:

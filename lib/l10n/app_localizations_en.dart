@@ -861,6 +861,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settings_version_label => 'Version';
 
   @override
+  String get settings_privacy_policy => 'Privacy policy';
+
+  @override
   String get settings_license_label => 'License';
 
   @override

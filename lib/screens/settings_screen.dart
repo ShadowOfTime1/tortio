@@ -510,6 +510,20 @@ class _SettingsScreenState extends State<SettingsScreen> {
     }
   }
 
+  Future<void> _openPrivacyPolicy() async {
+    final l = AppLocalizations.of(context);
+    final isRu = Localizations.localeOf(context).languageCode == 'ru';
+    final url = Uri.parse(
+      isRu
+          ? 'https://shadowoftime1.github.io/tortio/privacy-policy-ru/'
+          : 'https://shadowoftime1.github.io/tortio/privacy-policy/',
+    );
+    if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
+      if (!mounted) return;
+      _toast(l.settings_open_link_failed);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
@@ -762,6 +776,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
             subtitle: const Text('ShadowOfTime1/tortio'),
             trailing: const Icon(Icons.open_in_new, size: 18),
             onTap: _openGitHub,
+          ),
+          ListTile(
+            leading: const Icon(Icons.privacy_tip_outlined),
+            title: Text(l.settings_privacy_policy),
+            trailing: const Icon(Icons.open_in_new, size: 18),
+            onTap: _openPrivacyPolicy,
           ),
           ListTile(
             leading: const Icon(Icons.gavel_outlined),
