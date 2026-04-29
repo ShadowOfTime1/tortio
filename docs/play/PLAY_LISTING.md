@@ -208,8 +208,8 @@ Tortio для тебя, если:
 ## AAB файл
 
 Готовый AAB лежит на GitHub Releases:
-https://github.com/ShadowOfTime1/tortio/releases/tag/v0.1.0
+https://github.com/ShadowOfTime1/tortio/releases/tag/v0.1.1
 
-Файл: **`app-release.aab`** (47.7 MB).
+Файл: **`app-release.aab`** (~48 MB).
 
 Скачай и грузи в Console через **Production / Internal testing → Create new release → Upload app bundle**.
