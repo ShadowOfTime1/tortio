@@ -2,6 +2,23 @@
 
 Все значимые изменения по версиям. Формат — обратный хронологический.
 
+## v0.1.1 — 2026-04-29 (custom app icon + Play listing assets)
+
+Подготовка финальной версии для Google Play. Старая дефолтная Flutter-иконка заменена на собственную брендовую.
+
+### Что добавилось
+- **Новая иконка приложения** — pink/orange gradient (#FF6B8A → #FF8E53, как в UI приложения), белый трёхъярусный торт с frosting drip и свечкой. Заменяет дефолтный Flutter-логотип во всех mipmap-плотностях (mdpi/hdpi/xhdpi/xxhdpi/xxxhdpi). Сгенерирована Pillow-скриптом `tools/make_icon.py` (1024×1024 master + 5 размеров для Android + 512×512 для Play).
+- **Play Store assets** в `docs/play/`:
+  - `icon-512.png` — иконка для Play (512×512).
+  - `icon-1024-master.png` — мастер-копия (для будущих ребрендов).
+  - `feature-graphic-1024x500.png` — feature graphic для Play (брендированный баннер с названием и tagline).
+  - `screenshots-en/` — 6 скриншотов на английском (welcome, empty, list, wedding scaler, chocolate scaler, ingredients).
+  - `screenshots-ru/` — 5 скриншотов на русском (без welcome — system locale на эмуляторе EN).
+  - `PLAY_LISTING.md` — гайд по заполнению Play Console: тексты описаний (короткое 80 ch + полное ~1700 ch на каждый язык), категория, content rating, data safety, release track recommendations.
+
+### Дальше
+v0.1.1 AAB пойдёт в Play Console (после получения Developer Account verification от Google).
+
 ## v0.1.0 — 2026-04-28 (package rename + Play Store signing)
 
 **Breaking change для существующих установок**: новый applicationId означает, что Android считает это **другим приложением**. Старая `com.example.tortio` НЕ может быть автоматически обновлена до `com.tortio.app` — это невозможно технически. Существующие тестовые установки нужно вручную удалить и переустановить новую версию.
