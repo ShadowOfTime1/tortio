@@ -2,6 +2,15 @@
 
 Все значимые изменения по версиям. Формат — обратный хронологический.
 
+## v0.1.3 — 2026-04-30 (strip media permissions from play flavor)
+
+После v0.1.2 Play всё ещё ругался — `open_filex` тянул за собой `READ_MEDIA_IMAGES/VIDEO/AUDIO` + `READ_EXTERNAL_STORAGE`, что Google требует декларировать как «доступ к фото/видео». Эти разрешения нужны только для open_filex (а он используется только в auto-update GitHub Releases — в play-flavor он не вызывается).
+
+### Что изменилось
+- Создан `android/app/src/play/AndroidManifest.xml` с `tools:node="remove"` для четырёх media-разрешений.
+- В play-сборке остаётся только `INTERNET` — никаких декларируемых медиа-разрешений.
+- github-flavor не затронут — там open_filex продолжает работать.
+
 ## v0.1.2 — 2026-04-30 (build flavors: play vs github)
 
 Google Play отклонял v0.1.1 в Closed Testing из-за `REQUEST_INSTALL_PACKAGES` — это разрешение нужно нашему auto-update механизму для GitHub Releases, но для Play-сборки оно лишнее (Play обновляет приложение сам) и Google требует отдельной декларации с обоснованием.
