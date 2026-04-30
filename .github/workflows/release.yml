@@ -40,16 +40,16 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
-      - name: Build APK
-        run: flutter build apk --release
+      - name: Build GitHub APK (with auto-update)
+        run: flutter build apk --flavor github --dart-define=DISTRIBUTION=github
 
-      - name: Build AAB
-        run: flutter build appbundle --release
+      - name: Build Play AAB (no install permission)
+        run: flutter build appbundle --flavor play --dart-define=DISTRIBUTION=play
 
       - name: Create Release
         uses: softprops/action-gh-release@v3
         with:
           files: |
-            build/app/outputs/flutter-apk/app-release.apk
-            build/app/outputs/bundle/release/app-release.aab
+            build/app/outputs/flutter-apk/github/release/app-github-release.apk
+            build/app/outputs/bundle/playRelease/app-play-release.aab
           generate_release_notes: true

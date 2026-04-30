@@ -2,6 +2,22 @@
 
 Все значимые изменения по версиям. Формат — обратный хронологический.
 
+## v0.1.2 — 2026-04-30 (build flavors: play vs github)
+
+Google Play отклонял v0.1.1 в Closed Testing из-за `REQUEST_INSTALL_PACKAGES` — это разрешение нужно нашему auto-update механизму для GitHub Releases, но для Play-сборки оно лишнее (Play обновляет приложение сам) и Google требует отдельной декларации с обоснованием.
+
+### Что изменилось
+- **Build flavors `play` и `github`** в `android/app/build.gradle.kts` (dimension `distribution`).
+- **`REQUEST_INSTALL_PACKAGES` убрано** из `android/app/src/main/AndroidManifest.xml`, перенесено в новый `android/app/src/github/AndroidManifest.xml` (только github-flavor его получает).
+- **`UpdateService.checkForUpdate()`** возвращает `null` в play-сборке — баннер обновлений показывается только в github-сборке. Контролируется через `--dart-define=DISTRIBUTION=play|github`.
+- **`.github/workflows/release.yml`** теперь собирает оба варианта:
+  - `app-github-release.apk` (с auto-update) для GitHub Releases пользователей
+  - `app-play-release.aab` (без install permission) для Play Console
+
+### Что НЕ меняется
+- Auto-update для GitHub Releases пользователей продолжает работать как раньше.
+- Play Store пользователи получают обновления через Play автоматически.
+
 ## v0.1.1 — 2026-04-29 (custom app icon + Play listing assets)
 
 Подготовка финальной версии для Google Play. Старая дефолтная Flutter-иконка заменена на собственную брендовую.

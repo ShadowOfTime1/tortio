@@ -19,8 +19,15 @@ class UpdateException implements Exception {
 class UpdateService {
   static const String _owner = 'ShadowOfTime1';
   static const String _repo = 'tortio';
+  static const String _distribution = String.fromEnvironment(
+    'DISTRIBUTION',
+    defaultValue: 'github',
+  );
 
   static Future<UpdateInfo?> checkForUpdate() async {
+    // Play-сборки обновляются через Google Play, наш баннер тут не нужен
+    // (а REQUEST_INSTALL_PACKAGES в play-flavor нет — install всё равно бы упал).
+    if (_distribution == 'play') return null;
     // Auto-update механизм работает только на Android (через APK install).
     // На iOS / desktop / web баннер бесполезен — install не сработает.
     if (kIsWeb || !Platform.isAndroid) return null;
