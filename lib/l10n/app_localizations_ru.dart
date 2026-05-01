@@ -1114,6 +1114,28 @@ class AppLocalizationsRu extends AppLocalizations {
   String get settings_reset_settings_done => 'Настройки сброшены';
 
   @override
+  String get settings_regen_samples =>
+      'Пересоздать демо-рецепты на текущем языке';
+
+  @override
+  String get settings_regen_samples_subtitle =>
+      'Заменит нетронутые демо (Лёгкий бисквит / Шоколадный торт / Свадебный торт). Ваши рецепты не пострадают.';
+
+  @override
+  String get settings_regen_samples_confirm_title =>
+      'Пересоздать демо-рецепты?';
+
+  @override
+  String get settings_regen_samples_confirm_body =>
+      'Существующие демо-рецепты (определяются по заголовку) будут удалены и пересозданы на текущем языке UI. Ваши собственные рецепты не пострадают.';
+
+  @override
+  String get settings_regen_samples_action => 'Пересоздать';
+
+  @override
+  String get settings_regen_samples_done => 'Демо-рецепты пересозданы';
+
+  @override
   String get settings_delete_all => 'Удалить все рецепты и кастомные типы';
 
   @override

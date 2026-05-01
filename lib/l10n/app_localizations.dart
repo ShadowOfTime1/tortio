@@ -1951,6 +1951,42 @@ abstract class AppLocalizations {
   /// **'Настройки сброшены'**
   String get settings_reset_settings_done;
 
+  /// No description provided for @settings_regen_samples.
+  ///
+  /// In ru, this message translates to:
+  /// **'Пересоздать демо-рецепты на текущем языке'**
+  String get settings_regen_samples;
+
+  /// No description provided for @settings_regen_samples_subtitle.
+  ///
+  /// In ru, this message translates to:
+  /// **'Заменит нетронутые демо (Лёгкий бисквит / Шоколадный торт / Свадебный торт). Ваши рецепты не пострадают.'**
+  String get settings_regen_samples_subtitle;
+
+  /// No description provided for @settings_regen_samples_confirm_title.
+  ///
+  /// In ru, this message translates to:
+  /// **'Пересоздать демо-рецепты?'**
+  String get settings_regen_samples_confirm_title;
+
+  /// No description provided for @settings_regen_samples_confirm_body.
+  ///
+  /// In ru, this message translates to:
+  /// **'Существующие демо-рецепты (определяются по заголовку) будут удалены и пересозданы на текущем языке UI. Ваши собственные рецепты не пострадают.'**
+  String get settings_regen_samples_confirm_body;
+
+  /// No description provided for @settings_regen_samples_action.
+  ///
+  /// In ru, this message translates to:
+  /// **'Пересоздать'**
+  String get settings_regen_samples_action;
+
+  /// No description provided for @settings_regen_samples_done.
+  ///
+  /// In ru, this message translates to:
+  /// **'Демо-рецепты пересозданы'**
+  String get settings_regen_samples_done;
+
   /// No description provided for @settings_delete_all.
   ///
   /// In ru, this message translates to:

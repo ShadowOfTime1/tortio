@@ -1,7 +1,9 @@
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../l10n/app_localizations.dart';
 import '../models/recipe.dart';
 import 'drive_backup_service.dart';
+import 'sample_recipe.dart';
 
 class StorageService {
   static const String _key = 'recipes';
@@ -52,6 +54,22 @@ class StorageService {
   static Future<bool> hasImportSnapshot() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.containsKey(_importSnapshotKey);
+  }
+
+  /// Удаляет нетронутые демо-рецепты (распознанные по заголовкам на любой
+  /// поддерживаемой локали) и заново добавляет их на языке `l`. Возвращает
+  /// число добавленных. Пользовательские рецепты не трогаются.
+  ///
+  /// Нужно для случая «установил приложение когда системный язык был EN —
+  /// демо записались по-английски — потом переключил UI на RU». Сами демо
+  /// в БД остаются user data, их title/notes/ingredients не пересоздаются
+  /// при смене locale автоматически.
+  static Future<int> regenerateSampleRecipes(AppLocalizations l) async {
+    final all = await loadRecipes();
+    final kept = all.where((r) => !isLikelyDemoRecipe(r)).toList();
+    final fresh = buildSampleRecipes(l);
+    await saveRecipes([...kept, ...fresh]);
+    return fresh.length;
   }
 
   static Future<void> restoreImportSnapshot() async {

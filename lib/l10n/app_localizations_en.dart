@@ -1107,6 +1107,27 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settings_reset_settings_done => 'Settings reset';
 
   @override
+  String get settings_regen_samples =>
+      'Regenerate demo recipes in current language';
+
+  @override
+  String get settings_regen_samples_subtitle =>
+      'Replaces untouched demo recipes (Light sponge / Chocolate cake / Wedding cake). Your own recipes are kept.';
+
+  @override
+  String get settings_regen_samples_confirm_title => 'Regenerate demo recipes?';
+
+  @override
+  String get settings_regen_samples_confirm_body =>
+      'Existing demo recipes (matched by title) will be deleted and re-added in the current UI language. Your own recipes won\'t be touched.';
+
+  @override
+  String get settings_regen_samples_action => 'Regenerate';
+
+  @override
+  String get settings_regen_samples_done => 'Demo recipes regenerated';
+
+  @override
   String get settings_delete_all => 'Delete all recipes and custom types';
 
   @override

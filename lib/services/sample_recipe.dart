@@ -1,6 +1,23 @@
 import '../l10n/app_localizations.dart';
 import '../models/recipe.dart';
 
+/// Заголовки демо-рецептов на всех поддерживаемых локалях. Используется
+/// для распознавания нетронутых демо-рецептов при пересоздании их под
+/// текущий язык — без хранения признака `isSample` в модели Recipe (чтобы
+/// не ломать back-compat существующих сохранений и Drive-бэкапов).
+const Set<String> knownSampleTitles = {
+  // RU
+  'Лёгкий бисквит (пример)',
+  'Шоколадный торт (пример)',
+  'Свадебный торт (пример)',
+  // EN
+  'Light sponge (sample)',
+  'Chocolate cake (sample)',
+  'Wedding cake (sample)',
+};
+
+bool isLikelyDemoRecipe(Recipe r) => knownSampleTitles.contains(r.title);
+
 /// Демо-рецепты для пустого списка — 3 штуки разной сложности, чтобы новичок
 /// мог сразу пощупать разные сценарии:
 /// 1) **Light sponge** — самый простой, один ярус, 2 секции (бисквит + крем).
@@ -9,7 +26,8 @@ import '../models/recipe.dart';
 ///
 /// Текстовое содержимое (title, notes, ингредиенты, теги) генерится в
 /// текущей локали — после создания это уже user data, которая не пересоздаётся
-/// при смене языка.
+/// при смене языка. Для пересоздания на текущем языке см.
+/// `StorageService.regenerateSampleRecipes`.
 List<Recipe> buildSampleRecipes(AppLocalizations l) {
   final now = DateTime.now().millisecondsSinceEpoch;
   return [

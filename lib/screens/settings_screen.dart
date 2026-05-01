@@ -184,6 +184,33 @@ class _SettingsScreenState extends State<SettingsScreen> {
     _toast(AppLocalizations.of(context).settings_cloud_restore_done(count));
   }
 
+  Future<void> _regenerateSamples() async {
+    final l = AppLocalizations.of(context);
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Text(l.settings_regen_samples_confirm_title),
+        content: Text(l.settings_regen_samples_confirm_body),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(l.common_cancel),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text(l.settings_regen_samples_action),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+    if (!mounted) return;
+    await StorageService.regenerateSampleRecipes(AppLocalizations.of(context));
+    if (!mounted) return;
+    _toast(AppLocalizations.of(context).settings_regen_samples_done);
+  }
+
   Future<void> _clearAll() async {
     final l = AppLocalizations.of(context);
     final confirmed = await showDialog<bool>(
@@ -753,6 +780,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
             subtitle: Text(l.settings_reset_subtitle),
             onTap: _resetSettings,
+          ),
+          ListTile(
+            leading: const Icon(
+              Icons.cake_outlined,
+              color: Color(0xFFFF6B8A),
+            ),
+            title: Text(
+              l.settings_regen_samples,
+              style: const TextStyle(color: Color(0xFFE85D75)),
+            ),
+            subtitle: Text(l.settings_regen_samples_subtitle),
+            onTap: _regenerateSamples,
           ),
           ListTile(
             leading: const Icon(
