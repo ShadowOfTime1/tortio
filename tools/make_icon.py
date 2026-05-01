@@ -1,5 +1,13 @@
 #!/usr/bin/env python3
-"""Generate Tortio app icon (1024x1024 master + Android mipmap sizes + Play 512x512)."""
+"""Generate Tortio app icons:
+- Legacy launcher PNG (mipmap-*/ic_launcher.png) — gradient + cake, для < API 26.
+- Adaptive icon foreground (mipmap-*/ic_launcher_foreground.png) — cake on
+  transparent bg, scaled to 66% safe zone (108dp canvas, 66dp content).
+- Background color и XML wiring добавлены в репо вручную, см.
+  android/app/src/main/res/values/ic_launcher_background.xml и
+  mipmap-anydpi-v26/ic_launcher.xml.
+- 1024×1024 мастер + Play 512×512 promo.
+"""
 from PIL import Image, ImageDraw
 
 SIZE = 1024
@@ -7,6 +15,10 @@ PRIMARY = (255, 107, 138)   # #FF6B8A
 SECONDARY = (255, 142, 83)  # #FF8E53
 WHITE = (255, 255, 255, 255)
 SHADOW = (0, 0, 0, 60)
+
+# Адаптивная иконка: 108dp canvas, 66dp safe zone для всех масок (круг,
+# squircle, teardrop). Контент = 66/108 ≈ 0.611 от canvas.
+SAFE_ZONE_RATIO = 0.61
 
 
 def gradient(size):
@@ -108,16 +120,33 @@ def draw_cake(img):
     )
 
 
+def make_foreground_master():
+    """Foreground = только торт на прозрачном фоне, scaled под safe zone.
+    Возвращает 1024×1024 RGBA, где торт занимает центральные ~61%.
+    """
+    fg = Image.new('RGBA', (SIZE, SIZE), (0, 0, 0, 0))
+    # Рисуем торт как обычно (он сам центрируется в 1024×1024)
+    draw_cake(fg)
+    # Сжимаем содержимое до safe zone: подгоняем рисунок до (SIZE * 0.61)
+    # и центрируем на новом 1024 canvas.
+    inner_size = int(SIZE * SAFE_ZONE_RATIO)
+    inner = fg.resize((inner_size, inner_size), Image.LANCZOS)
+    out = Image.new('RGBA', (SIZE, SIZE), (0, 0, 0, 0))
+    offset = (SIZE - inner_size) // 2
+    out.paste(inner, (offset, offset), inner)
+    return out
+
+
 def main():
+    # === Legacy & promo ===
     master = gradient(SIZE)
     draw_cake(master)
     master.save('/tmp/tortio-icon-1024.png', 'PNG', optimize=True)
 
-    # Play Store
     play = master.resize((512, 512), Image.LANCZOS)
     play.save('/tmp/tortio-icon-play-512.png', 'PNG', optimize=True)
 
-    # Android mipmap sizes (square legacy launcher icon)
+    # Android mipmap legacy (square gradient + cake) — для < API 26.
     sizes = {
         'mdpi': 48,
         'hdpi': 72,
@@ -128,6 +157,21 @@ def main():
     for name, size in sizes.items():
         out = master.resize((size, size), Image.LANCZOS)
         out.save(f'/tmp/ic_launcher_{name}.png', 'PNG', optimize=True)
+
+    # === Adaptive icon foreground (API 26+) ===
+    # Размеры canvas адаптивной иконки: 108dp = 1.5× legacy launcher size.
+    fg_master = make_foreground_master()
+    adaptive_sizes = {
+        'mdpi': 108,
+        'hdpi': 162,
+        'xhdpi': 216,
+        'xxhdpi': 324,
+        'xxxhdpi': 432,
+    }
+    for name, size in adaptive_sizes.items():
+        out = fg_master.resize((size, size), Image.LANCZOS)
+        out.save(f'/tmp/ic_launcher_foreground_{name}.png', 'PNG', optimize=True)
+
     print('done')
 
 
