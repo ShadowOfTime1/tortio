@@ -778,6 +778,7 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
                               style: const TextStyle(
                                 fontSize: 17,
                                 fontWeight: FontWeight.w600,
+                                color: Colors.black87,
                               ),
                               overflow: TextOverflow.ellipsis,
                             ),
@@ -797,7 +798,7 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
                                 r.allIngredients.length,
                               ),
                               style: TextStyle(
-                                color: Colors.grey.shade600,
+                                color: Colors.grey.shade800,
                                 fontSize: 13,
                               ),
                               maxLines: 1,
@@ -853,7 +854,7 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
                             _lastCookedSuffix(r, l),
                           ),
                           style: TextStyle(
-                            color: Colors.grey.shade500,
+                            color: Colors.grey.shade700,
                             fontSize: 12,
                           ),
                         ),
@@ -870,14 +871,14 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
                                 vertical: 2,
                               ),
                               decoration: BoxDecoration(
-                                color: Colors.black.withValues(alpha: 0.05),
+                                color: Colors.black.withValues(alpha: 0.12),
                                 borderRadius: BorderRadius.circular(6),
                               ),
                               child: Text(
                                 tag,
-                                style: TextStyle(
+                                style: const TextStyle(
                                   fontSize: 11,
-                                  color: Colors.grey.shade700,
+                                  color: Colors.black87,
                                 ),
                               ),
                             );
@@ -888,7 +889,7 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
                   ),
                 ),
                 PopupMenuButton<String>(
-                  icon: Icon(Icons.more_vert, color: Colors.grey.shade600),
+                  icon: Icon(Icons.more_vert, color: Colors.grey.shade800),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(14),
                   ),

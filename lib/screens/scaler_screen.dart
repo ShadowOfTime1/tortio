@@ -1287,28 +1287,38 @@ class _ScalerScreenState extends State<ScalerScreen> {
                 borderRadius: BorderRadius.circular(14),
                 border: Border.all(color: Colors.white.withValues(alpha: 0.3)),
               ),
-              child: TextField(
-                controller: _diameterController,
-                keyboardType: TextInputType.number,
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xFFFF6B8A),
-                ),
-                decoration: InputDecoration(
-                  border: InputBorder.none,
-                  suffixText: AppLocalizations.of(
-                    context,
-                  ).unit_centimeters_short,
-                  suffixStyle: const TextStyle(
-                    fontSize: 14,
-                    color: Colors.white70,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.baseline,
+                textBaseline: TextBaseline.alphabetic,
+                children: [
+                  IntrinsicWidth(
+                    child: TextField(
+                      controller: _diameterController,
+                      keyboardType: TextInputType.number,
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFFFF6B8A),
+                      ),
+                      decoration: const InputDecoration(
+                        border: InputBorder.none,
+                        isDense: true,
+                        contentPadding: EdgeInsets.zero,
+                      ),
+                      onChanged: _onDiameterInput,
+                    ),
                   ),
-                  isDense: true,
-                  contentPadding: EdgeInsets.zero,
-                ),
-                onChanged: _onDiameterInput,
+                  const SizedBox(width: 4),
+                  Text(
+                    AppLocalizations.of(context).unit_centimeters_short,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      color: Colors.white70,
+                    ),
+                  ),
+                ],
               ),
             ),
           ],
@@ -1378,28 +1388,38 @@ class _ScalerScreenState extends State<ScalerScreen> {
                     color: Colors.white.withValues(alpha: 0.3),
                   ),
                 ),
-                child: TextField(
-                  controller: _heightController,
-                  keyboardType: TextInputType.number,
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xFFFF6B8A),
-                  ),
-                  decoration: InputDecoration(
-                    border: InputBorder.none,
-                    suffixText: AppLocalizations.of(
-                      context,
-                    ).unit_centimeters_short,
-                    suffixStyle: const TextStyle(
-                      fontSize: 11,
-                      color: Colors.white70,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.baseline,
+                  textBaseline: TextBaseline.alphabetic,
+                  children: [
+                    IntrinsicWidth(
+                      child: TextField(
+                        controller: _heightController,
+                        keyboardType: TextInputType.number,
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFFFF6B8A),
+                        ),
+                        decoration: const InputDecoration(
+                          border: InputBorder.none,
+                          isDense: true,
+                          contentPadding: EdgeInsets.zero,
+                        ),
+                        onChanged: _onHeightInput,
+                      ),
                     ),
-                    isDense: true,
-                    contentPadding: EdgeInsets.zero,
-                  ),
-                  onChanged: _onHeightInput,
+                    const SizedBox(width: 3),
+                    Text(
+                      AppLocalizations.of(context).unit_centimeters_short,
+                      style: const TextStyle(
+                        fontSize: 11,
+                        color: Colors.white70,
+                      ),
+                    ),
+                  ],
                 ),
               ),
               Expanded(
@@ -1494,26 +1514,38 @@ class _ScalerScreenState extends State<ScalerScreen> {
                 borderRadius: BorderRadius.circular(14),
                 border: Border.all(color: Colors.white.withValues(alpha: 0.3)),
               ),
-              child: TextField(
-                controller: _weightController,
-                keyboardType: TextInputType.number,
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xFFFF6B8A),
-                ),
-                decoration: InputDecoration(
-                  border: InputBorder.none,
-                  suffixText: AppLocalizations.of(context).unit_grams_short,
-                  suffixStyle: const TextStyle(
-                    fontSize: 14,
-                    color: Colors.white70,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.baseline,
+                textBaseline: TextBaseline.alphabetic,
+                children: [
+                  IntrinsicWidth(
+                    child: TextField(
+                      controller: _weightController,
+                      keyboardType: TextInputType.number,
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFFFF6B8A),
+                      ),
+                      decoration: const InputDecoration(
+                        border: InputBorder.none,
+                        isDense: true,
+                        contentPadding: EdgeInsets.zero,
+                      ),
+                      onChanged: _onWeightInput,
+                    ),
                   ),
-                  isDense: true,
-                  contentPadding: EdgeInsets.zero,
-                ),
-                onChanged: _onWeightInput,
+                  const SizedBox(width: 4),
+                  Text(
+                    AppLocalizations.of(context).unit_grams_short,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      color: Colors.white70,
+                    ),
+                  ),
+                ],
               ),
             ),
           ],
