@@ -436,7 +436,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
               if (stats.totalWeight > 0)
                 _statRow(
                   l.stats_total_recipe_weights,
-                  formatGrams(stats.totalWeight),
+                  formatGrams(
+                    stats.totalWeight,
+                    gramsUnit: l.unit_grams_short,
+                    kilogramsUnit: l.unit_kilograms_short,
+                    decimalSeparator:
+                        Localizations.localeOf(context).languageCode == 'ru'
+                        ? ','
+                        : '.',
+                  ),
                 ),
               const SizedBox(height: 16),
               if (stats.topIngredients.isNotEmpty) ...[
@@ -536,20 +544,22 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ListenableBuilder(
             listenable: ThemeService.instance,
             builder: (context, _) {
-              return Column(
-                children: ThemeMode.values.map((mode) {
-                  return RadioGroup<ThemeMode>(
-                    groupValue: ThemeService.instance.mode,
-                    onChanged: (v) {
-                      if (v != null) ThemeService.instance.setMode(v);
-                    },
-                    child: RadioListTile<ThemeMode>(
-                      dense: true,
-                      title: Text(_themeLabel(mode)),
-                      value: mode,
-                    ),
-                  );
-                }).toList(),
+              return RadioGroup<ThemeMode>(
+                groupValue: ThemeService.instance.mode,
+                onChanged: (v) {
+                  if (v != null) ThemeService.instance.setMode(v);
+                },
+                child: Column(
+                  children: ThemeMode.values
+                      .map(
+                        (mode) => RadioListTile<ThemeMode>(
+                          dense: true,
+                          title: Text(_themeLabel(mode)),
+                          value: mode,
+                        ),
+                      )
+                      .toList(),
+                ),
               );
             },
           ),
@@ -565,20 +575,22 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ('ru', l.settings_language_ru),
                 ('en', l.settings_language_en),
               ];
-              return Column(
-                children: entries.map((e) {
-                  return RadioGroup<String>(
-                    groupValue: LocaleService.instance.pref,
-                    onChanged: (v) {
-                      if (v != null) LocaleService.instance.setPref(v);
-                    },
-                    child: RadioListTile<String>(
-                      dense: true,
-                      title: Text(e.$2),
-                      value: e.$1,
-                    ),
-                  );
-                }).toList(),
+              return RadioGroup<String>(
+                groupValue: LocaleService.instance.pref,
+                onChanged: (v) {
+                  if (v != null) LocaleService.instance.setPref(v);
+                },
+                child: Column(
+                  children: entries
+                      .map(
+                        (e) => RadioListTile<String>(
+                          dense: true,
+                          title: Text(e.$2),
+                          value: e.$1,
+                        ),
+                      )
+                      .toList(),
+                ),
               );
             },
           ),

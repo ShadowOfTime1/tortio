@@ -524,24 +524,29 @@ class _ScalerScreenState extends State<ScalerScreen> {
   }
 
   // Делегируем форматирование в utils.formatGrams, прокидывая локализованные
-  // единицы — иначе при English-локали всё равно покажутся 'г' / 'кг'.
+  // единицы и разделитель — иначе при English-локали всё равно покажутся
+  // 'г' / 'кг' и десятичная запятая по русскому стилю.
   String _formatWeight(double g) {
     final l = AppLocalizations.of(context);
+    final isRu = Localizations.localeOf(context).languageCode == 'ru';
     return formatGrams(
       g,
       gramsUnit: l.unit_grams_short,
       kilogramsUnit: l.unit_kilograms_short,
+      decimalSeparator: isRu ? ',' : '.',
     );
   }
 
   String _formatAmount(double amount, String unit) {
     final l = AppLocalizations.of(context);
+    final isRu = Localizations.localeOf(context).languageCode == 'ru';
     return formatAmount(
       amount,
       unit,
       gramsUnit: l.unit_grams_short,
       kilogramsUnit: l.unit_kilograms_short,
       piecesUnit: l.unit_pieces_short,
+      decimalSeparator: isRu ? ',' : '.',
     );
   }
 

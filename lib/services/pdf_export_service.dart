@@ -69,8 +69,15 @@ class PdfExportService {
     );
   }
 
-  static String _formatWeight(double g, AppLocalizations l) =>
-      formatGrams(g, gramsUnit: l.unit_grams_short, kilogramsUnit: l.unit_kilograms_short);
+  static String _decimalSep(AppLocalizations l) =>
+      l.localeName.startsWith('ru') ? ',' : '.';
+
+  static String _formatWeight(double g, AppLocalizations l) => formatGrams(
+    g,
+    gramsUnit: l.unit_grams_short,
+    kilogramsUnit: l.unit_kilograms_short,
+    decimalSeparator: _decimalSep(l),
+  );
 
   static String _formatAmount(double amount, String unit, AppLocalizations l) =>
       formatAmount(
@@ -79,6 +86,7 @@ class PdfExportService {
         gramsUnit: l.unit_grams_short,
         kilogramsUnit: l.unit_kilograms_short,
         piecesUnit: l.unit_pieces_short,
+        decimalSeparator: _decimalSep(l),
       );
 
   /// Roboto не содержит глифа `⌀` (U+2300). Заменяем на `Ø` (U+00D8) —
