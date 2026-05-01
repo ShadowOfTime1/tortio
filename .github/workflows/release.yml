@@ -50,6 +50,6 @@ jobs:
         uses: softprops/action-gh-release@v3
         with:
           files: |
-            build/app/outputs/flutter-apk/github/release/app-github-release.apk
+            build/app/outputs/flutter-apk/app-github-release.apk
             build/app/outputs/bundle/playRelease/app-play-release.aab
           generate_release_notes: true
